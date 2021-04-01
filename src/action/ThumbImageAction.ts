@@ -117,7 +117,8 @@ export default class ThumbImageAction extends Page implements PageInterface {
 			if (requestHeaderSecFetchDest !== undefined) {
 				/* Fetch Metadata Request Headers 対応ブラウザ（Chrome 80+）https://caniuse.com/mdn-http_headers_sec-fetch-dest */
 				switch (req.get('Sec-Fetch-Site')) {
-					case 'same-origin': {
+					case 'same-origin':
+					case 'same-site': {
 						/* 自サイト内の埋め込みやリンク遷移時は新規画像生成を行う */
 						create = true;
 						break;
@@ -129,7 +130,7 @@ export default class ThumbImageAction extends Page implements PageInterface {
 						break;
 					}
 					default: {
-						// cross-site or same-site
+						/* Sec-Fetch-Site: cross-site */
 						const referrerStr = req.headers.referer;
 						if (referrerStr === undefined) {
 							this.logger.debug(`リファラーが送出されていないので元画像を表示: ${req.url}`);
@@ -139,7 +140,7 @@ export default class ThumbImageAction extends Page implements PageInterface {
 							const referrer = new URL(referrerStr);
 							const referrerOrigin = referrer.origin;
 
-							if (this.#config.thumb_image.dev_origins.includes(referrerOrigin)) {
+							if (this.#config.thumb_image.allow_origins.includes(referrerOrigin)) {
 								/* 開発環境からのアクセスの場合 */
 								create = true;
 							} else {
@@ -171,7 +172,7 @@ export default class ThumbImageAction extends Page implements PageInterface {
 					const referrer = new URL(referrerStr);
 					const referrerOrigin = referrer.origin;
 
-					if (requestOrigin === referrerOrigin || this.#config.thumb_image.dev_origins.includes(referrerOrigin)) {
+					if (requestOrigin === referrerOrigin || this.#config.thumb_image.allow_origins.includes(referrerOrigin)) {
 						/* 同一オリジンのリファラーがある、ないし開発環境からのアクセスの場合 */
 						if (req.url !== `${referrer.pathname}${referrer.search}`) {
 							create = true;

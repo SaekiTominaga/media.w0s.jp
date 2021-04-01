@@ -113,7 +113,7 @@ export interface NoName7 {
   thumb_dir: NoName9;
   extension: NoName10;
   param: NoName11;
-  dev_origins: NoName14;
+  allow_origins: NoName14;
   referrer_exclusion_origins: NoName15;
 }
 export interface NoName10 {

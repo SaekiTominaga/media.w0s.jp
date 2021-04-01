@@ -151,7 +151,7 @@
 		"thumb_image": {
 			"type": "object",
 			"title": "サムネイル画像",
-			"required": ["orig_dir", "thumb_dir", "extension", "param", "dev_origins", "referrer_exclusion_origins"],
+			"required": ["orig_dir", "thumb_dir", "extension", "param", "allow_origins", "referrer_exclusion_origins"],
 			"properties": {
 				"orig_dir": {
 					"type": "string",
@@ -183,7 +183,7 @@
 					},
 					"additionalProperties": false
 				},
-				"dev_origins": {
+				"allow_origins": {
 					"type": "array",
 					"items": {
 						"type": "string"
