@@ -1,0 +1,39 @@
+body {
+	margin: auto;
+	padding: 0 2vw;
+	box-sizing: border-box;
+	width: min(100vw, 1280px);
+}
+
+body > footer {
+	margin-top: 3em;
+	border-top: 1px solid;
+}
+
+main > :is(section, nav) {
+	margin-top: 4em;
+}
+
+main > section > section + section {
+	margin-top: 3em;
+}
+
+.spec {
+	display: table;
+	border-collapse: collapse;
+}
+
+.spec > div {
+	display: table-row;
+}
+
+.spec :is(dt, dd) {
+	padding: 0.25em 0.5em;
+	border: 1px solid;
+	display: table-cell;
+}
+
+.spec dt {
+	padding-right: 1em;
+	font-weight: bold;
+}

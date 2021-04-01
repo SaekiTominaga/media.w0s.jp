@@ -1,0 +1,8 @@
+/configure/*.json
+/dist/
+/docs/image/*
+/docs/video/*
+/log/
+/node_modules/
+/log4js*.json
+/thumbimage/*
