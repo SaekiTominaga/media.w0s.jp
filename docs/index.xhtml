@@ -15,10 +15,25 @@
 			<p><a href="https://github.com/SaekiTominaga/media.w0s.jp">Source Code (GitHub)</a></p>
 
 			<nav>
-				<h2>Function List</h2>
+				<h2>thumbimage</h2>
+
+				<p>Automatically generate thumbnail images.</p>
+
+				<p><a href="/thumbimage">Sample</a></p>
 
 				<ul>
-					<li><a href="/thumbimage">thumbimage</a></li>
+					<li>The Type (JPEG, WebP, AVIF), Width, MaxHeight, and Quality can be specified in the URL parameters.</li>
+					<li>
+						Check the <code>Sec-Fetch-Dest</code> header to prevent generation when URLs are typed directly or embedded from other sites without permission.
+						<ul>
+							<li>For browsers that do not support the <code>Sec-Fetch-Dest</code> header, substitute a check in the <code>referer</code> header.</li>
+						</ul>
+					</li>
+					<li>
+						If a thumbnail image has already been generated (in the case of the second or later requests), the generated image will be displayed instead of
+						processing the generation.
+					</li>
+					<li>If the original image has been updated (the file's modified date is newer than the thumbnail image), the generation process will be repeated.</li>
 				</ul>
 			</nav>
 		</main>
