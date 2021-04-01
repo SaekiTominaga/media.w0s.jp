@@ -129,19 +129,31 @@ export default class ThumbImageAction extends Page implements PageInterface {
 						break;
 					}
 					default: {
-						this.logger.debug(`別サイトから '${requestHeaderSecFetchDest}' でリクエストされたので元画像を表示: ${req.url}`);
+						// cross-site or same-site
+						const referrerStr = req.headers.referer;
+						if (referrerStr === undefined) {
+							this.logger.debug(`リファラーが送出されていないので元画像を表示: ${req.url}`);
 
-						res.append('Vary', 'Sec-Fetch-Site');
+							res.append('Vary', 'Sec-Fetch-Site');
+						} else {
+							const referrer = new URL(referrerStr);
+							const referrerOrigin = referrer.origin;
 
-						const referrer = req.headers.referer;
-						if (['image', 'iframe', 'object', 'embed'].includes(requestHeaderSecFetchDest)) {
-							if (
-								referrer !== undefined &&
-								!this.#config.thumb_image.referrer_check_exclusion_urls?.some((url) => referrer.startsWith(url))
-							) {
-								this.logger.warn(
-									`画像ファイル ${paramPath} が別ドメインから埋め込まれている（リファラー: ${referrer} 、DEST: ${requestHeaderSecFetchDest} ）`
-								);
+							if (this.#config.thumb_image.dev_origins.includes(referrerOrigin)) {
+								/* 開発環境からのアクセスの場合 */
+								create = true;
+							} else {
+								this.logger.debug(`別サイトから '${requestHeaderSecFetchDest}' でリクエストされたので元画像を表示: ${req.url}`);
+
+								res.append('Vary', 'Sec-Fetch-Site');
+
+								if (['image', 'iframe', 'object', 'embed'].includes(requestHeaderSecFetchDest)) {
+									if (!this.#config.thumb_image.referrer_exclusion_origins.includes(referrerOrigin)) {
+										this.logger.warn(
+											`画像ファイル ${paramPath} が別オリジンから埋め込まれている（リファラー: ${referrerStr} 、DEST: ${requestHeaderSecFetchDest} ）`
+										);
+									}
+								}
 							}
 						}
 					}
@@ -154,22 +166,28 @@ export default class ThumbImageAction extends Page implements PageInterface {
 
 					res.append('Vary', 'referer');
 				} else {
+					const requestOrigin = `${req.protocol}://${req.hostname}`;
+
 					const referrer = new URL(referrerStr);
-					if (req.hostname !== referrer.hostname) {
+					const referrerOrigin = referrer.origin;
+
+					if (requestOrigin === referrerOrigin || this.#config.thumb_image.dev_origins.includes(referrerOrigin)) {
+						/* 同一オリジンのリファラーがある、ないし開発環境からのアクセスの場合 */
+						if (req.url !== `${referrer.pathname}${referrer.search}`) {
+							create = true;
+						} else {
+							this.logger.debug(`リファラーが画像ファイル自身なので元画像を表示: ${req.url}`);
+
+							res.append('Vary', 'referer');
+						}
+					} else {
 						this.logger.debug(`別ドメインからリンクないし埋め込まれているので元画像を表示: ${req.url}`);
 
 						res.append('Vary', 'referer');
 
-						if (!this.#config.thumb_image.referrer_check_exclusion_urls?.some((url) => referrerStr.startsWith(url))) {
-							this.logger.warn(`画像ファイル ${paramPath} が別ドメインから埋め込まれている（リファラー: ${referrerStr} ）`);
+						if (!this.#config.thumb_image.referrer_exclusion_origins.includes(referrerOrigin)) {
+							this.logger.warn(`画像ファイル ${paramPath} が別オリジンから埋め込まれている（リファラー: ${referrerStr} ）`);
 						}
-					} else if (req.url === `${referrer.pathname}${referrer.search}`) {
-						this.logger.debug(`リファラーが画像ファイル自身なので元画像を表示: ${req.url}`);
-
-						res.append('Vary', 'referer');
-					} else {
-						/* 同一ドメインのリファラーがある場合は新規画像生成を行う */
-						create = true;
 					}
 				}
 			}

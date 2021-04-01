@@ -151,7 +151,7 @@
 		"thumb_image": {
 			"type": "object",
 			"title": "サムネイル画像",
-			"required": ["orig_dir", "thumb_dir", "extension", "param"],
+			"required": ["orig_dir", "thumb_dir", "extension", "param", "dev_origins", "referrer_exclusion_origins"],
 			"properties": {
 				"orig_dir": {
 					"type": "string",
@@ -183,12 +183,19 @@
 					},
 					"additionalProperties": false
 				},
-				"referrer_check_exclusion_urls": {
+				"dev_origins": {
 					"type": "array",
 					"items": {
 						"type": "string"
 					},
-					"title": "リファラーチェックで除外する URL"
+					"title": "開発環境のオリジン"
+				},
+				"referrer_exclusion_origins": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"title": "リファラーチェックで除外するオリジン"
 				}
 			},
 			"additionalProperties": false

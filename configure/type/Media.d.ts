@@ -53,7 +53,8 @@ export type NoName8 = string;
 export type NoName9 = string;
 export type NoName12 = number;
 export type NoName13 = number;
-export type URL = string[];
+export type NoName14 = string[];
+export type NoName15 = string[];
 
 export interface MediaW0SJp {
   port: HTTP;
@@ -112,7 +113,8 @@ export interface NoName7 {
   thumb_dir: NoName9;
   extension: NoName10;
   param: NoName11;
-  referrer_check_exclusion_urls?: URL;
+  dev_origins: NoName14;
+  referrer_exclusion_origins: NoName15;
 }
 export interface NoName10 {
   [k: string]: unknown;
