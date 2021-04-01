@@ -18,6 +18,20 @@ main > section > section + section {
 	margin-top: 3em;
 }
 
+nav > ul {
+	margin-top: 2em;
+	padding-left: 1em;
+}
+
+nav > ul > li > ul {
+	margin-top: 0.5em;
+	padding-left: 1em;
+}
+
+nav li + li {
+	margin-top: 1em;
+}
+
 .spec {
 	display: table;
 	border-collapse: collapse;
