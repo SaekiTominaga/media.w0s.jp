@@ -115,7 +115,7 @@ export default class ThumbImageAction extends Page implements PageInterface {
 
 			const requestHeaderSecFetchDest = req.get('Sec-Fetch-Dest');
 			if (requestHeaderSecFetchDest !== undefined) {
-				/* Fetch Metadata Request Headers 対応ブラウザ（Chrome 80+）https://caniuse.com/#feat=mdn-http_headers_sec-fetch-dest */
+				/* Fetch Metadata Request Headers 対応ブラウザ（Chrome 80+）https://caniuse.com/mdn-http_headers_sec-fetch-dest */
 				switch (req.get('Sec-Fetch-Site')) {
 					case 'same-origin': {
 						/* 自サイト内の埋め込みやリンク遷移時は新規画像生成を行う */
