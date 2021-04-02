@@ -1,8 +1,8 @@
 import fs from 'fs';
 import HttpResponse from '../util/HttpResponse.js';
 import imageSize from 'image-size';
-import Page from '../Page.js';
-import PageInterface from '../PageInterface.js';
+import Controller from '../Controller.js';
+import ControllerInterface from '../ControllerInterface.js';
 import path from 'path';
 import Sharp from 'sharp';
 import URLSearchParamsCustomSeparator from '@saekitominaga/urlsearchparams-custom-separator';
@@ -13,7 +13,7 @@ import { Request, Response } from 'express';
 /**
  * サムネイル画像
  */
-export default class ThumbImageAction extends Page implements PageInterface {
+export default class ThumbImageController extends Controller implements ControllerInterface {
 	#config: Configure;
 
 	/* 生成する画像のタイプ（jpeg, webp, ...） */
@@ -45,7 +45,7 @@ export default class ThumbImageAction extends Page implements PageInterface {
 		/* 存在チェック */
 		if (paramType === null || paramWidth === null || paramQuality === null) {
 			this.logger.info(`必須 URL パラメーター不足: ${req.url}`);
-			res.status(403).sendFile(path.resolve(this.#config.errorpage.path403));
+			res.status(403).sendFile(path.resolve(this.#config.errorpage.path_403));
 			return;
 		}
 
@@ -54,13 +54,13 @@ export default class ThumbImageAction extends Page implements PageInterface {
 		const paramMaxheightNumber = paramMaxheight !== null ? Number(paramMaxheight) : null;
 		const paramQualityNumber = Number(paramQuality);
 		if (!this._requestUrlParamTypeCheck(req, paramWidthNumber, paramMaxheightNumber, paramQualityNumber)) {
-			res.status(403).sendFile(path.resolve(this.#config.errorpage.path403));
+			res.status(403).sendFile(path.resolve(this.#config.errorpage.path_403));
 			return;
 		}
 
 		/* 値チェック */
 		if (!this._requestUrlParamValueCheck(req, paramType, paramWidthNumber, paramMaxheightNumber, paramQualityNumber)) {
-			res.status(403).sendFile(path.resolve(this.#config.errorpage.path403));
+			res.status(403).sendFile(path.resolve(this.#config.errorpage.path_403));
 			return;
 		}
 
@@ -71,7 +71,7 @@ export default class ThumbImageAction extends Page implements PageInterface {
 		const origFilePath = path.resolve(`${this.#config.thumb_image.orig_dir}/${paramPath}`);
 		if (!fs.existsSync(origFilePath)) {
 			this.logger.info(`存在しないファイルパスが指定: ${req.url}`);
-			res.status(404).sendFile(path.resolve(this.#config.errorpage.path404));
+			res.status(404).sendFile(path.resolve(this.#config.errorpage.path_404));
 			return;
 		}
 
@@ -102,8 +102,7 @@ export default class ThumbImageAction extends Page implements PageInterface {
 				this.logger.debug(`生成済みの画像を表示: ${newFilePath}`);
 
 				/* キャッシュ確認 */
-				const httpResponse = new HttpResponse(req, res);
-				httpResponse.checkLastModified(newFileMtime);
+				new HttpResponse(res).checkLastModified(req, newFileMtime);
 
 				/* 生成済みの画像データを表示 */
 				this._responseImage(req, res, newFilePath, newFileMtime);
@@ -355,8 +354,7 @@ export default class ThumbImageAction extends Page implements PageInterface {
 	 */
 	private _responseImage(req: Request, res: Response, filePath: string, fileMtime?: Date): void {
 		if (fileMtime !== undefined) {
-			const httpResponse = new HttpResponse(req, res);
-			httpResponse.checkLastModified(fileMtime); // キャッシュ確認
+			new HttpResponse(res).checkLastModified(req, fileMtime); // キャッシュ確認
 		}
 
 		res.sendFile(filePath, {

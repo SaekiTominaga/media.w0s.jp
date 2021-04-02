@@ -3,26 +3,16 @@ import Express, { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
 import Log4js from 'log4js';
 import path from 'path';
-import ThumbImageAction from './action/ThumbImageAction.js';
+import ThumbImageController from './controller/ThumbImageController.js';
 import { MediaW0SJp as Configure } from '../configure/type/Media';
 import { TypeMap } from 'mime';
 
-const CONFIGURE_FILE_PATH = './configure/Media.json'; // 設定ファイルパス
-const LOGGER_FILE_PATH = './log4js.json'; // Logger 設定ファイルパス
-const HTML_500 = `
-<!DOCTYPE html>
-<html lang=en>
-<meta name=viewport content="width=device-width,initial-scale=1">
-<title>media.w0s.jp</title>
-<h1>500 Internal Server Error</h1>
-`; // 500 エラーの HTML 文字列
-
 /* 設定ファイル読み込み */
-const config = <Configure>JSON.parse(fs.readFileSync(CONFIGURE_FILE_PATH, 'utf8'));
+const config = <Configure>JSON.parse(fs.readFileSync('./configure/Media.json', 'utf8'));
 
 /* Logger 設定 */
-Log4js.configure(LOGGER_FILE_PATH);
-const logger = Log4js.getLogger('media.w0s.jp');
+Log4js.configure(config.logger.path);
+const logger = Log4js.getLogger();
 
 /* Express 設定 */
 Express.static.mime.define(<TypeMap>config.response.mime); // 静的ファイルの MIME
@@ -62,13 +52,11 @@ app.use(
 /**
  * サムネイル画像
  */
-app.get('/thumbimage/:path([^?]+)', async (req, res) => {
+app.get('/thumbimage/:path([^?]+)', async (req, res, next) => {
 	try {
-		const thumbImageAction = new ThumbImageAction(config);
-		await thumbImageAction.execute(req, res);
+		await new ThumbImageController(config).execute(req, res);
 	} catch (e) {
-		logger.fatal(`${req.method} ${req.url}`, e);
-		res.status(500).send(HTML_500);
+		next(e);
 	}
 });
 
@@ -77,11 +65,15 @@ app.get('/thumbimage/:path([^?]+)', async (req, res) => {
  */
 app.use((req, res): void => {
 	logger.warn(`404 Not Found: ${req.method} ${req.url}`);
-	res.status(404).sendFile(path.resolve(config.errorpage.path404));
+	res.status(404).sendFile(path.resolve(config.errorpage.path_404));
 });
 app.use((err: Error, req: Request, res: Response, _next: NextFunction /* eslint-disable-line @typescript-eslint/no-unused-vars */): void => {
 	logger.fatal(`${req.method} ${req.url}`, err.stack);
-	res.sendStatus(500).send(HTML_500);
+	res.status(500).send(`<!DOCTYPE html>
+<html lang=en>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>media.w0s.jp</title>
+<h1>500 Internal Server Error</h1>`);
 });
 
 /**

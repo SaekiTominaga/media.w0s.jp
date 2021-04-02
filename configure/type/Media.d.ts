@@ -47,21 +47,24 @@ export type StrictTransportSecurity = string;
 export type ContentSecurityPolicyHTML = string;
 export type ContentSecurityPolicyHTML1 = string;
 export type Threshold = string;
-export type Filepath403Forbidden = string;
-export type Filepath404NotFound = string;
+export type FilepathFor403Forbidden = string;
+export type FilepathFor404NotFound = string;
+export type NoName7 = string;
 export type NoName8 = string;
-export type NoName9 = string;
-export type NoName12 = number;
-export type NoName13 = number;
-export type NoName14 = string[];
-export type NoName15 = string[];
+export type NoName10 = string;
+export type NoName11 = string;
+export type NoName14 = number;
+export type NoName15 = number;
+export type NoName16 = string[];
+export type NoName17 = string[];
 
 export interface MediaW0SJp {
   port: HTTP;
   static: NoName;
   response: NoName3;
   errorpage: NoName6;
-  thumb_image: NoName7;
+  logger: Logger;
+  thumb_image: NoName9;
 }
 export interface NoName {
   root: NoName1;
@@ -105,21 +108,25 @@ export interface NoName5 {
   threshold: Threshold;
 }
 export interface NoName6 {
-  path403: Filepath403Forbidden;
-  path404: Filepath404NotFound;
+  path_403: FilepathFor403Forbidden;
+  path_404: FilepathFor404NotFound;
 }
-export interface NoName7 {
-  orig_dir: NoName8;
-  thumb_dir: NoName9;
-  extension: NoName10;
-  param: NoName11;
-  allow_origins: NoName14;
-  referrer_exclusion_origins: NoName15;
+export interface Logger {
+  path: NoName7;
+  category: NoName8;
 }
-export interface NoName10 {
+export interface NoName9 {
+  orig_dir: NoName10;
+  thumb_dir: NoName11;
+  extension: NoName12;
+  param: NoName13;
+  allow_origins: NoName16;
+  referrer_exclusion_origins: NoName17;
+}
+export interface NoName12 {
   [k: string]: unknown;
 }
-export interface NoName11 {
-  max_width: NoName12;
-  max_height: NoName13;
+export interface NoName13 {
+  max_width: NoName14;
+  max_height: NoName15;
 }

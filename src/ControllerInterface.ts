@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-export default interface Component {
+export default interface ControllerInterface {
 	/**
 	 * Execute the process
 	 *

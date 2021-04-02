@@ -3,7 +3,7 @@
 	"$id": "https://schema.w0s.jp/Media.json",
 	"type": "object",
 	"title": "media.w0s.jp",
-	"required": ["port", "static", "response", "errorpage", "thumb_image"],
+	"required": ["port", "static", "response", "errorpage", "logger", "thumb_image"],
 	"properties": {
 		"port": {
 			"type": "integer",
@@ -135,15 +135,27 @@
 		"errorpage": {
 			"type": "object",
 			"title": "エラーページ",
-			"required": ["path403", "path404"],
+			"required": ["path_403", "path_404"],
 			"properties": {
-				"path403": {
+				"path_403": {
 					"type": "string",
-					"title": "Filepath 403 Forbidden"
+					"title": "Filepath for `403 Forbidden`"
 				},
-				"path404": {
+				"path_404": {
 					"type": "string",
-					"title": "Filepath 404 Not Found"
+					"title": "Filepath for `404 Not Found`"
+				}
+			},
+			"additionalProperties": false
+		},
+		"logger": {
+			"type": "object",
+			"title": "Logger",
+			"required": ["path"],
+			"properties": {
+				"path": {
+					"type": "string",
+					"title": "ファイルパス"
 				}
 			},
 			"additionalProperties": false
