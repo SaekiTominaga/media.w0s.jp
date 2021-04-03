@@ -320,13 +320,13 @@ export default class ThumbImageController extends Controller implements Controll
 		}
 		await sharp.toFile(newFilePath);
 
+		const processingTime = Date.now() - startTime;
+
 		/* 生成後の処理 */
 		const origFileSize = fs.statSync(origFilePath).size;
 		const origFileSizeIec = FileSizeFormat.iec(origFileSize, { digits: 1 });
 		const createdFileSize = fs.statSync(newFilePath).size;
 		const createdFileSizeIec = FileSizeFormat.iec(createdFileSize, { digits: 1 });
-
-		const processingTime = Date.now() - startTime;
 
 		this.logger.info(
 			`画像生成完了（${Math.round(processingTime / 1000)}秒）: ${newFilePath} （幅: ${this.#thumbWidth}px, 画質: ${
