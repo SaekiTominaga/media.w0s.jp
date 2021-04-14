@@ -8,9 +8,9 @@
 	"scripts": {
 		"build": "tsc",
 		"build:watch": "tsc -w",
-		"config:validate": "ajv --spec=draft7 -s configure/schema/Media.json -d configure/Media.json",
-		"config:tsconvert": "json2ts -i configure/schema -o configure/type",
-		"app:dev": "nodemon dist/app.js"
+		"config:validate": "ajv --spec=draft7 -s node/configure/schema/Media.json -d node/configure/Media.json",
+		"config:tsconvert": "json2ts -i node/configure/schema -o configure/type",
+		"app:dev": "nodemon node/dist/app.js"
 	},
 	"dependencies": {
 		"@log4js-node/smtp": "^1.1.0",
