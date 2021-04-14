@@ -1,15 +1,23 @@
 {
-	"name": "blog.w0s.jp",
+	"name": "media.w0s.jp",
 	"version": "1.0.0",
-	"description": "blog.w0s.jp",
+	"description": "media.w0s.jp",
+	"homepage": "https://github.com/SaekiTominaga/media.w0s.jp#readme",
+	"bugs": {
+		"url": "https://github.com/SaekiTominaga/media.w0s.jp/issues"
+	},
 	"license": "MIT",
 	"author": "Saeki Tominaga",
 	"type": "module",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/SaekiTominaga/media.w0s.jp.git"
+	},
 	"scripts": {
 		"build": "tsc",
 		"build:watch": "tsc -w",
 		"config:validate": "ajv --spec=draft7 -s node/configure/schema/Media.json -d node/configure/Media.json",
-		"config:tsconvert": "json2ts -i node/configure/schema -o configure/type",
+		"config:tsconvert": "json2ts -i node/configure/schema -o node/configure/type",
 		"app:dev": "nodemon node/dist/app.js"
 	},
 	"dependencies": {
