@@ -5,21 +5,6 @@
 		"es2021": true
 	},
 	"extends": ["eslint:recommended"],
-	"globals": {
-		"trustedTypes": "readonly",
-		"importScripts": "readonly",
-		"adsbygoogle": "writable",
-		"firebase": "readonly",
-
-		"CSSKeywordValue": "readonly",
-		"CSSUnitValue": "readonly",
-		"DOMParserSupportedType": "readonly",
-		"Firebase": "readonly",
-		"Messaging": "readonly",
-		"HTMLCollectionOf": "readonly",
-		"HTMLPortalElement": "readonly",
-		"NodeListOf": "readonly"
-	},
 	"plugins": ["jsdoc"],
 	"parserOptions": {
 		"ecmaVersion": 2021,
