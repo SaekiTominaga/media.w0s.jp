@@ -358,7 +358,6 @@ export default class ThumbImageController extends Controller implements Controll
 		}
 
 		response.sendFile(filePath, {
-			immutable: true,
 			maxAge: this.#config.static.options.max_age,
 		});
 	}
