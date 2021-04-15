@@ -8,7 +8,7 @@ import Sharp from 'sharp';
 import URLSearchParamsCustomSeparator from '@saekitominaga/urlsearchparams-custom-separator';
 import FileSizeFormat from '@saekitominaga/file-size-format';
 import { MediaW0SJp as Configure } from '../../configure/type/Media';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 
 /**
  * サムネイル画像
@@ -31,9 +31,9 @@ export default class ThumbImageController extends Controller implements Controll
 
 	/**
 	 * @param {Request} req - Request
-	 * @param {Response} res - Response
+	 * @param {HttpResponse} response - HttpResponse
 	 */
-	async execute(req: Request, res: Response): Promise<void> {
+	async execute(req: Request, response: HttpResponse): Promise<void> {
 		const urlSearchParams = new URLSearchParamsCustomSeparator(req.url, [';']).getURLSearchParamsObject();
 
 		const paramPath = req.params.path;
@@ -45,7 +45,7 @@ export default class ThumbImageController extends Controller implements Controll
 		/* 存在チェック */
 		if (paramType === null || paramWidth === null || paramQuality === null) {
 			this.logger.info(`必須 URL パラメーター不足: ${req.url}`);
-			res.status(403).sendFile(path.resolve(this.#config.errorpage.path_403));
+			response.send403();
 			return;
 		}
 
@@ -54,13 +54,13 @@ export default class ThumbImageController extends Controller implements Controll
 		const paramMaxheightNumber = paramMaxheight !== null ? Number(paramMaxheight) : null;
 		const paramQualityNumber = Number(paramQuality);
 		if (!this._requestUrlParamTypeCheck(req, paramWidthNumber, paramMaxheightNumber, paramQualityNumber)) {
-			res.status(403).sendFile(path.resolve(this.#config.errorpage.path_403));
+			response.send403();
 			return;
 		}
 
 		/* 値チェック */
 		if (!this._requestUrlParamValueCheck(req, paramType, paramWidthNumber, paramMaxheightNumber, paramQualityNumber)) {
-			res.status(403).sendFile(path.resolve(this.#config.errorpage.path_403));
+			response.send403();
 			return;
 		}
 
@@ -71,7 +71,7 @@ export default class ThumbImageController extends Controller implements Controll
 		const origFilePath = path.resolve(`${this.#config.thumb_image.orig_dir}/${paramPath}`);
 		if (!fs.existsSync(origFilePath)) {
 			this.logger.info(`存在しないファイルパスが指定: ${req.url}`);
-			res.status(404).sendFile(path.resolve(this.#config.errorpage.path_404));
+			response.send404();
 			return;
 		}
 
@@ -101,11 +101,8 @@ export default class ThumbImageController extends Controller implements Controll
 			} else {
 				this.logger.debug(`生成済みの画像を表示: ${newFilePath}`);
 
-				/* キャッシュ確認 */
-				new HttpResponse(res).checkLastModified(req, newFileMtime);
-
 				/* 生成済みの画像データを表示 */
-				this._responseImage(req, res, newFilePath, newFileMtime);
+				this._responseImage(req, response, newFilePath, newFileMtime);
 				return;
 			}
 		} else {
@@ -125,7 +122,7 @@ export default class ThumbImageController extends Controller implements Controll
 					case 'none': {
 						this.logger.debug(`画像が URL 直打ち等でリクエストされたので元画像を表示: ${req.url}`);
 
-						res.append('Vary', 'Sec-Fetch-Site');
+						response.append('Vary', 'Sec-Fetch-Site');
 						break;
 					}
 					default: {
@@ -134,7 +131,7 @@ export default class ThumbImageController extends Controller implements Controll
 						if (referrerStr === undefined) {
 							this.logger.debug(`リファラーが送出されていないので元画像を表示: ${req.url}`);
 
-							res.append('Vary', 'Sec-Fetch-Site');
+							response.append('Vary', 'Sec-Fetch-Site');
 						} else {
 							const referrer = new URL(referrerStr);
 							const referrerOrigin = referrer.origin;
@@ -145,7 +142,7 @@ export default class ThumbImageController extends Controller implements Controll
 							} else {
 								this.logger.debug(`別サイトから '${requestHeaderSecFetchDest}' でリクエストされたので元画像を表示: ${req.url}`);
 
-								res.append('Vary', 'Sec-Fetch-Site');
+								response.append('Vary', 'Sec-Fetch-Site');
 
 								if (['image', 'iframe', 'object', 'embed'].includes(requestHeaderSecFetchDest)) {
 									if (!this.#config.thumb_image.referrer_exclusion_origins.includes(referrerOrigin)) {
@@ -164,7 +161,7 @@ export default class ThumbImageController extends Controller implements Controll
 				if (referrerStr === undefined) {
 					this.logger.debug(`リファラーが送出されていないので元画像を表示: ${req.url}`);
 
-					res.append('Vary', 'referer');
+					response.append('Vary', 'referer');
 				} else {
 					const requestOrigin = `${req.protocol}://${req.hostname}`;
 
@@ -178,12 +175,12 @@ export default class ThumbImageController extends Controller implements Controll
 						} else {
 							this.logger.debug(`リファラーが画像ファイル自身なので元画像を表示: ${req.url}`);
 
-							res.append('Vary', 'referer');
+							response.append('Vary', 'referer');
 						}
 					} else {
 						this.logger.debug(`別ドメインからリンクないし埋め込まれているので元画像を表示: ${req.url}`);
 
-						res.append('Vary', 'referer');
+						response.append('Vary', 'referer');
 
 						if (!this.#config.thumb_image.referrer_exclusion_origins.includes(referrerOrigin)) {
 							this.logger.warn(`画像ファイル ${paramPath} が別オリジンから埋め込まれている（リファラー: ${referrerStr} ）`);
@@ -194,14 +191,14 @@ export default class ThumbImageController extends Controller implements Controll
 
 			if (!create) {
 				/* 元画像を表示する */
-				this._responseImage(req, res, origFilePath, origFileMtime); // 元画像を表示
+				this._responseImage(req, response, origFilePath, origFileMtime); // 元画像を表示
 				return;
 			}
 		}
 
 		/* 新しい画像ファイルを生成する */
 		await this._createImage(origFilePath, newFilePath); // 画像ファイルを生成
-		this._responseImage(req, res, newFilePath); // 生成した画像データを表示
+		this._responseImage(req, response, newFilePath); // 生成した画像データを表示
 	}
 
 	/**
@@ -348,16 +345,19 @@ export default class ThumbImageController extends Controller implements Controll
 	 * 画像ファイルを画面に出力する
 	 *
 	 * @param {Request} req - Request
-	 * @param {Response} res - Response
+	 * @param {HttpResponse} response - HttpResponse
 	 * @param {string} filePath - 出力する画像ファイルパス
 	 * @param {Date} fileMtime - 最終更新日時
 	 */
-	private _responseImage(req: Request, res: Response, filePath: string, fileMtime?: Date): void {
+	private _responseImage(req: Request, response: HttpResponse, filePath: string, fileMtime?: Date): void {
 		if (fileMtime !== undefined) {
-			new HttpResponse(res).checkLastModified(req, fileMtime); // キャッシュ確認
+			/* キャッシュ確認 */
+			if (response.checkLastModified(req, fileMtime)) {
+				return;
+			}
 		}
 
-		res.sendFile(filePath, {
+		response.sendFile(filePath, {
 			immutable: true,
 			maxAge: this.#config.static.options.max_age,
 		});

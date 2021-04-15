@@ -1,6 +1,7 @@
 import compression from 'compression';
 import Express, { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
+import HttpResponse from './util/HttpResponse.js';
 import Log4js from 'log4js';
 import path from 'path';
 import ThumbImageController from './controller/ThumbImageController.js';
@@ -22,6 +23,7 @@ const app = Express();
 app.set('x-powered-by', false);
 app.set('trust proxy', true);
 app.use((req, res, next) => {
+	/* HSTS */
 	res.setHeader('Strict-Transport-Security', config.response.header.hsts);
 
 	if (/(^\/[^.]*$)|(\.x?html$)/.test(req.url)) {
@@ -31,6 +33,7 @@ app.use((req, res, next) => {
 		res.setHeader('Content-Security-Policy', config.response.header.csp);
 	}
 
+	/* MIME スニッフィング抑止 */
 	res.setHeader('X-Content-Type-Options', 'nosniff');
 
 	next();
@@ -54,7 +57,7 @@ app.use(
  */
 app.get('/thumbimage/:path([^?]+)', async (req, res, next) => {
 	try {
-		await new ThumbImageController(config).execute(req, res);
+		await new ThumbImageController(config).execute(req, new HttpResponse(res, config));
 	} catch (e) {
 		next(e);
 	}
