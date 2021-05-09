@@ -171,12 +171,10 @@ export default class ThumbImageController extends Controller implements Controll
 
 					res.append('Vary', 'referer');
 				} else {
-					const requestOrigin = `${req.protocol}://${req.hostname}`;
-
 					const referrer = new URL(referrerStr);
 					const referrerOrigin = referrer.origin;
 
-					if (requestOrigin === referrerOrigin || this.#config.allow_origins.includes(referrerOrigin)) {
+					if (this.#config.allow_origins.includes(referrerOrigin)) {
 						/* 同一オリジンのリファラーがある、ないし開発環境からのアクセスの場合 */
 						if (req.url !== `${referrer.pathname}${referrer.search}`) {
 							create = true;
