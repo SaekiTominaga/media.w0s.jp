@@ -1,0 +1,54 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "https://schema.w0s.jp/thumb-image.json",
+	"type": "object",
+	"title": "サムネイル画像",
+	"required": ["orig_dir", "thumb_dir", "extension", "param", "allow_origins", "referrer_exclusion_origins"],
+	"properties": {
+		"orig_dir": {
+			"type": "string",
+			"title": "オリジナル画像が保存されているルートディレクトリ"
+		},
+		"thumb_dir": {
+			"type": "string",
+			"title": "サムネイル画像を保存するルートディレクトリ"
+		},
+		"extension": {
+			"type": "object",
+			"title": "ファイル拡張子の定義"
+		},
+		"param": {
+			"type": "object",
+			"title": "パラメーター",
+			"required": ["max_width", "max_height"],
+			"properties": {
+				"max_width": {
+					"type": "integer",
+					"minimum": 1,
+					"title": "幅の最大値"
+				},
+				"max_height": {
+					"type": "integer",
+					"minimum": 1,
+					"title": "高さの最大値"
+				}
+			},
+			"additionalProperties": false
+		},
+		"allow_origins": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"title": "開発環境のオリジン"
+		},
+		"referrer_exclusion_origins": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"title": "リファラーチェックで除外するオリジン"
+		}
+	},
+	"additionalProperties": false
+}

@@ -14,11 +14,12 @@
 		"url": "git+https://github.com/SaekiTominaga/media.w0s.jp.git"
 	},
 	"scripts": {
+		"app:dev": "nodemon node/dist/app.js",
 		"build": "tsc",
 		"build:watch": "tsc -w",
-		"config:validate": "ajv --spec=draft7 -s node/configure/schema/Media.json -d node/configure/Media.json",
-		"config:tsconvert": "json2ts -i node/configure/schema -o node/configure/type",
-		"app:dev": "nodemon node/dist/app.js"
+		"config:validate:common": "ajv --spec=draft7 -s node/configure/schema/common.json -d node/configure/common.json",
+		"config:validate:thumb-image": "ajv --spec=draft7 -s node/configure/schema/thumb-image.json -d node/configure/thumb-image.json",
+		"config:tsconvert": "json2ts -i node/configure/schema -o node/configure/type"
 	},
 	"dependencies": {
 		"@log4js-node/smtp": "^1.1.0",

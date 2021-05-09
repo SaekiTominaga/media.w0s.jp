@@ -1,15 +1,14 @@
 import compression from 'compression';
 import Express, { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
-import HttpResponse from './util/HttpResponse.js';
 import Log4js from 'log4js';
 import path from 'path';
 import ThumbImageController from './controller/ThumbImageController.js';
-import { MediaW0SJp as Configure } from '../configure/type/Media';
+import { MediaW0SJp as Configure } from '../configure/type/common';
 import { TypeMap } from 'mime';
 
 /* 設定ファイル読み込み */
-const config = <Configure>JSON.parse(fs.readFileSync('node/configure/Media.json', 'utf8'));
+const config = <Configure>JSON.parse(fs.readFileSync('node/configure/common.json', 'utf8'));
 
 /* Logger 設定 */
 Log4js.configure(config.logger.path);
@@ -23,11 +22,14 @@ const app = Express();
 app.set('x-powered-by', false);
 app.set('trust proxy', true);
 app.use((req, res, next) => {
+	const requestUrl = req.url;
+	const html = /(^\/[^.]*$)|(\.x?html$)/.test(requestUrl);
+
 	/* HSTS */
 	res.setHeader('Strict-Transport-Security', config.response.header.hsts);
 
-	if (/(^\/[^.]*$)|(\.x?html$)/.test(req.url)) {
-		/* HTML ページ */
+	/* CSP */
+	if (html) {
 		res.setHeader('Content-Security-Policy', config.response.header.csp_html);
 	} else {
 		res.setHeader('Content-Security-Policy', config.response.header.csp);
@@ -43,6 +45,7 @@ app.use(
 		threshold: config.response.compression.threshold,
 	})
 );
+app.use(Express.urlencoded({ limit: 1000000 })); // 1MB
 app.use(
 	Express.static(config.static.root, {
 		extensions: config.static.options.extensions,
@@ -56,7 +59,7 @@ app.use(
  */
 app.get('/thumbimage/:path([^?]+)', async (req, res, next) => {
 	try {
-		await new ThumbImageController(config).execute(req, new HttpResponse(res, config));
+		await new ThumbImageController(config).execute(req, res);
 	} catch (e) {
 		next(e);
 	}

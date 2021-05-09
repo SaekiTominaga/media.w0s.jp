@@ -1,19 +1,21 @@
+import Controller from '../Controller.js';
+import ControllerInterface from '../ControllerInterface.js';
+import FileSizeFormat from '@saekitominaga/file-size-format';
 import fs from 'fs';
 import HttpResponse from '../util/HttpResponse.js';
 import imageSize from 'image-size';
-import Controller from '../Controller.js';
-import ControllerInterface from '../ControllerInterface.js';
 import path from 'path';
 import Sharp from 'sharp';
 import URLSearchParamsCustomSeparator from '@saekitominaga/urlsearchparams-custom-separator';
-import FileSizeFormat from '@saekitominaga/file-size-format';
-import { MediaW0SJp as Configure } from '../../configure/type/Media';
-import { Request } from 'express';
+import { MediaW0SJp as ConfigureCommon } from '../../configure/type/common';
+import { NoName as Configure } from '../../configure/type/thumb-image';
+import { Request, Response } from 'express';
 
 /**
  * サムネイル画像
  */
 export default class ThumbImageController extends Controller implements ControllerInterface {
+	#configCommon: ConfigureCommon;
 	#config: Configure;
 
 	/* 生成する画像のタイプ（jpeg, webp, ...） */
@@ -23,17 +25,21 @@ export default class ThumbImageController extends Controller implements Controll
 	/* 生成する画像の画質 */
 	#thumbQuality = 0;
 
-	constructor(config: Configure) {
+	/**
+	 * @param {ConfigureCommon} configCommon - 共通設定
+	 */
+	constructor(configCommon: ConfigureCommon) {
 		super();
 
-		this.#config = config;
+		this.#configCommon = configCommon;
+		this.#config = <Configure>JSON.parse(fs.readFileSync('node/configure/thumb-image.json', 'utf8'));
 	}
 
 	/**
 	 * @param {Request} req - Request
-	 * @param {HttpResponse} response - HttpResponse
+	 * @param {Response} res - Response
 	 */
-	async execute(req: Request, response: HttpResponse): Promise<void> {
+	async execute(req: Request, res: Response): Promise<void> {
 		const urlSearchParams = new URLSearchParamsCustomSeparator(req.url, [';']).getURLSearchParamsObject();
 
 		const paramPath = req.params.path;
@@ -42,10 +48,12 @@ export default class ThumbImageController extends Controller implements Controll
 		const paramMaxheight = urlSearchParams.get('mh');
 		const paramQuality = urlSearchParams.get('quality');
 
+		const httpResponse = new HttpResponse(res, this.#configCommon);
+
 		/* 存在チェック */
 		if (paramType === null || paramWidth === null || paramQuality === null) {
 			this.logger.info(`必須 URL パラメーター不足: ${req.url}`);
-			response.send403();
+			httpResponse.send403();
 			return;
 		}
 
@@ -54,13 +62,13 @@ export default class ThumbImageController extends Controller implements Controll
 		const paramMaxheightNumber = paramMaxheight !== null ? Number(paramMaxheight) : null;
 		const paramQualityNumber = Number(paramQuality);
 		if (!this._requestUrlParamTypeCheck(req, paramWidthNumber, paramMaxheightNumber, paramQualityNumber)) {
-			response.send403();
+			httpResponse.send403();
 			return;
 		}
 
 		/* 値チェック */
 		if (!this._requestUrlParamValueCheck(req, paramType, paramWidthNumber, paramMaxheightNumber, paramQualityNumber)) {
-			response.send403();
+			httpResponse.send403();
 			return;
 		}
 
@@ -68,10 +76,10 @@ export default class ThumbImageController extends Controller implements Controll
 		this.#thumbWidth = paramWidthNumber;
 		this.#thumbQuality = paramQualityNumber;
 
-		const origFilePath = path.resolve(`${this.#config.thumb_image.orig_dir}/${paramPath}`);
+		const origFilePath = path.resolve(`${this.#config.orig_dir}/${paramPath}`);
 		if (!fs.existsSync(origFilePath)) {
 			this.logger.info(`存在しないファイルパスが指定: ${req.url}`);
-			response.send404();
+			httpResponse.send404();
 			return;
 		}
 
@@ -89,8 +97,8 @@ export default class ThumbImageController extends Controller implements Controll
 			}
 		}
 
-		const parse = path.parse(path.resolve(`${this.#config.thumb_image.thumb_dir}/${paramPath}`));
-		const newFilePath = `${parse.dir}/${parse.name}@w=${this.#thumbWidth};q=${this.#thumbQuality}.${this.#config.thumb_image.extension[this.#thumbType]}`;
+		const parse = path.parse(path.resolve(`${this.#config.thumb_dir}/${paramPath}`));
+		const newFilePath = `${parse.dir}/${parse.name}@w=${this.#thumbWidth};q=${this.#thumbQuality}.${this.#config.extension[this.#thumbType]}`;
 
 		if (fs.existsSync(newFilePath)) {
 			/* 画像ファイルが生成済みだった場合 */
@@ -102,7 +110,7 @@ export default class ThumbImageController extends Controller implements Controll
 				this.logger.debug(`生成済みの画像を表示: ${newFilePath}`);
 
 				/* 生成済みの画像データを表示 */
-				this._responseImage(req, response, newFilePath, newFileMtime);
+				this._responseImage(req, res, httpResponse, newFilePath, newFileMtime);
 				return;
 			}
 		} else {
@@ -122,7 +130,7 @@ export default class ThumbImageController extends Controller implements Controll
 					case 'none': {
 						this.logger.debug(`画像が URL 直打ち等でリクエストされたので元画像を表示: ${req.url}`);
 
-						response.append('Vary', 'Sec-Fetch-Site');
+						res.append('Vary', 'Sec-Fetch-Site');
 						break;
 					}
 					default: {
@@ -131,21 +139,21 @@ export default class ThumbImageController extends Controller implements Controll
 						if (referrerStr === undefined) {
 							this.logger.debug(`リファラーが送出されていないので元画像を表示: ${req.url}`);
 
-							response.append('Vary', 'Sec-Fetch-Site');
+							res.append('Vary', 'Sec-Fetch-Site');
 						} else {
 							const referrer = new URL(referrerStr);
 							const referrerOrigin = referrer.origin;
 
-							if (this.#config.thumb_image.allow_origins.includes(referrerOrigin)) {
+							if (this.#config.allow_origins.includes(referrerOrigin)) {
 								/* 開発環境からのアクセスの場合 */
 								create = true;
 							} else {
 								this.logger.debug(`別サイトから '${requestHeaderSecFetchDest}' でリクエストされたので元画像を表示: ${req.url}`);
 
-								response.append('Vary', 'Sec-Fetch-Site');
+								res.append('Vary', 'Sec-Fetch-Site');
 
 								if (['image', 'iframe', 'object', 'embed'].includes(requestHeaderSecFetchDest)) {
-									if (!this.#config.thumb_image.referrer_exclusion_origins.includes(referrerOrigin)) {
+									if (!this.#config.referrer_exclusion_origins.includes(referrerOrigin)) {
 										this.logger.warn(
 											`画像ファイル ${paramPath} が別オリジンから埋め込まれている（リファラー: ${referrerStr} 、DEST: ${requestHeaderSecFetchDest} ）`
 										);
@@ -161,28 +169,28 @@ export default class ThumbImageController extends Controller implements Controll
 				if (referrerStr === undefined) {
 					this.logger.debug(`リファラーが送出されていないので元画像を表示: ${req.url}`);
 
-					response.append('Vary', 'referer');
+					res.append('Vary', 'referer');
 				} else {
 					const requestOrigin = `${req.protocol}://${req.hostname}`;
 
 					const referrer = new URL(referrerStr);
 					const referrerOrigin = referrer.origin;
 
-					if (requestOrigin === referrerOrigin || this.#config.thumb_image.allow_origins.includes(referrerOrigin)) {
+					if (requestOrigin === referrerOrigin || this.#config.allow_origins.includes(referrerOrigin)) {
 						/* 同一オリジンのリファラーがある、ないし開発環境からのアクセスの場合 */
 						if (req.url !== `${referrer.pathname}${referrer.search}`) {
 							create = true;
 						} else {
 							this.logger.debug(`リファラーが画像ファイル自身なので元画像を表示: ${req.url}`);
 
-							response.append('Vary', 'referer');
+							res.append('Vary', 'referer');
 						}
 					} else {
 						this.logger.debug(`別ドメインからリンクないし埋め込まれているので元画像を表示: ${req.url}`);
 
-						response.append('Vary', 'referer');
+						res.append('Vary', 'referer');
 
-						if (!this.#config.thumb_image.referrer_exclusion_origins.includes(referrerOrigin)) {
+						if (!this.#config.referrer_exclusion_origins.includes(referrerOrigin)) {
 							this.logger.warn(`画像ファイル ${paramPath} が別オリジンから埋め込まれている（リファラー: ${referrerStr} ）`);
 						}
 					}
@@ -191,14 +199,14 @@ export default class ThumbImageController extends Controller implements Controll
 
 			if (!create) {
 				/* 元画像を表示する */
-				this._responseImage(req, response, origFilePath, origFileMtime); // 元画像を表示
+				this._responseImage(req, res, httpResponse, origFilePath, origFileMtime); // 元画像を表示
 				return;
 			}
 		}
 
 		/* 新しい画像ファイルを生成する */
 		await this._createImage(origFilePath, newFilePath); // 画像ファイルを生成
-		this._responseImage(req, response, newFilePath); // 生成した画像データを表示
+		this._responseImage(req, res, httpResponse, newFilePath); // 生成した画像データを表示
 	}
 
 	/**
@@ -253,17 +261,17 @@ export default class ThumbImageController extends Controller implements Controll
 	 * @returns {boolean} 値に問題があれば false
 	 */
 	private _requestUrlParamValueCheck(req: Request, type: string, width: number, maxheight: number | null, quality: number): boolean {
-		if (!Object.keys(this.#config.thumb_image.extension).includes(type)) {
+		if (!Object.keys(this.#config.extension).includes(type)) {
 			this.logger.info(`type パラメーターの値が定義外: ${req.url}`);
 			return false;
 		}
 
-		if (width <= 0 || width > this.#config.thumb_image.param.max_width) {
+		if (width <= 0 || width > this.#config.param.max_width) {
 			this.logger.info(`width パラメーターの値が範囲外: ${req.url}`);
 			return false;
 		}
 
-		if (maxheight !== null && (maxheight <= 0 || maxheight > this.#config.thumb_image.param.max_height)) {
+		if (maxheight !== null && (maxheight <= 0 || maxheight > this.#config.param.max_height)) {
 			this.logger.info(`maxheight パラメーターの値が範囲外: ${req.url}`);
 			return false;
 		}
@@ -345,20 +353,21 @@ export default class ThumbImageController extends Controller implements Controll
 	 * 画像ファイルを画面に出力する
 	 *
 	 * @param {Request} req - Request
-	 * @param {HttpResponse} response - HttpResponse
+	 * @param {Response} res - Response
+	 * @param {HttpResponse} httpResponse - HttpResponse
 	 * @param {string} filePath - 出力する画像ファイルパス
 	 * @param {Date} fileMtime - 最終更新日時
 	 */
-	private _responseImage(req: Request, response: HttpResponse, filePath: string, fileMtime?: Date): void {
+	private _responseImage(req: Request, res: Response, httpResponse: HttpResponse, filePath: string, fileMtime?: Date): void {
 		if (fileMtime !== undefined) {
 			/* キャッシュ確認 */
-			if (response.checkLastModified(req, fileMtime)) {
+			if (httpResponse.checkLastModified(req, fileMtime)) {
 				return;
 			}
 		}
 
-		response.sendFile(filePath, {
-			maxAge: this.#config.static.options.max_age,
+		res.sendFile(filePath, {
+			maxAge: this.#configCommon.static.options.max_age,
 		});
 	}
 }

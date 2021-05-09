@@ -50,13 +50,6 @@ export type Threshold = string;
 export type FilepathFor403Forbidden = string;
 export type FilepathFor404NotFound = string;
 export type NoName7 = string;
-export type NoName8 = string;
-export type NoName10 = string;
-export type NoName11 = string;
-export type NoName14 = number;
-export type NoName15 = number;
-export type NoName16 = string[];
-export type NoName17 = string[];
 
 export interface MediaW0SJp {
   port: HTTP;
@@ -64,7 +57,6 @@ export interface MediaW0SJp {
   response: NoName3;
   errorpage: NoName6;
   logger: Logger;
-  thumb_image: NoName9;
 }
 export interface NoName {
   root: NoName1;
@@ -113,20 +105,4 @@ export interface NoName6 {
 }
 export interface Logger {
   path: NoName7;
-  category: NoName8;
-}
-export interface NoName9 {
-  orig_dir: NoName10;
-  thumb_dir: NoName11;
-  extension: NoName12;
-  param: NoName13;
-  allow_origins: NoName16;
-  referrer_exclusion_origins: NoName17;
-}
-export interface NoName12 {
-  [k: string]: unknown;
-}
-export interface NoName13 {
-  max_width: NoName14;
-  max_height: NoName15;
 }

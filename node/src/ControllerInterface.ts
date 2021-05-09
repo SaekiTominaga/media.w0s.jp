@@ -1,12 +1,11 @@
-import { Request } from 'express';
-import HttpResponse from './util/HttpResponse.js';
+import { Request, Response } from 'express';
 
 export default interface ControllerInterface {
 	/**
 	 * Execute the process
 	 *
 	 * @param {Request} req - Request
-	 * @param {HttpResponse} response - HttpResponse
+	 * @param {Response} res - HttpResponse
 	 */
-	execute(req: Request, response: HttpResponse): Promise<void>;
+	execute(req: Request, res: Response): Promise<void>;
 }
