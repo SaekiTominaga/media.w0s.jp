@@ -14,7 +14,7 @@
 		"url": "git+https://github.com/SaekiTominaga/media.w0s.jp.git"
 	},
 	"scripts": {
-		"app:dev": "nodemon node/dist/app.js",
+		"app:dev": "nodemon --inspect node/dist/app.js",
 		"build": "tsc",
 		"build:watch": "tsc -w",
 		"config:validate:common": "ajv --spec=draft7 -s node/configure/schema/common.json -d node/configure/common.json",
