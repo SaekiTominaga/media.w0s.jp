@@ -89,6 +89,8 @@ export default class BlogUploadController extends Controller implements Controll
 	}
 
 	/**
+	 * ファイルアップロードを実行する（実際はアップロードされたファイルを media.w0s.jp の適切な場所に移動する）
+	 *
 	 * @param {string} fileName - ファイル名
 	 * @param {string} tempPath - 仮で保存されたファイルパス
 	 * @param {number} size - ファイルサイズ
