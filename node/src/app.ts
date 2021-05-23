@@ -1,3 +1,4 @@
+import BlogUploadController from './controller/BlogUploadController.js';
 import compression from 'compression';
 import Express, { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
@@ -55,11 +56,22 @@ app.use(
 );
 
 /**
- * サムネイル画像
+ * サムネイル画像の表示
  */
 app.get('/thumbimage/:path([^?]+)', async (req, res, next) => {
 	try {
 		await new ThumbImageController(config).execute(req, res);
+	} catch (e) {
+		next(e);
+	}
+});
+
+/**
+ * ブログ用ファイルアップロード
+ */
+app.post('/blogupload', async (req, res, next) => {
+	try {
+		await new BlogUploadController(config).execute(req, res);
 	} catch (e) {
 		next(e);
 	}

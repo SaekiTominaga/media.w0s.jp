@@ -3,7 +3,7 @@
 	"$id": "https://schema.w0s.jp/common.json",
 	"type": "object",
 	"title": "media.w0s.jp",
-	"required": ["port", "static", "response", "errorpage", "logger"],
+	"required": ["port", "static", "response", "errorpage", "logger", "auth"],
 	"properties": {
 		"port": {
 			"type": "integer",
@@ -156,6 +156,26 @@
 				"path": {
 					"type": "string",
 					"title": "ファイルパス"
+				}
+			},
+			"additionalProperties": false
+		},
+		"auth": {
+			"type": "object",
+			"title": "認証",
+			"required": ["realm", "htpasswd_file", "json_401"],
+			"properties": {
+				"realm": {
+					"type": "string",
+					"title": "保護領域の説明文"
+				},
+				"htpasswd_file": {
+					"type": "string",
+					"title": "htpasswd ファイルのパス"
+				},
+				"json_401": {
+					"type": "object",
+					"title": "認証失敗時に返す JSON 内容"
 				}
 			},
 			"additionalProperties": false

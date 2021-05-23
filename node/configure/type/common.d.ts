@@ -50,6 +50,8 @@ export type Threshold = string;
 export type FilepathFor403Forbidden = string;
 export type FilepathFor404NotFound = string;
 export type NoName7 = string;
+export type NoName9 = string;
+export type Htpasswd = string;
 
 export interface MediaW0SJp {
   port: HTTP;
@@ -57,6 +59,7 @@ export interface MediaW0SJp {
   response: NoName3;
   errorpage: NoName6;
   logger: Logger;
+  auth: NoName8;
 }
 export interface NoName {
   root: NoName1;
@@ -105,4 +108,12 @@ export interface NoName6 {
 }
 export interface Logger {
   path: NoName7;
+}
+export interface NoName8 {
+  realm: NoName9;
+  htpasswd_file: Htpasswd;
+  json_401: JSON;
+}
+export interface JSON {
+  [k: string]: unknown;
 }

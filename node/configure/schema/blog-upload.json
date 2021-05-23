@@ -1,0 +1,120 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "https://schema.w0s.jp/blog-upload.json",
+	"type": "object",
+	"title": "ブログ用ファイルアップロード",
+	"required": ["image", "video", "response"],
+	"properties": {
+		"image": {
+			"type": "object",
+			"title": "画像",
+			"required": ["dir", "limit"],
+			"properties": {
+				"dir": {
+					"type": "string",
+					"title": "保存ディレクトリ"
+				},
+				"limit": {
+					"type": "integer",
+					"minimum": 0,
+					"title": "許容最大サイズ"
+				}
+			},
+			"additionalProperties": false
+		},
+		"video": {
+			"type": "object",
+			"title": "動画",
+			"required": ["dir", "limit"],
+			"properties": {
+				"dir": {
+					"type": "string",
+					"title": "保存ディレクトリ"
+				},
+				"limit": {
+					"type": "integer",
+					"minimum": 0,
+					"title": "許容最大サイズ"
+				}
+			},
+			"additionalProperties": false
+		},
+		"response": {
+			"type": "object",
+			"title": "画像",
+			"required": ["success", "type", "overwrite", "size"],
+			"properties": {
+				"success": {
+					"type": "object",
+					"title": "成功",
+					"required": ["code", "message"],
+					"properties": {
+						"code": {
+							"type": "integer",
+							"minimum": 1,
+							"title": "コード"
+						},
+						"message": {
+							"type": "string",
+							"title": "メッセージ"
+						}
+					},
+					"additionalProperties": false
+				},
+				"type": {
+					"type": "object",
+					"title": "MIME エラー",
+					"required": ["code", "message"],
+					"properties": {
+						"code": {
+							"type": "integer",
+							"minimum": 11,
+							"title": "コード"
+						},
+						"message": {
+							"type": "string",
+							"title": "メッセージ"
+						}
+					},
+					"additionalProperties": false
+				},
+				"overwrite": {
+					"type": "object",
+					"title": "上書きエラー",
+					"required": ["code", "message"],
+					"properties": {
+						"code": {
+							"type": "integer",
+							"minimum": 11,
+							"title": "コード"
+						},
+						"message": {
+							"type": "string",
+							"title": "メッセージ"
+						}
+					},
+					"additionalProperties": false
+				},
+				"size": {
+					"type": "object",
+					"title": "サイズ超過エラー",
+					"required": ["code", "message"],
+					"properties": {
+						"code": {
+							"type": "integer",
+							"minimum": 11,
+							"title": "コード"
+						},
+						"message": {
+							"type": "string",
+							"title": "メッセージ"
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"additionalProperties": false
+		}
+	},
+	"additionalProperties": false
+}
