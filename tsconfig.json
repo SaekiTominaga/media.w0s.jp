@@ -1,4 +1,5 @@
 {
+	"include": ["node/@types/*.d.ts", "node/src/**/*.ts"],
 	"compilerOptions": {
 		/* Project Options */
 		"incremental": true,
@@ -24,6 +25,5 @@
 		"allowUnreachableCode": false,
 		"forceConsistentCasingInFileNames": true,
 		"newLine": "LF"
-	},
-	"include": ["node/src/**/*.ts"]
+	}
 }

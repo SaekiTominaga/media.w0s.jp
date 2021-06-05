@@ -4,6 +4,7 @@ import Express, { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
 import Log4js from 'log4js';
 import path from 'path';
+import qs from 'qs';
 import ThumbImageController from './controller/ThumbImageController.js';
 import { MediaW0SJp as Configure } from '../configure/type/common';
 import { TypeMap } from 'mime';
@@ -20,8 +21,9 @@ Express.static.mime.define(<TypeMap>config.response.mime); // 静的ファイル
 
 const app = Express();
 
-app.set('x-powered-by', false);
+app.set('query parser', (query: string) => qs.parse(query, { delimiter: /[&;]/ }));
 app.set('trust proxy', true);
+app.set('x-powered-by', false);
 app.use((req, res, next) => {
 	const requestUrl = req.url;
 	const html = /(^\/[^.]*$)|(\.x?html$)/.test(requestUrl);

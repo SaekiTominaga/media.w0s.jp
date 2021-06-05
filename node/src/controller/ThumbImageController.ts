@@ -6,7 +6,6 @@ import HttpResponse from '../util/HttpResponse.js';
 import imageSize from 'image-size';
 import path from 'path';
 import Sharp from 'sharp';
-import URLSearchParamsCustomSeparator from '@saekitominaga/urlsearchparams-custom-separator';
 import { MediaW0SJp as ConfigureCommon } from '../../configure/type/common';
 import { NoName as Configure } from '../../configure/type/thumb-image';
 import { Request, Response } from 'express';
@@ -40,43 +39,43 @@ export default class ThumbImageController extends Controller implements Controll
 	 * @param {Response} res - Response
 	 */
 	async execute(req: Request, res: Response): Promise<void> {
-		const urlSearchParams = new URLSearchParamsCustomSeparator(req.url, [';']).getURLSearchParamsObject();
-
-		const paramPath = req.params.path;
-		const paramType = urlSearchParams.get('type');
-		const paramWidth = urlSearchParams.get('w');
-		const paramMaxheight = urlSearchParams.get('mh');
-		const paramQuality = urlSearchParams.get('quality');
+		const requestQuery: ThumbImageRequest.Query = {
+			path: req.params.path,
+			type: <string>req.query.type ?? null,
+			width: <string>req.query.w ?? null,
+			max_height: <string>req.query.mh ?? null,
+			quality: <string>req.query.quality ?? null,
+		};
 
 		const httpResponse = new HttpResponse(res, this.#configCommon);
 
 		/* 存在チェック */
-		if (paramType === null || paramWidth === null || paramQuality === null) {
+		if (requestQuery.type === null || requestQuery.width === null || requestQuery.quality === null) {
 			this.logger.info(`必須 URL パラメーター不足: ${req.url}`);
 			httpResponse.send403();
 			return;
 		}
 
 		/* 型チェック */
-		const paramWidthNumber = Number(paramWidth);
-		const paramMaxheightNumber = paramMaxheight !== null ? Number(paramMaxheight) : null;
-		const paramQualityNumber = Number(paramQuality);
+		const paramWidthNumber = Number(requestQuery.width);
+		const paramMaxheightNumber = requestQuery.max_height !== null ? Number(requestQuery.max_height) : null;
+		const paramQualityNumber = Number(requestQuery.quality);
 		if (!this._requestUrlParamTypeCheck(req, paramWidthNumber, paramMaxheightNumber, paramQualityNumber)) {
 			httpResponse.send403();
 			return;
 		}
 
 		/* 値チェック */
-		if (!this._requestUrlParamValueCheck(req, paramType, paramWidthNumber, paramMaxheightNumber, paramQualityNumber)) {
+		if (!this._requestUrlParamValueCheck(req, requestQuery.type, paramWidthNumber, paramMaxheightNumber, paramQualityNumber)) {
 			httpResponse.send403();
 			return;
 		}
 
-		this.#thumbType = paramType;
+		this.#thumbType = requestQuery.type;
 		this.#thumbWidth = paramWidthNumber;
 		this.#thumbQuality = paramQualityNumber;
 
-		const origFilePath = path.resolve(`${this.#config.orig_dir}/${paramPath}`);
+		const origFilePath = path.resolve(`${this.#config.orig_dir}/${requestQuery.path}`);
 		if (!fs.existsSync(origFilePath)) {
 			this.logger.info(`存在しないファイルパスが指定: ${req.url}`);
 			httpResponse.send404();
@@ -97,7 +96,7 @@ export default class ThumbImageController extends Controller implements Controll
 			}
 		}
 
-		const parse = path.parse(path.resolve(`${this.#config.thumb_dir}/${paramPath}`));
+		const parse = path.parse(path.resolve(`${this.#config.thumb_dir}/${requestQuery.path}`));
 		const newFilePath = `${parse.dir}/${parse.name}@w=${this.#thumbWidth};q=${this.#thumbQuality}.${this.#config.extension[this.#thumbType]}`;
 
 		if (fs.existsSync(newFilePath)) {
@@ -155,7 +154,7 @@ export default class ThumbImageController extends Controller implements Controll
 								if (['image', 'iframe', 'object', 'embed'].includes(requestHeaderSecFetchDest)) {
 									if (!this.#config.referrer_exclusion_origins.includes(referrerOrigin)) {
 										this.logger.warn(
-											`画像ファイル ${paramPath} が別オリジンから埋め込まれている（リファラー: ${referrerStr} 、DEST: ${requestHeaderSecFetchDest} ）`
+											`画像ファイル ${requestQuery.path} が別オリジンから埋め込まれている（リファラー: ${referrerStr} 、DEST: ${requestHeaderSecFetchDest} ）`
 										);
 									}
 								}
@@ -189,7 +188,7 @@ export default class ThumbImageController extends Controller implements Controll
 						res.append('Vary', 'referer');
 
 						if (!this.#config.referrer_exclusion_origins.includes(referrerOrigin)) {
-							this.logger.warn(`画像ファイル ${paramPath} が別オリジンから埋め込まれている（リファラー: ${referrerStr} ）`);
+							this.logger.warn(`画像ファイル ${requestQuery.path} が別オリジンから埋め込まれている（リファラー: ${referrerStr} ）`);
 						}
 					}
 				}
