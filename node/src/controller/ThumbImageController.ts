@@ -6,10 +6,10 @@ import HttpResponse from '../util/HttpResponse.js';
 import imageSize from 'image-size';
 import path from 'path';
 import Sharp from 'sharp';
+import ThumbImageValidator from '../validator/ThumbImageValidator.js';
 import { MediaW0SJp as ConfigureCommon } from '../../configure/type/common';
 import { NoName as Configure } from '../../configure/type/thumb-image';
 import { Request, Response } from 'express';
-import { validationResult as expressValidationResult } from 'express-validator';
 
 /**
  * サムネイル画像
@@ -41,9 +41,10 @@ export default class ThumbImageController extends Controller implements Controll
 			quality: Number(req.query.quality),
 		};
 
+		const validationResult = await new ThumbImageValidator(req, this.#config).display();
+
 		const httpResponse = new HttpResponse(res, this.#configCommon);
 
-		const validationResult = expressValidationResult(req);
 		if (!validationResult.isEmpty()) {
 			this.logger.info('パラメーター不正', validationResult.array());
 			httpResponse.send403();

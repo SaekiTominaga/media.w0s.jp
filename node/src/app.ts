@@ -6,7 +6,6 @@ import Log4js from 'log4js';
 import path from 'path';
 import qs from 'qs';
 import ThumbImageController from './controller/ThumbImageController.js';
-import ThumbImageValidator from './validator/ThumbImageValidator.js';
 import { MediaW0SJp as Configure } from '../configure/type/common';
 import { TypeMap } from 'mime';
 
@@ -61,7 +60,7 @@ app.use(
 /**
  * サムネイル画像の表示
  */
-app.get('/thumbimage/:path([^?]+)', new ThumbImageValidator().validate(), async (req: Request, res: Response, next: NextFunction) => {
+app.get('/thumbimage/:path([^?]+)', async (req, res, next) => {
 	try {
 		await new ThumbImageController(config).execute(req, res);
 	} catch (e) {
