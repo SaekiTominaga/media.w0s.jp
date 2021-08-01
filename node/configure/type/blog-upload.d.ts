@@ -17,6 +17,8 @@ export type NoName14 = number;
 export type NoName15 = string;
 export type NoName17 = number;
 export type NoName18 = string;
+export type NoName20 = number;
+export type NoName21 = string;
 
 export interface NoName {
   image: NoName1;
@@ -36,6 +38,7 @@ export interface NoName7 {
   type: MIME;
   overwrite: NoName13;
   size: NoName16;
+  request_query: NoName19;
 }
 export interface NoName8 {
   code: NoName9;
@@ -52,4 +55,8 @@ export interface NoName13 {
 export interface NoName16 {
   code: NoName17;
   message: NoName18;
+}
+export interface NoName19 {
+  code: NoName20;
+  message: NoName21;
 }

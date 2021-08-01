@@ -1,17 +1,15 @@
-import auth from 'basic-auth';
 import Controller from '../Controller.js';
 import ControllerInterface from '../ControllerInterface.js';
 import fs from 'fs';
-// @ts-expect-error: ts(7016)
-import htpasswd from 'htpasswd-js';
+import HttpBasicAuth from '../util/HttpBasicAuth.js';
 import MIMEParser from '@saekitominaga/mime-parser';
 import { MediaW0SJp as ConfigureCommon } from '../../configure/type/common';
 import { NoName as Configure } from '../../configure/type/blog-upload';
 import { Request, Response } from 'express';
 
 interface ResponseJson {
-	name: string;
-	size: number;
+	name: string | null;
+	size: number | null;
 	code: number;
 	message: string;
 }
@@ -39,15 +37,8 @@ export default class BlogUploadController extends Controller implements Controll
 	 */
 	async execute(req: Request, res: Response): Promise<void> {
 		/* Basic 認証 */
-		const credentials = auth(req);
-		if (
-			credentials === undefined ||
-			!(await htpasswd.authenticate({
-				username: credentials.name,
-				password: credentials.pass,
-				file: this.#configCommon.auth.htpasswd_file,
-			}))
-		) {
+		const httpBasicAuth = new HttpBasicAuth(req);
+		if (!(await httpBasicAuth.htpasswd(this.#configCommon.auth.htpasswd_file))) {
 			res
 				.status(401)
 				.set('WWW-Authenticate', `Basic realm="${this.#configCommon.auth.realm}"`)
@@ -55,30 +46,58 @@ export default class BlogUploadController extends Controller implements Controll
 			return;
 		}
 
-		const requestBody = req.body;
-		const fileName: string = requestBody.name;
-		const mime: string = requestBody.type;
-		const tempPath: string = requestBody.temppath;
-		const size = Number(requestBody.size);
-		const overwrite = Boolean(requestBody.overwrite);
+		const requestQuery: BlogUploadRequest.Query = {
+			file_name: req.body.name ?? null,
+			mime: req.body.type ?? null,
+			temp_path: req.body.temppath ?? null,
+			size: req.body.size !== undefined ? Number(req.body.size) : null,
+			overwrite: Boolean(req.body.overwrite),
+		};
 
 		let responseJson: ResponseJson;
 
-		switch (new MIMEParser(mime).getType()) {
+		if (requestQuery.file_name === null || requestQuery.mime === null || requestQuery.temp_path === null || requestQuery.size === null) {
+			this.logger.warn('必要なパラメーターが存在しない', requestQuery);
+
+			responseJson = {
+				name: requestQuery.file_name,
+				size: requestQuery.size,
+				code: this.#config.response.request_query.code,
+				message: this.#config.response.request_query.message,
+			};
+			res.status(403).json(responseJson);
+			return;
+		}
+
+		switch (new MIMEParser(requestQuery.mime).getType()) {
 			case 'image': {
-				responseJson = await this.upload(fileName, tempPath, size, this.#config.image.dir, overwrite, this.#config.image.limit);
+				responseJson = await this.upload(
+					requestQuery.file_name,
+					requestQuery.temp_path,
+					requestQuery.size,
+					this.#config.image.dir,
+					requestQuery.overwrite,
+					this.#config.image.limit
+				);
 				break;
 			}
 			case 'video': {
-				responseJson = await this.upload(fileName, tempPath, size, this.#config.video.dir, overwrite, this.#config.video.limit);
+				responseJson = await this.upload(
+					requestQuery.file_name,
+					requestQuery.temp_path,
+					requestQuery.size,
+					this.#config.video.dir,
+					requestQuery.overwrite,
+					this.#config.video.limit
+				);
 				break;
 			}
 			default: {
-				this.logger.info(`未対応のファイルタイプ: ${mime}`);
+				this.logger.info('未対応のファイルタイプ', requestQuery.mime);
 
 				responseJson = {
-					name: fileName,
-					size: size,
+					name: requestQuery.file_name,
+					size: requestQuery.size,
 					code: this.#config.response.type.code,
 					message: this.#config.response.type.message,
 				};

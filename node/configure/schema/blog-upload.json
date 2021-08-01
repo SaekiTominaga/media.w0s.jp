@@ -41,8 +41,8 @@
 		},
 		"response": {
 			"type": "object",
-			"title": "画像",
-			"required": ["success", "type", "overwrite", "size"],
+			"title": "レスポンス",
+			"required": ["success", "type", "overwrite", "size", "request_query"],
 			"properties": {
 				"success": {
 					"type": "object",
@@ -103,6 +103,23 @@
 						"code": {
 							"type": "integer",
 							"minimum": 11,
+							"title": "コード"
+						},
+						"message": {
+							"type": "string",
+							"title": "メッセージ"
+						}
+					},
+					"additionalProperties": false
+				},
+				"request_query": {
+					"type": "object",
+					"title": "パラメーターエラー",
+					"required": ["code", "message"],
+					"properties": {
+						"code": {
+							"type": "integer",
+							"minimum": 21,
 							"title": "コード"
 						},
 						"message": {
