@@ -7,23 +7,16 @@
 
 export type NoName1 = string;
 export type NoName2 = string;
-export type NoName5 = number;
-export type NoName6 = number;
-export type NoName7 = string[];
-export type NoName8 = string[];
+export type NoName4 = string[];
+export type NoName5 = string[];
 
 export interface NoName {
   orig_dir: NoName1;
   thumb_dir: NoName2;
   extension: NoName3;
-  param: NoName4;
-  allow_origins: NoName7;
-  referrer_exclusion_origins: NoName8;
+  allow_origins: NoName4;
+  referrer_exclusion_origins: NoName5;
 }
 export interface NoName3 {
   [k: string]: unknown;
-}
-export interface NoName4 {
-  max_width: NoName5;
-  max_height: NoName6;
 }
