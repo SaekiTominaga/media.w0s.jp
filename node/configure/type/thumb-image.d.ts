@@ -7,6 +7,7 @@
 
 export type NoName1 = string;
 export type NoName2 = string;
+export type JPRGWebPAVIF = number;
 export type NoName4 = string[];
 export type NoName5 = string[];
 
@@ -14,6 +15,7 @@ export interface NoName {
   orig_dir: NoName1;
   thumb_dir: NoName2;
   extension: NoName3;
+  quality_default: JPRGWebPAVIF;
   allow_origins: NoName4;
   referrer_exclusion_origins: NoName5;
 }

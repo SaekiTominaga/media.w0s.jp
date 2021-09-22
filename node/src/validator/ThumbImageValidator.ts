@@ -24,19 +24,23 @@ export default class ThumbImageValidator {
 	 * @returns {Result<ValidationError>} 検証エラー
 	 */
 	async display(): Promise<Result<ValidationError>> {
-		await query('type')
-			.isIn(Object.keys(this.#config.extension))
-			.run(this.#req);
-		await query('w')
-			.isInt({ min: 1, max: 9999 })
-			.run(this.#req);
-		await query('mh')
-			.optional({ checkFalsy: true })
-			.isInt({ min: 1, max: 9999 })
-			.run(this.#req);
-		await query('quality')
-			.isInt({ min: 0, max: 100 })
-			.run(this.#req);
+		await Promise.all([
+			query('type')
+				.isIn(Object.keys(this.#config.extension))
+				.run(this.#req),
+			query('w')
+				.optional({ checkFalsy: true })
+				.isInt({ min: 1, max: 9999 })
+				.run(this.#req),
+			query('h')
+				.optional({ checkFalsy: true })
+				.isInt({ min: 1, max: 9999 })
+				.run(this.#req),
+			query('quality')
+				.optional({ checkFalsy: true })
+				.isInt({ min: 1, max: 100 })
+				.run(this.#req),
+		]);
 
 		return validationResult(this.#req);
 	}

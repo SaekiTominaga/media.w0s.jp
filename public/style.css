@@ -30,18 +30,17 @@ main > section > section + section {
 	margin-top: 3em;
 }
 
-nav > ul {
-	margin-top: 2em;
-	padding-left: 1em;
+table {
+	border-collapse: collapse;
 }
 
-nav > ul > li > ul {
-	margin-top: 0.5em;
-	padding-left: 1em;
+:is(th, td) {
+	padding: 0.25em 0.5em;
+	border: 1px solid;
 }
 
-nav li + li {
-	margin-top: 1em;
+thead th {
+	text-align: center;
 }
 
 .link a {
@@ -75,22 +74,40 @@ nav li + li {
 	display: inline-block;
 }
 
-.spec {
+.details {
+	margin-top: 2em;
+	padding-left: 1em;
+}
+
+.details :is(p, ul, table) {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.details > li > ul {
+	padding-left: 1em;
+}
+
+.details > li + li {
+	margin-top: 1em;
+}
+
+.sample-spec {
 	display: table;
 	border-collapse: collapse;
 }
 
-.spec > div {
+.sample-spec > div {
 	display: table-row;
 }
 
-.spec :is(dt, dd) {
+.sample-spec :is(dt, dd) {
 	padding: 0.25em 0.5em;
 	border: 1px solid;
 	display: table-cell;
 }
 
-.spec dt {
+.sample-spec dt {
 	padding-right: 1em;
 	font-weight: bold;
 }

@@ -11,6 +11,11 @@ import { MediaW0SJp as ConfigureCommon } from '../../configure/type/common';
 import { NoName as Configure } from '../../configure/type/thumb-image';
 import { Request, Response } from 'express';
 
+type ImageSize = {
+	width: number;
+	height: number;
+};
+
 /**
  * サムネイル画像
  */
@@ -36,9 +41,9 @@ export default class ThumbImageController extends Controller implements Controll
 		const requestQuery: ThumbImageRequest.Query = {
 			path: req.params.path,
 			type: <string>req.query.type,
-			width: Number(req.query.w),
-			max_height: Number(req.query.mh) ?? null,
-			quality: Number(req.query.quality),
+			width: req.query.w !== undefined ? Number(req.query.w) : null,
+			height: req.query.h !== undefined ? Number(req.query.h) : null,
+			quality: req.query.quality !== undefined ? Number(req.query.quality) : this.#config.quality_default,
 		};
 
 		const validationResult = await new ThumbImageValidator(req, this.#config).display();
@@ -60,20 +65,16 @@ export default class ThumbImageController extends Controller implements Controll
 
 		const origFileMtime = fs.statSync(origFilePath).mtime;
 
-		if (requestQuery.max_height !== null) {
-			const dimensions = imageSize(origFilePath);
-			const origImageWidth = dimensions.width;
-			const origImageHeight = dimensions.height;
-
-			if (origImageWidth !== undefined && origImageHeight !== undefined) {
-				if ((origImageHeight / origImageWidth) * requestQuery.width > requestQuery.max_height) {
-					requestQuery.width = Math.round((origImageWidth / origImageHeight) * requestQuery.max_height);
-				}
-			}
+		/* 出力するファイルのサイズを計算する */
+		const newImageSize = this.getNewFileSize(requestQuery, origFilePath);
+		if (newImageSize === null) {
+			this.logger.info(`存在しないファイルパスが指定: ${req.url}`);
+			httpResponse.send403();
+			return;
 		}
 
-		const parse = path.parse(path.resolve(`${this.#config.thumb_dir}/${requestQuery.path}`));
-		const newFilePath = `${parse.dir}/${parse.name}@w=${requestQuery.width};q=${requestQuery.quality}.${this.#config.extension[requestQuery.type]}`;
+		/* 出力するファイルパス */
+		const newFilePath = this.getNewFilePath(requestQuery, newImageSize);
 
 		if (fs.existsSync(newFilePath)) {
 			/* 画像ファイルが生成済みだった場合 */
@@ -178,8 +179,85 @@ export default class ThumbImageController extends Controller implements Controll
 		}
 
 		/* 新しい画像ファイルを生成する */
-		await this.createImage(requestQuery, origFilePath, newFilePath); // 画像ファイルを生成
+		await this.createImage(requestQuery, origFilePath, newFilePath, newImageSize); // 画像ファイルを生成
 		this.responseImage(req, res, httpResponse, newFilePath); // 生成した画像データを表示
+	}
+
+	/**
+	 * 出力する画像ファイルの大きさを計算する
+	 *
+	 * @param {object} requestQuery - URL クエリー情報
+	 * @param {string} origFilePath - オリジナル画像のパス
+	 *
+	 * @returns {object} 出力する画像ファイルの大きさ
+	 */
+	private getNewFileSize(requestQuery: ThumbImageRequest.Query, origFilePath: string): ImageSize | null {
+		const dimensions = imageSize(origFilePath);
+		const origImageWidth = dimensions.width;
+		const origImageHeight = dimensions.height;
+
+		if (origImageWidth === undefined || origImageHeight === undefined) {
+			return null;
+		}
+		this.logger.debug('オリジナル画像サイズ', `${origImageWidth}x${origImageHeight}`);
+
+		let newImageWidth = origImageWidth;
+		let newImageHeight = origImageHeight;
+
+		if (requestQuery.height === null) {
+			/* 幅のみが指定された場合 */
+			if (requestQuery.width !== null && requestQuery.width < origImageWidth) {
+				/* 幅を基準に縮小する */
+				newImageWidth = requestQuery.width;
+				newImageHeight = Math.round((origImageHeight / origImageWidth) * requestQuery.width);
+
+				this.logger.debug('幅のみが指定された場合', `${newImageWidth}x${newImageHeight}`);
+			}
+		} else if (requestQuery.width === null) {
+			/* 高さのみが指定された場合 */
+			if (requestQuery.height !== null && requestQuery.height < origImageHeight) {
+				/* 高さを基準に縮小する */
+				newImageWidth = Math.round((origImageWidth / origImageHeight) * requestQuery.height);
+				newImageHeight = requestQuery.height;
+
+				this.logger.debug('高さのみが指定された場合', `${newImageWidth}x${newImageHeight}`);
+			}
+		} else {
+			/* 幅、高さが両方指定された場合 */
+			if (requestQuery.width !== null && requestQuery.height !== null && (requestQuery.width < origImageWidth || requestQuery.height < origImageHeight)) {
+				/* 幅か高さ、どちらかより縮小割合が大きい方を基準に縮小する */
+				const reductionRatio = Math.min(requestQuery.width / origImageWidth, requestQuery.height / origImageHeight);
+
+				newImageWidth = Math.round(origImageWidth * reductionRatio);
+				newImageHeight = Math.round(origImageHeight * reductionRatio);
+
+				this.logger.debug('幅、高さが両方指定された場合', `${newImageWidth}x${newImageHeight}`);
+			}
+		}
+
+		return { width: newImageWidth, height: newImageHeight };
+	}
+
+	/**
+	 * 出力する画像ファイルパスを組み立てる
+	 *
+	 * @param {object} requestQuery - URL クエリー情報
+	 * @param {ImageSize} imageSize - 出力画像の大きさ
+	 *
+	 * @returns {string} 出力する画像ファイルパス
+	 */
+	private getNewFilePath(requestQuery: ThumbImageRequest.Query, imageSize: ImageSize): string {
+		const parse = path.parse(path.resolve(`${this.#config.thumb_dir}/${requestQuery.path}`));
+
+		const paramSize = `s=${imageSize.width}x${imageSize.height}`;
+		const paramQuality = `q=${requestQuery.quality}`;
+
+		const params = [paramSize];
+		if (requestQuery.type !== 'png') {
+			params.push(paramQuality);
+		}
+
+		return `${parse.dir}/${parse.base}@${params.join(';')}.${this.#config.extension[requestQuery.type]}`;
 	}
 
 	/**
@@ -188,8 +266,9 @@ export default class ThumbImageController extends Controller implements Controll
 	 * @param {object} requestQuery - URL クエリー情報
 	 * @param {string} origFilePath - 元画像ファイルパス
 	 * @param {string} newFilePath - 生成する画像ファイルパス
+	 * @param {ImageSize} newImageSize - 生成する画像ファイルのサイズ
 	 */
-	private async createImage(requestQuery: ThumbImageRequest.Query, origFilePath: string, newFilePath: string): Promise<void> {
+	private async createImage(requestQuery: ThumbImageRequest.Query, origFilePath: string, newFilePath: string, newImageSize: ImageSize): Promise<void> {
 		/* ディレクトリのチェック */
 		fs.mkdirSync(path.dirname(newFilePath), {
 			recursive: true,
@@ -204,7 +283,7 @@ export default class ThumbImageController extends Controller implements Controll
 		Sharp.cache(false);
 
 		const sharp = Sharp(origFilePath);
-		sharp.resize(requestQuery.width);
+		sharp.resize(newImageSize.width, newImageSize.height);
 		switch (requestQuery.type) {
 			case 'avif': {
 				sharp.avif({

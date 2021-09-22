@@ -3,7 +3,7 @@
 	"$id": "https://schema.w0s.jp/thumb-image.json",
 	"type": "object",
 	"title": "サムネイル画像",
-	"required": ["orig_dir", "thumb_dir", "extension", "allow_origins", "referrer_exclusion_origins"],
+	"required": ["orig_dir", "thumb_dir", "extension", "quality_default", "allow_origins", "referrer_exclusion_origins"],
 	"properties": {
 		"orig_dir": {
 			"type": "string",
@@ -16,6 +16,12 @@
 		"extension": {
 			"type": "object",
 			"title": "ファイル拡張子の定義"
+		},
+		"quality_default": {
+			"type": "integer",
+			"minimum": 1,
+			"maximum": 100,
+			"title": "JPRG, WebP, AVIF の品質デフォルト値"
 		},
 		"allow_origins": {
 			"type": "array",
