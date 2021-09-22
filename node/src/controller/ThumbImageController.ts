@@ -200,6 +200,9 @@ export default class ThumbImageController extends Controller implements Controll
 
 		const startTime = Date.now();
 
+		/* sharp 設定 */
+		Sharp.cache(false);
+
 		const sharp = Sharp(origFilePath);
 		sharp.resize(requestQuery.width);
 		switch (requestQuery.type) {
