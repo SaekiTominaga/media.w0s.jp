@@ -221,6 +221,22 @@ export default class ThumbImageController extends Controller implements Controll
 				});
 				break;
 			}
+			case 'png': {
+				const sharpOptions: Sharp.PngOptions = {
+					compressionLevel: 9,
+				};
+
+				const metadata = await sharp.metadata();
+				// @ts-expect-error: ts(2339)
+				if (metadata.format === 'png' && metadata.paletteBitDepth === 8) {
+					/* PNG8 */
+					sharpOptions.palette = true;
+				}
+
+				sharp.png(sharpOptions);
+
+				break;
+			}
 		}
 		await sharp.toFile(newFilePath);
 
