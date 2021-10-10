@@ -6,7 +6,11 @@
  */
 
 export type HTTP = number;
-export type NoName1 = string;
+export type StrictTransportSecurity = string;
+export type ContentSecurityPolicyHTML = string;
+export type ContentSecurityPolicyHTML1 = string;
+export type Threshold = string;
+export type NoName4 = string;
 /**
  * Determines how dotfiles (files or directories that begin with a dot “.”) are treated.
  */
@@ -43,10 +47,6 @@ export type MaxAge = string;
  * Redirect to trailing “/” when the pathname is a directory.
  */
 export type Redirect = boolean;
-export type StrictTransportSecurity = string;
-export type ContentSecurityPolicyHTML = string;
-export type ContentSecurityPolicyHTML1 = string;
-export type Threshold = string;
 export type FilepathFor403Forbidden = string;
 export type FilepathFor404NotFound = string;
 export type NoName7 = string;
@@ -55,20 +55,40 @@ export type Htpasswd = string;
 
 export interface MediaW0SJp {
   port: HTTP;
-  static: NoName;
-  response: NoName3;
+  response: NoName;
+  static: NoName3;
   errorpage: NoName6;
   logger: Logger;
   auth: NoName8;
 }
 export interface NoName {
-  root: NoName1;
-  options: NoName2;
+  mime_extension: MIME;
+  mime_path: MIME1;
+  header: NoName1;
+  compression: NoName2;
+}
+export interface MIME {
+  [k: string]: unknown;
+}
+export interface MIME1 {
+  [k: string]: unknown;
+}
+export interface NoName1 {
+  hsts: StrictTransportSecurity;
+  csp: ContentSecurityPolicyHTML;
+  csp_html: ContentSecurityPolicyHTML1;
+}
+export interface NoName2 {
+  threshold: Threshold;
+}
+export interface NoName3 {
+  root: NoName4;
+  options: NoName5;
 }
 /**
  * https://expressjs.com/ja/4x/api.html#express.static
  */
-export interface NoName2 {
+export interface NoName5 {
   dotfiles?: Dotfiles;
   etag?: Etag;
   extensions?: Extensions;
@@ -85,22 +105,6 @@ export interface NoName2 {
  */
 export interface SetHeaders {
   [k: string]: unknown;
-}
-export interface NoName3 {
-  mime: MIME;
-  header: NoName4;
-  compression: NoName5;
-}
-export interface MIME {
-  [k: string]: unknown;
-}
-export interface NoName4 {
-  hsts: StrictTransportSecurity;
-  csp: ContentSecurityPolicyHTML;
-  csp_html: ContentSecurityPolicyHTML1;
-}
-export interface NoName5 {
-  threshold: Threshold;
 }
 export interface NoName6 {
   path_403: FilepathFor403Forbidden;

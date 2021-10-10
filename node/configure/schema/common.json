@@ -3,13 +3,61 @@
 	"$id": "https://schema.w0s.jp/common.json",
 	"type": "object",
 	"title": "media.w0s.jp",
-	"required": ["port", "static", "response", "errorpage", "logger", "auth"],
+	"required": ["port", "response", "static", "errorpage", "logger", "auth"],
 	"properties": {
 		"port": {
 			"type": "integer",
 			"minimum": 1,
 			"maximum": 65535,
 			"title": "HTTP サーバーのポート番号"
+		},
+		"response": {
+			"type": "object",
+			"title": "レスポンス",
+			"required": ["mime_extension", "mime_path", "header", "compression"],
+			"properties": {
+				"mime_extension": {
+					"type": "object",
+					"title": "MIME と拡張子の紐付け"
+				},
+				"mime_path": {
+					"type": "object",
+					"title": "MIME とファイルパスの紐付け"
+				},
+				"header": {
+					"type": "object",
+					"title": "レスポンスヘッダー",
+					"required": ["hsts", "csp", "csp_html"],
+					"properties": {
+						"hsts": {
+							"type": "string",
+							"title": "Strict-Transport-Security"
+						},
+						"csp": {
+							"type": "string",
+							"title": "Content-Security-Policy (HTML 以外)"
+						},
+						"csp_html": {
+							"type": "string",
+							"title": "Content-Security-Policy (HTML)"
+						}
+					},
+					"additionalProperties": false
+				},
+				"compression": {
+					"type": "object",
+					"title": "圧縮",
+					"required": ["threshold"],
+					"properties": {
+						"threshold": {
+							"type": "string",
+							"title": "Threshold"
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"additionalProperties": false
 		},
 		"static": {
 			"type": "object",
@@ -81,50 +129,6 @@
 							"type": "object",
 							"title": "set_headers",
 							"description": "Function for setting HTTP headers to serve with the file."
-						}
-					},
-					"additionalProperties": false
-				}
-			},
-			"additionalProperties": false
-		},
-		"response": {
-			"type": "object",
-			"title": "レスポンス",
-			"required": ["mime", "header", "compression"],
-			"properties": {
-				"mime": {
-					"type": "object",
-					"title": "MIME と拡張子の紐付け"
-				},
-				"header": {
-					"type": "object",
-					"title": "レスポンスヘッダー",
-					"required": ["hsts", "csp", "csp_html"],
-					"properties": {
-						"hsts": {
-							"type": "string",
-							"title": "Strict-Transport-Security"
-						},
-						"csp": {
-							"type": "string",
-							"title": "Content-Security-Policy (HTML 以外)"
-						},
-						"csp_html": {
-							"type": "string",
-							"title": "Content-Security-Policy (HTML)"
-						}
-					},
-					"additionalProperties": false
-				},
-				"compression": {
-					"type": "object",
-					"title": "圧縮",
-					"required": ["threshold"],
-					"properties": {
-						"threshold": {
-							"type": "string",
-							"title": "Threshold"
 						}
 					},
 					"additionalProperties": false
