@@ -11,67 +11,38 @@ export type ContentSecurityPolicyHTML = string;
 export type ContentSecurityPolicyHTML1 = string;
 export type Threshold = string;
 export type NoName4 = string;
-/**
- * Determines how dotfiles (files or directories that begin with a dot “.”) are treated.
- */
-export type Dotfiles = number;
-/**
- * Enable or disable etag generation
- */
-export type Etag = boolean;
-/**
- * Sets file extension fallbacks: If a file is not found, search for files with the specified extensions and serve the first one found. Example: ['html', 'htm'].
- */
-export type Extensions = string[];
-/**
- * Let client errors fall-through as unhandled requests, otherwise forward a client error.
- */
-export type Fallthrough = boolean;
-/**
- * Enable or disable the immutable directive in the Cache-Control response header. If enabled, the maxAge option should also be specified to enable caching. The immutable directive will prevent supported clients from making conditional requests during the life of the maxAge option to check if the file has changed.
- */
-export type Immutable = boolean;
-/**
- * Sends the specified directory index file. Set to false to disable directory indexing.
- */
-export type Index = string[];
-/**
- * Set the Last-Modified header to the last modified date of the file on the OS.
- */
-export type LastModified = boolean;
-/**
- * Set the max-age property of the Cache-Control header in milliseconds or a string in ms format.
- */
-export type MaxAge = string;
-/**
- * Redirect to trailing “/” when the pathname is a directory.
- */
-export type Redirect = boolean;
+export type NoName5 = string[];
+export type NoName6 = string[];
+export type NoName9 = string;
+export type NoName11 = string[];
+export type NoName12 = string;
+export type NoName10 = {
+  paths: NoName11;
+  value: NoName12;
+}[];
+export type NoName14 = string[];
+export type NoName15 = string;
+export type NoName13 = {
+  extensions: NoName14;
+  value: NoName15;
+}[];
 export type FilepathFor403Forbidden = string;
 export type FilepathFor404NotFound = string;
-export type NoName7 = string;
-export type NoName9 = string;
+export type NoName17 = string;
+export type NoName19 = string;
 export type Htpasswd = string;
 
 export interface MediaW0SJp {
   port: HTTP;
   response: NoName;
   static: NoName3;
-  errorpage: NoName6;
+  errorpage: NoName16;
   logger: Logger;
-  auth: NoName8;
+  auth: NoName18;
 }
 export interface NoName {
-  mime_extension: MIME;
-  mime_path: MIME1;
   header: NoName1;
   compression: NoName2;
-}
-export interface MIME {
-  [k: string]: unknown;
-}
-export interface MIME1 {
-  [k: string]: unknown;
 }
 export interface NoName1 {
   hsts: StrictTransportSecurity;
@@ -83,38 +54,38 @@ export interface NoName2 {
 }
 export interface NoName3 {
   root: NoName4;
-  options: NoName5;
+  extensions?: NoName5;
+  indexes?: NoName6;
+  headers: NoName7;
 }
-/**
- * https://expressjs.com/ja/4x/api.html#express.static
- */
-export interface NoName5 {
-  dotfiles?: Dotfiles;
-  etag?: Etag;
-  extensions?: Extensions;
-  fallthrough?: Fallthrough;
-  immutable?: Immutable;
-  index?: Index;
-  last_modified?: LastModified;
-  max_age?: MaxAge;
-  redirect?: Redirect;
-  set_headers?: SetHeaders;
+export interface NoName7 {
+  mime: MIME;
+  cache_control?: NoName8;
 }
-/**
- * Function for setting HTTP headers to serve with the file.
- */
-export interface SetHeaders {
+export interface MIME {
+  path: MIME1;
+  extension: MIME2;
+}
+export interface MIME1 {
   [k: string]: unknown;
 }
-export interface NoName6 {
+export interface MIME2 {
+  [k: string]: unknown;
+}
+export interface NoName8 {
+  default: NoName9;
+  path: NoName10;
+  extension: NoName13;
+}
+export interface NoName16 {
   path_403: FilepathFor403Forbidden;
   path_404: FilepathFor404NotFound;
 }
 export interface Logger {
-  path: NoName7;
+  path: NoName17;
 }
-export interface NoName8 {
-  realm: NoName9;
+export interface NoName18 {
+  realm: NoName19;
   htpasswd_file: Htpasswd;
   json_401: JSON;
 }
