@@ -42,6 +42,7 @@ app.use((req, res, next) => {
 		requestFilePath = requestUrl;
 	}
 
+	/* Content-Type */
 	const mimeOfPath = Object.entries(<{ [key: string]: string[] }>config.static.headers.mime.path).find(
 		([, paths]) => requestFilePath !== undefined && paths.includes(requestFilePath)
 	)?.[0]; // ファイルパスから決定される MIME
@@ -50,9 +51,8 @@ app.use((req, res, next) => {
 	)?.[0]; // 拡張子から決定される MIME
 	const mime = mimeOfPath ?? mimeOfExtension;
 
-	/* Content-Type */
 	if (mime === undefined) {
-		logger.info('未定義の MIME', requestUrl);
+		logger.info('MIME が未定義のファイル', requestUrl);
 	} else {
 		logger.debug('Content-Type', `${requestUrl} - ${mime}`);
 
