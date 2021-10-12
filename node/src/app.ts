@@ -50,7 +50,7 @@ app.use((req, res, next) => {
 	)?.[0]; // 拡張子から決定される MIME
 	const mime = mimeOfPath ?? mimeOfExtension;
 
-	/* 特殊なファイルパスの MIME */
+	/* Content-Type */
 	if (mime === undefined) {
 		logger.info('未定義の MIME', requestUrl);
 	} else {
