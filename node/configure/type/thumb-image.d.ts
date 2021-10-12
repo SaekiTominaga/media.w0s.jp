@@ -16,6 +16,7 @@ export interface NoName {
   thumb_dir: NoName2;
   extension: NoName3;
   quality_default: JPRGWebPAVIF;
+  max_age: string;
   allow_origins: NoName4;
   referrer_exclusion_origins: NoName5;
 }

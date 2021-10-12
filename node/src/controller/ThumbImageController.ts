@@ -362,7 +362,7 @@ export default class ThumbImageController extends Controller implements Controll
 		}
 
 		res.sendFile(filePath, {
-			maxAge: this.#configCommon.static.options.max_age,
+			maxAge: this.#config.max_age,
 		});
 	}
 }
