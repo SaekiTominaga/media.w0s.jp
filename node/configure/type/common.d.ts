@@ -13,32 +13,34 @@ export type Threshold = string;
 export type NoName4 = string;
 export type NoName5 = string[];
 export type NoName6 = string[];
-export type NoName9 = string;
-export type NoName11 = string[];
-export type NoName12 = string;
-export type NoName10 = {
-  paths: NoName11;
-  value: NoName12;
+export type NoName8 = string[];
+export type NoName9 = string[];
+export type NoName11 = string;
+export type NoName13 = string[];
+export type NoName14 = string;
+export type NoName12 = {
+  paths: NoName13;
+  value: NoName14;
 }[];
-export type NoName14 = string[];
-export type NoName15 = string;
-export type NoName13 = {
-  extensions: NoName14;
-  value: NoName15;
+export type NoName16 = string[];
+export type NoName17 = string;
+export type NoName15 = {
+  extensions: NoName16;
+  value: NoName17;
 }[];
 export type FilepathFor403Forbidden = string;
 export type FilepathFor404NotFound = string;
-export type NoName17 = string;
 export type NoName19 = string;
+export type NoName21 = string;
 export type Htpasswd = string;
 
 export interface MediaW0SJp {
   port: HTTP;
   response: NoName;
   static: NoName3;
-  errorpage: NoName16;
+  errorpage: NoName18;
   logger: Logger;
-  auth: NoName18;
+  auth: NoName20;
 }
 export interface NoName {
   header: NoName1;
@@ -60,32 +62,32 @@ export interface NoName3 {
 }
 export interface NoName7 {
   mime: MIME;
-  cache_control?: NoName8;
+  cache_control?: NoName10;
 }
 export interface MIME {
   path: MIME1;
   extension: MIME2;
 }
 export interface MIME1 {
-  [k: string]: unknown;
+  [k: string]: NoName8;
 }
 export interface MIME2 {
-  [k: string]: unknown;
+  [k: string]: NoName9;
 }
-export interface NoName8 {
-  default: NoName9;
-  path: NoName10;
-  extension: NoName13;
+export interface NoName10 {
+  default: NoName11;
+  path: NoName12;
+  extension: NoName15;
 }
-export interface NoName16 {
+export interface NoName18 {
   path_403: FilepathFor403Forbidden;
   path_404: FilepathFor404NotFound;
 }
 export interface Logger {
-  path: NoName17;
+  path: NoName19;
 }
-export interface NoName18 {
-  realm: NoName19;
+export interface NoName20 {
+  realm: NoName21;
   htpasswd_file: Htpasswd;
   json_401: JSON;
 }
