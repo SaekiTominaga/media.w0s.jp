@@ -7,6 +7,8 @@
 
 export type NoName1 = string;
 export type NoName2 = string;
+export type MIME1 = string;
+export type NoName3 = string;
 export type JPRGWebPAVIF = number;
 export type NoName4 = string[];
 export type NoName5 = string[];
@@ -14,12 +16,15 @@ export type NoName5 = string[];
 export interface NoName {
   orig_dir: NoName1;
   thumb_dir: NoName2;
-  extension: NoName3;
+  type: MIME;
   quality_default: JPRGWebPAVIF;
   max_age: string;
   allow_origins: NoName4;
   referrer_exclusion_origins: NoName5;
 }
-export interface NoName3 {
-  [k: string]: unknown;
+export interface MIME {
+  [k: string]: {
+    mime: MIME1;
+    extension: NoName3;
+  };
 }

@@ -22,24 +22,24 @@ app.set('query parser', (query: string) => qs.parse(query, { delimiter: /[&;]/ }
 app.set('trust proxy', true);
 app.set('x-powered-by', false);
 app.use((req, res, next) => {
-	const requestUrl = req.url;
+	const requestPath = req.path;
 
 	let requestFilePath: string | undefined; // 実ファイルパス
-	if (requestUrl.endsWith('/')) {
+	if (requestPath.endsWith('/')) {
 		/* ディレクトリトップ（e.g. /foo/ ） */
-		const fileName = config.static.indexes?.find((name) => fs.existsSync(`${config.static.root}/${requestUrl}${name}`));
+		const fileName = config.static.indexes?.find((name) => fs.existsSync(`${config.static.root}/${requestPath}${name}`));
 		if (fileName !== undefined) {
-			requestFilePath = `${requestUrl}${fileName}`;
+			requestFilePath = `${requestPath}${fileName}`;
 		}
-	} else if (path.extname(requestUrl) === '') {
+	} else if (path.extname(requestPath) === '') {
 		/* 拡張子のない URL（e.g. /foo ） */
-		const extension = config.static.extensions?.find((ext) => fs.existsSync(`${config.static.root}/${requestUrl}.${ext}`));
+		const extension = config.static.extensions?.find((ext) => fs.existsSync(`${config.static.root}/${requestPath}.${ext}`));
 		if (extension !== undefined) {
-			requestFilePath = `${requestUrl}.${extension}`;
+			requestFilePath = `${requestPath}.${extension}`;
 		}
 	} else {
 		/* 拡張子のある URL（e.g. /foo.txt ） */
-		requestFilePath = requestUrl;
+		requestFilePath = requestPath;
 	}
 
 	/* Content-Type */
@@ -52,9 +52,11 @@ app.use((req, res, next) => {
 	const mime = mimeOfPath ?? mimeOfExtension;
 
 	if (mime === undefined) {
-		logger.info('MIME が未定義のファイル', requestUrl);
+		if (requestFilePath !== undefined) {
+			logger.info('MIME が未定義のファイル', requestPath);
+		}
 	} else {
-		logger.debug('Content-Type', `${requestUrl} - ${mime}`);
+		logger.debug('Content-Type', `${requestPath} - ${mime}`);
 
 		res.setHeader('Content-Type', mime);
 	}

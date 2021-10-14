@@ -3,7 +3,7 @@
 	"$id": "https://schema.w0s.jp/thumb-image.json",
 	"type": "object",
 	"title": "サムネイル画像",
-	"required": ["orig_dir", "thumb_dir", "extension", "quality_default", "max_age", "allow_origins", "referrer_exclusion_origins"],
+	"required": ["orig_dir", "thumb_dir", "type", "quality_default", "max_age", "allow_origins", "referrer_exclusion_origins"],
 	"properties": {
 		"orig_dir": {
 			"type": "string",
@@ -13,9 +13,24 @@
 			"type": "string",
 			"title": "サムネイル画像を保存するルートディレクトリ"
 		},
-		"extension": {
+		"type": {
 			"type": "object",
-			"title": "ファイル拡張子の定義"
+			"title": "ファイルの MIME や拡張子の定義",
+			"additionalProperties": {
+				"type": "object",
+				"required": ["mime", "extension"],
+				"properties": {
+					"mime": {
+						"type": "string",
+						"title": "MIME"
+					},
+					"extension": {
+						"type": "string",
+						"title": "拡張子"
+					}
+				},
+				"additionalProperties": false
+			}
 		},
 		"quality_default": {
 			"type": "integer",

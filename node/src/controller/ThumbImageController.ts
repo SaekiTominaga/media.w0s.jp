@@ -86,7 +86,7 @@ export default class ThumbImageController extends Controller implements Controll
 				this.logger.debug(`生成済みの画像を表示: ${newFilePath}`);
 
 				/* 生成済みの画像データを表示 */
-				this.responseImage(req, res, httpResponse, newFilePath, newFileMtime);
+				this.responseImage(req, res, requestQuery, httpResponse, newFilePath, newFileMtime);
 				return;
 			}
 		} else {
@@ -173,14 +173,14 @@ export default class ThumbImageController extends Controller implements Controll
 
 			if (!create) {
 				/* 元画像を表示する */
-				this.responseImage(req, res, httpResponse, origFilePath, origFileMtime); // 元画像を表示
+				this.responseImage(req, res, requestQuery, httpResponse, origFilePath, origFileMtime); // 元画像を表示
 				return;
 			}
 		}
 
 		/* 新しい画像ファイルを生成する */
 		await this.createImage(requestQuery, origFilePath, newFilePath, newImageSize); // 画像ファイルを生成
-		this.responseImage(req, res, httpResponse, newFilePath); // 生成した画像データを表示
+		this.responseImage(req, res, requestQuery, httpResponse, newFilePath); // 生成した画像データを表示
 	}
 
 	/**
@@ -257,7 +257,7 @@ export default class ThumbImageController extends Controller implements Controll
 			params.push(paramQuality);
 		}
 
-		return `${parse.dir}/${parse.base}@${params.join(';')}.${this.#config.extension[requestQuery.type]}`;
+		return `${parse.dir}/${parse.base}@${params.join(';')}.${this.#config.type[requestQuery.type].extension}`;
 	}
 
 	/**
@@ -349,11 +349,19 @@ export default class ThumbImageController extends Controller implements Controll
 	 *
 	 * @param {Request} req - Request
 	 * @param {Response} res - Response
+	 * @param {object} requestQuery - URL クエリー情報
 	 * @param {HttpResponse} httpResponse - HttpResponse
 	 * @param {string} filePath - 出力する画像ファイルパス
 	 * @param {Date} fileMtime - 最終更新日時
 	 */
-	private responseImage(req: Request, res: Response, httpResponse: HttpResponse, filePath: string, fileMtime?: Date): void {
+	private responseImage(
+		req: Request,
+		res: Response,
+		requestQuery: ThumbImageRequest.Query,
+		httpResponse: HttpResponse,
+		filePath: string,
+		fileMtime?: Date
+	): void {
 		if (fileMtime !== undefined) {
 			/* キャッシュ確認 */
 			if (httpResponse.checkLastModified(req, fileMtime)) {
@@ -361,6 +369,7 @@ export default class ThumbImageController extends Controller implements Controll
 			}
 		}
 
+		res.setHeader('Content-Type', this.#config.type[requestQuery.type].mime);
 		res.sendFile(filePath, {
 			maxAge: this.#config.max_age,
 		});
