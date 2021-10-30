@@ -95,7 +95,7 @@ export default class ThumbImageController extends Controller implements Controll
 
 			const requestHeaderSecFetchDest = req.get('Sec-Fetch-Dest');
 			if (requestHeaderSecFetchDest !== undefined) {
-				/* Fetch Metadata Request Headers 対応ブラウザ（Chrome 80+）https://caniuse.com/mdn-http_headers_sec-fetch-dest */
+				/* Fetch Metadata Request Headers 対応ブラウザ（Firefox 90+, Chrome 80+）https://caniuse.com/mdn-http_headers_sec-fetch-dest */
 				switch (req.get('Sec-Fetch-Site')) {
 					case 'same-origin':
 					case 'same-site': {
@@ -140,7 +140,7 @@ export default class ThumbImageController extends Controller implements Controll
 					}
 				}
 			} else {
-				/* Fetch Metadata Request Headers 未対応ブラウザ（Firefox, Safari, IE） */
+				/* Fetch Metadata Request Headers 未対応ブラウザ（Safari, IE） */
 				const referrerStr = req.headers.referer;
 				if (referrerStr === undefined) {
 					this.logger.debug(`リファラーが送出されていないので元画像を表示: ${req.url}`);
