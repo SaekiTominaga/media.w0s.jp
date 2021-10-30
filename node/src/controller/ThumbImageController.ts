@@ -76,27 +76,31 @@ export default class ThumbImageController extends Controller implements Controll
 		const origFileMtime = fs.statSync(origFilePath).mtime;
 
 		/* 出力するファイルのサイズを計算する */
-		const newImageSize = this.getNewFileSize(requestQuery, origFilePath);
-		if (newImageSize === null) {
+		const thumbImageSize = this.getThumbFileSize(requestQuery, origFilePath);
+		if (thumbImageSize === null) {
 			this.logger.info(`存在しないファイルパスが指定: ${req.url}`);
 			httpResponse.send403();
 			return;
 		}
 
 		/* 出力するファイルパス */
-		const newFilePath = this.getNewFilePath(requestQuery, newImageSize);
+		const thumbFilePath = this.getThumbFilePath(requestQuery, thumbImageSize);
 
-		if (fs.existsSync(newFilePath)) {
+		let thumbFileData: Buffer | undefined;
+		try {
+			thumbFileData = await fs.promises.readFile(thumbFilePath);
+		} catch (e) {}
+		if (thumbFileData !== undefined) {
 			/* 画像ファイルが生成済みだった場合 */
-			const newFileMtime = fs.statSync(newFilePath).mtime;
+			const thumbFileMtime = fs.statSync(thumbFilePath).mtime;
 
-			if (origFileMtime > newFileMtime) {
+			if (origFileMtime > thumbFileMtime) {
 				this.logger.debug(`画像が生成済みだが、元画像が更新されているので差し替える: ${req.url}`);
 			} else {
-				this.logger.debug(`生成済みの画像を表示: ${newFilePath}`);
+				this.logger.debug(`生成済みの画像を表示: ${thumbFilePath}`);
 
 				/* 生成済みの画像データを表示 */
-				this.responseImage(req, res, requestQuery, httpResponse, newFilePath, newFileMtime);
+				this.responseImage(req, res, requestQuery, httpResponse, thumbFileData, thumbFileMtime);
 				return;
 			}
 		} else {
@@ -183,14 +187,15 @@ export default class ThumbImageController extends Controller implements Controll
 
 			if (!create) {
 				/* 元画像を表示する */
-				this.responseImage(req, res, requestQuery, httpResponse, origFilePath, origFileMtime); // 元画像を表示
+				const origFileData = await fs.promises.readFile(origFilePath);
+				this.responseImage(req, res, requestQuery, httpResponse, origFileData, origFileMtime); // 元画像を表示
 				return;
 			}
 		}
 
 		/* 新しい画像ファイルを生成する */
-		await this.createImage(requestQuery, origFilePath, newFilePath, newImageSize); // 画像ファイルを生成
-		this.responseImage(req, res, requestQuery, httpResponse, newFilePath); // 生成した画像データを表示
+		const createdFileData = await this.createImage(requestQuery, origFilePath, thumbFilePath, thumbImageSize); // 画像ファイルを生成
+		this.responseImage(req, res, requestQuery, httpResponse, createdFileData); // 生成した画像データを表示
 	}
 
 	/**
@@ -201,7 +206,7 @@ export default class ThumbImageController extends Controller implements Controll
 	 *
 	 * @returns {object} 出力する画像ファイルの大きさ
 	 */
-	private getNewFileSize(requestQuery: ThumbImageRequest.Query, origFilePath: string): ImageSize | null {
+	private getThumbFileSize(requestQuery: ThumbImageRequest.Query, origFilePath: string): ImageSize | null {
 		const dimensions = imageSize(origFilePath);
 		const origImageWidth = dimensions.width;
 		const origImageHeight = dimensions.height;
@@ -256,7 +261,7 @@ export default class ThumbImageController extends Controller implements Controll
 	 *
 	 * @returns {string} 出力する画像ファイルパス
 	 */
-	private getNewFilePath(requestQuery: ThumbImageRequest.Query, imageSize: ImageSize): string {
+	private getThumbFilePath(requestQuery: ThumbImageRequest.Query, imageSize: ImageSize): string {
 		const parse = path.parse(path.resolve(`${this.#config.thumb_dir}/${requestQuery.path}`));
 
 		const paramSize = `s=${imageSize.width}x${imageSize.height}`;
@@ -275,17 +280,19 @@ export default class ThumbImageController extends Controller implements Controll
 	 *
 	 * @param {object} requestQuery - URL クエリー情報
 	 * @param {string} origFilePath - 元画像ファイルパス
-	 * @param {string} newFilePath - 生成する画像ファイルパス
-	 * @param {ImageSize} newImageSize - 生成する画像ファイルのサイズ
+	 * @param {string} thumbFilePath - 生成するサムネイル画像ファイルパス
+	 * @param {ImageSize} thumbImageSize - 生成するサムネイル画像ファイルのサイズ
+	 *
+	 * @returns {object} 生成した画像データ
 	 */
-	private async createImage(requestQuery: ThumbImageRequest.Query, origFilePath: string, newFilePath: string, newImageSize: ImageSize): Promise<void> {
+	private async createImage(requestQuery: ThumbImageRequest.Query, origFilePath: string, thumbFilePath: string, thumbImageSize: ImageSize): Promise<Buffer> {
 		/* ディレクトリのチェック */
-		fs.mkdirSync(path.dirname(newFilePath), {
+		fs.mkdirSync(path.dirname(thumbFilePath), {
 			recursive: true,
 		});
 
 		/* 画像ファイル生成 */
-		this.logger.debug(`サムネイル画像を新規作成: ${newFilePath}`);
+		this.logger.debug(`サムネイル画像を新規作成: ${thumbFilePath}`);
 
 		const startTime = Date.now();
 
@@ -293,7 +300,7 @@ export default class ThumbImageController extends Controller implements Controll
 		Sharp.cache(false);
 
 		const sharp = Sharp(origFilePath);
-		sharp.resize(newImageSize.width, newImageSize.height);
+		sharp.resize(thumbImageSize.width, thumbImageSize.height);
 		switch (requestQuery.type) {
 			case 'avif': {
 				sharp.avif({
@@ -330,18 +337,20 @@ export default class ThumbImageController extends Controller implements Controll
 				break;
 			}
 		}
-		await sharp.toFile(newFilePath);
+
+		const fileData = await sharp.toBuffer();
+		await fs.promises.writeFile(thumbFilePath, fileData);
 
 		const processingTime = Date.now() - startTime;
 
 		/* 生成後の処理 */
 		const origFileSize = fs.statSync(origFilePath).size;
 		const origFileSizeIec = FileSizeFormat.iec(origFileSize, { digits: 1 });
-		const createdFileSize = fs.statSync(newFilePath).size;
+		const createdFileSize = fs.statSync(thumbFilePath).size;
 		const createdFileSizeIec = FileSizeFormat.iec(createdFileSize, { digits: 1 });
 
 		this.logger.info(
-			`画像生成完了（${Math.round(processingTime / 1000)}秒）: ${newFilePath} （幅: ${requestQuery.width}px, 画質: ${
+			`画像生成完了（${Math.round(processingTime / 1000)}秒）: ${thumbFilePath} （幅: ${requestQuery.width}px, 画質: ${
 				requestQuery.quality
 			}, サイズ: ${createdFileSizeIec}, 元画像サイズ: ${origFileSizeIec}）`
 		);
@@ -349,9 +358,11 @@ export default class ThumbImageController extends Controller implements Controll
 		/* 管理者向け通知 */
 		if (createdFileSize >= origFileSize * 10 && createdFileSize > 10240) {
 			this.logger.warn(
-				`元画像よりファイルサイズの大きな画像が生成: ${newFilePath} （幅: ${requestQuery.width}px, 画質: ${requestQuery.quality}, サイズ: ${createdFileSizeIec}, 元画像サイズ: ${origFileSizeIec}）`
+				`元画像よりファイルサイズの大きな画像が生成: ${thumbFilePath} （幅: ${requestQuery.width}px, 画質: ${requestQuery.quality}, サイズ: ${createdFileSizeIec}, 元画像サイズ: ${origFileSizeIec}）`
 			);
 		}
+
+		return fileData;
 	}
 
 	/**
@@ -361,7 +372,7 @@ export default class ThumbImageController extends Controller implements Controll
 	 * @param {Response} res - Response
 	 * @param {object} requestQuery - URL クエリー情報
 	 * @param {HttpResponse} httpResponse - HttpResponse
-	 * @param {string} filePath - 出力する画像ファイルパス
+	 * @param {object} fileData - 出力する画像データ
 	 * @param {Date} fileMtime - 最終更新日時
 	 */
 	private responseImage(
@@ -369,7 +380,7 @@ export default class ThumbImageController extends Controller implements Controll
 		res: Response,
 		requestQuery: ThumbImageRequest.Query,
 		httpResponse: HttpResponse,
-		filePath: string,
+		fileData: Buffer,
 		fileMtime?: Date
 	): void {
 		if (fileMtime !== undefined) {
@@ -380,8 +391,7 @@ export default class ThumbImageController extends Controller implements Controll
 		}
 
 		res.setHeader('Content-Type', this.#config.type[requestQuery.type].mime);
-		res.sendFile(filePath, {
-			maxAge: this.#config.max_age,
-		});
+		res.setHeader('Cache-Control', this.#config.cache_control);
+		res.send(fileData);
 	}
 }

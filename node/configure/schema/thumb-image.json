@@ -3,7 +3,7 @@
 	"$id": "https://schema.w0s.jp/thumb-image.json",
 	"type": "object",
 	"title": "サムネイル画像",
-	"required": ["orig_dir", "thumb_dir", "type", "quality_default", "max_age", "allow_origins", "referrer_exclusion_origins"],
+	"required": ["orig_dir", "thumb_dir", "type", "quality_default", "cache_control", "allow_origins", "referrer_exclusion_origins"],
 	"properties": {
 		"orig_dir": {
 			"type": "string",
@@ -38,9 +38,9 @@
 			"maximum": 100,
 			"title": "JPRG, WebP, AVIF の品質デフォルト値"
 		},
-		"max_age": {
+		"cache_control": {
 			"type": "string",
-			"title": ""
+			"title": "Cache-Control レスポンスヘッダーの値"
 		},
 		"allow_origins": {
 			"type": "array",
