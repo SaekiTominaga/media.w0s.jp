@@ -38,23 +38,33 @@ export default class ThumbImageController extends Controller implements Controll
 	 * @param {Response} res - Response
 	 */
 	async execute(req: Request, res: Response): Promise<void> {
-		const requestQuery: ThumbImageRequest.Query = {
-			path: req.params.path,
-			type: <string>req.query.type,
-			width: req.query.w !== undefined ? Number(req.query.w) : null,
-			height: req.query.h !== undefined ? Number(req.query.h) : null,
-			quality: req.query.quality !== undefined ? Number(req.query.quality) : this.#config.quality_default,
-		};
-
-		const validationResult = await new ThumbImageValidator(req, this.#config).display();
-
 		const httpResponse = new HttpResponse(res, this.#configCommon);
 
+		const validationResult = await new ThumbImageValidator(req, this.#config).display();
 		if (!validationResult.isEmpty()) {
 			this.logger.info('パラメーター不正', validationResult.array());
 			httpResponse.send403();
 			return;
 		}
+
+		let type: string;
+		if (typeof req.query.type === 'string') {
+			type = req.query.type;
+		} else {
+			/* type パラメーターが複数指定されていた場合、 accept リクエストヘッダーと見比べて先頭から順に適用可能な値を抜き出す（適用可能な値が存在しない場合、末尾の値を強制適用する） */
+			const types = <string[]>req.query.type;
+			const acceptType = req.accepts(types);
+			type = acceptType !== false ? acceptType : types[types.length - 1];
+			this.logger.debug('決定 Type', type);
+		}
+
+		const requestQuery: ThumbImageRequest.Query = {
+			path: req.params.path,
+			type: type,
+			width: req.query.w !== undefined ? Number(req.query.w) : null,
+			height: req.query.h !== undefined ? Number(req.query.h) : null,
+			quality: req.query.quality !== undefined ? Number(req.query.quality) : this.#config.quality_default,
+		};
 
 		const origFilePath = path.resolve(`${this.#config.orig_dir}/${requestQuery.path}`);
 		if (!fs.existsSync(origFilePath)) {

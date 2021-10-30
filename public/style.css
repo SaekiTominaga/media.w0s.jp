@@ -43,6 +43,10 @@ thead th {
 	text-align: center;
 }
 
+code {
+	tab-size: 4;
+}
+
 .link a {
 	--bullet-size: 0.75em;
 	--bullet-color: #0bb;

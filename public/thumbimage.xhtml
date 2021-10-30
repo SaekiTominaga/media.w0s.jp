@@ -11,8 +11,102 @@
 		</header>
 
 		<main>
+			<ul class="details">
+				<li>
+					The Type, Width, Height, and Quality can be specified in the URL parameters. (e.g.
+					<code>/thumbimage/sample.jpg?type=webp;w=320;quality=30</code>)
+					<table>
+						<thead>
+							<tr>
+								<th scope="col" rowspan="2">Image Type</th>
+								<th scope="col" colspan="4">URL parameters</th>
+							</tr>
+							<tr>
+								<th scope="col"><code>type</code> (Required)</th>
+								<th scope="col"><code>w</code></th>
+								<th scope="col"><code>h</code></th>
+								<th scope="col"><code>quality</code></th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<th scope="row">AVIF</th>
+								<td><code>avif</code></td>
+								<td rowspan="4"><code>1</code>-<code>9999</code></td>
+								<td rowspan="4"><code>1</code>-<code>9999</code></td>
+								<td rowspan="3"><code>1</code>-<code>100</code> (default: 80)</td>
+							</tr>
+							<tr>
+								<th scope="row">WebP</th>
+								<td><code>webp</code></td>
+							</tr>
+							<tr>
+								<th scope="row">JPEG</th>
+								<td><code>jpeg</code></td>
+							</tr>
+							<tr>
+								<th scope="row">PNG</th>
+								<td><code>png</code></td>
+								<td>✘ (ignore)</td>
+							</tr>
+						</tbody>
+					</table>
+				</li>
+				<li>
+					If the parameter <code>w</code> or <code>h</code> is larger than the size of the original image, thumbnails will be generated at the size of the
+					original image.
+					<table>
+						<thead>
+							<tr>
+								<th scope="col">Original image size</th>
+								<th scope="col">URL parameters</th>
+								<th scope="col">Generated image size</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td rowspan="6">1920×1080</td>
+								<td><code>w=9999;h=9999</code></td>
+								<td>1920×1080</td>
+							</tr>
+							<tr>
+								<td><code>w=9999;h=540</code></td>
+								<td>960×540</td>
+							</tr>
+							<tr>
+								<td><code>w=360;h=540</code></td>
+								<td>480×270</td>
+							</tr>
+							<tr>
+								<td><code>w=9999</code></td>
+								<td>1920×1080</td>
+							</tr>
+							<tr>
+								<td><code>h=540</code></td>
+								<td>960×540</td>
+							</tr>
+							<tr>
+								<td>(not specified)</td>
+								<td>1920×1080</td>
+							</tr>
+						</tbody>
+					</table>
+				</li>
+				<li>
+					Check the <code>Sec-Fetch-Dest</code> header to prevent generation when URLs are typed directly or embedded from other sites without permission.
+					<ul>
+						<li>For browsers that do not support the <code>Sec-Fetch-Dest</code> header, substitute a check in the <code>referer</code> header.</li>
+					</ul>
+				</li>
+				<li>
+					If a thumbnail image has already been generated (in the case of the second or later requests), the generated image will be displayed instead of
+					processing the generation.
+				</li>
+				<li>If the original image has been updated (the file's modified date is newer than the thumbnail image), the generation process will be repeated.</li>
+			</ul>
+
 			<section>
-				<h2>Original</h2>
+				<h2>Original file</h2>
 
 				<p class="link"><a href="/image/sample.jpg" type="image/jpeg">Image file</a></p>
 
@@ -41,31 +135,35 @@
 			</section>
 
 			<section>
-				<h2>JPEG / Width: 320px / Quality: 30</h2>
+				<h2>Generated thumbnail image</h2>
 
-				<ul>
-					<li><code>/thumbimage/sample.jpg?type=jpeg;w=320;quality=30</code></li>
-				</ul>
+				<section>
+					<h3>Optimal image type selection by using the <code>picture</code> element</h3>
 
-				<p><img src="/thumbimage/sample.jpg?type=jpeg;w=320;quality=30" alt="Sample Image" /></p>
-			</section>
+					<pre><code>&lt;picture&gt;
+	&lt;source type="image/avif" srcset="/thumbimage/sample.jpg?type=avif;w=360;quality=30" /&gt;
+	&lt;source type="image/webp" srcset="/thumbimage/sample.jpg?type=webp;w=360;quality=30" /&gt;
+	&lt;img src="/thumbimage/sample.jpg?type=jpeg;w=360;quality=30" alt="Sample Image" /&gt;
+&lt;/picture&gt;</code></pre>
 
-			<section>
-				<h2>AVIF / Width: 480px / Height: 160px / Quality: 90</h2>
+					<p>
+						<picture>
+							<source type="image/avif" srcset="/thumbimage/sample.jpg?type=avif;w=360;quality=30" />
+							<source type="image/webp" srcset="/thumbimage/sample.jpg?type=webp;w=360;quality=30" />
+							<img src="/thumbimage/sample.jpg?type=jpeg;w=360;quality=30" alt="Sample Image" />
+						</picture>
+					</p>
+				</section>
 
-				<ul>
-					<li><code>/thumbimage/sample.jpg?type=avif;w=480;h=160;quality=90</code></li>
-					<li><code>/thumbimage/sample.jpg?type=webp;w=480;h=160;quality=90</code> (fallback)</li>
-					<li><code>/thumbimage/sample.jpg?type=jpeg;w=480;h=160;quality=90</code> (fallback)</li>
-				</ul>
+				<section>
+					<h3>Optimal image type selection by using the <code>accept</code> request header</h3>
 
-				<p>
-					<picture>
-						<source type="image/avif" srcset="/thumbimage/sample.jpg?type=avif;w=480;h=160;quality=30" />
-						<source type="image/webp" srcset="/thumbimage/sample.jpg?type=webp;w=480;h=160;quality=30" />
-						<img src="/thumbimage/sample.jpg?type=jpeg;w=480;h=160;quality=30" alt="Sample Image" />
-					</picture>
-				</p>
+					<pre><code>&lt;img src="/thumbimage/sample.jpg?type[]=avif;type[]=webp;type[]=jpeg;w=360;quality=30" alt="Sample Image" /&gt;</code></pre>
+
+					<p>
+						<img src="/thumbimage/sample.jpg?type[]=avif;type[]=webp;type[]=jpeg;w=360;quality=30" alt="Sample Image" />
+					</p>
+				</section>
 			</section>
 		</main>
 
