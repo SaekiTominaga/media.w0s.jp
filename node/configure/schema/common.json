@@ -62,7 +62,7 @@
 				},
 				"directory": {
 					"type": "object",
-					"title": "メディアファイルの格納ディレクトリ（ルートディレクトリ基準のルート相対パス、末尾のスラッシュ必須）",
+					"title": "メディアファイルの格納ディレクトリ（ルートディレクトリ基準、末尾のスラッシュなし）",
 					"required": ["image", "audio", "video"],
 					"properties": {
 						"image": {
