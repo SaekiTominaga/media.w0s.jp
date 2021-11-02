@@ -66,7 +66,7 @@ export default class ThumbImageController extends Controller implements Controll
 			quality: req.query.quality !== undefined ? Number(req.query.quality) : this.#config.quality_default,
 		};
 
-		const origFilePath = path.resolve(`${this.#config.orig_dir}/${requestQuery.path}`);
+		const origFilePath = path.resolve(`${this.#configCommon.static.root}/${this.#configCommon.static.directory.image}/${requestQuery.path}`);
 		if (!fs.existsSync(origFilePath)) {
 			this.logger.info(`存在しないファイルパスが指定: ${req.url}`);
 			httpResponse.send404();
@@ -392,6 +392,8 @@ export default class ThumbImageController extends Controller implements Controll
 
 		res.setHeader('Content-Type', this.#config.type[requestQuery.type].mime);
 		res.setHeader('Cache-Control', this.#config.cache_control);
+		res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+
 		res.send(fileData);
 	}
 }

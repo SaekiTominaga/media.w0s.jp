@@ -110,6 +110,13 @@ app.use(
 
 				res.setHeader('Cache-Control', cacheControlValue);
 			}
+
+			/* Cross-Origin-* */
+			if (
+				[config.static.directory.image, config.static.directory.audio, config.static.directory.video].find((urlPath) => requestUrlOrigin.startsWith(urlPath))
+			) {
+				res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+			}
 		},
 	})
 );

@@ -6,26 +6,24 @@
  */
 
 export type NoName1 = string;
-export type NoName2 = string;
 export type MIME1 = string;
-export type NoName3 = string;
+export type NoName2 = string;
 export type JPRGWebPAVIF = number;
 export type CacheControl = string;
+export type NoName3 = string[];
 export type NoName4 = string[];
-export type NoName5 = string[];
 
 export interface NoName {
-  orig_dir: NoName1;
-  thumb_dir: NoName2;
+  thumb_dir: NoName1;
   type: MIME;
   quality_default: JPRGWebPAVIF;
   cache_control: CacheControl;
-  allow_origins: NoName4;
-  referrer_exclusion_origins: NoName5;
+  allow_origins: NoName3;
+  referrer_exclusion_origins: NoName4;
 }
 export interface MIME {
   [k: string]: {
     mime: MIME1;
-    extension: NoName3;
+    extension: NoName2;
   };
 }

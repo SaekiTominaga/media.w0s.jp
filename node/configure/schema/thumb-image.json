@@ -3,12 +3,8 @@
 	"$id": "https://schema.w0s.jp/thumb-image.json",
 	"type": "object",
 	"title": "サムネイル画像",
-	"required": ["orig_dir", "thumb_dir", "type", "quality_default", "cache_control", "allow_origins", "referrer_exclusion_origins"],
+	"required": ["thumb_dir", "type", "quality_default", "cache_control", "allow_origins", "referrer_exclusion_origins"],
 	"properties": {
-		"orig_dir": {
-			"type": "string",
-			"title": "オリジナル画像が保存されているルートディレクトリ"
-		},
 		"thumb_dir": {
 			"type": "string",
 			"title": "サムネイル画像を保存するルートディレクトリ"

@@ -54,11 +54,31 @@
 		"static": {
 			"type": "object",
 			"title": "静的ファイル",
-			"required": ["root", "headers"],
+			"required": ["root", "headers", "directory"],
 			"properties": {
 				"root": {
 					"type": "string",
 					"title": "ルートディレクトリ"
+				},
+				"directory": {
+					"type": "object",
+					"title": "メディアファイルの格納ディレクトリ（ルートディレクトリ基準のルート相対パス、末尾のスラッシュ必須）",
+					"required": ["image", "audio", "video"],
+					"properties": {
+						"image": {
+							"type": "string",
+							"title": "画像ファイル"
+						},
+						"audio": {
+							"type": "string",
+							"title": "音声ファイル"
+						},
+						"video": {
+							"type": "string",
+							"title": "動画ファイル"
+						}
+					},
+					"additionalProperties": false
 				},
 				"extensions": {
 					"type": "array",
