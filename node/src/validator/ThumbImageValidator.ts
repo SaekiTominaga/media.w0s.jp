@@ -25,7 +25,7 @@ export default class ThumbImageValidator {
 	 */
 	async display(): Promise<Result<ValidationError>> {
 		await Promise.all([
-			query('type')
+			query(typeof this.#req.query.type === 'string' ? 'type' : 'type.*')
 				.isIn(Object.keys(this.#config.type))
 				.run(this.#req),
 			query('w')
