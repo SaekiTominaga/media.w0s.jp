@@ -25,6 +25,9 @@ export default class ThumbImageCreateValidator {
 	 */
 	async create(): Promise<Result<ValidationError>> {
 		await Promise.all([
+			body('file_path')
+				.notEmpty()
+				.run(this.#req),
 			body('type')
 				.isIn(Object.keys(this.#config.type))
 				.run(this.#req),
