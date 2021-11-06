@@ -10,7 +10,7 @@ declare namespace ThumbImageRequest {
 
 declare namespace ThumbImageCreateRequest {
 	export interface Query {
-		path: string;
+		file_path: string;
 		type: string;
 		width: number;
 		height: number;
