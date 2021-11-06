@@ -206,9 +206,6 @@ export default class ThumbImageRenderController extends Controller implements Co
 		});
 		const createProcessingTime = Date.now() - createStartTime;
 
-		/* 生成した画像データを表示 */
-		this.responseImage(req, res, requestQuery, httpResponse, createdFileData);
-
 		/* 生成後の処理 */
 		const origFileSize = fs.statSync(origFilePath).size;
 		const origFileSizeIec = FileSizeFormat.iec(origFileSize, { digits: 1 });
@@ -246,6 +243,9 @@ export default class ThumbImageRenderController extends Controller implements Co
 				break;
 			}
 		}
+
+		/* 生成した画像データを表示 */
+		this.responseImage(req, res, requestQuery, httpResponse, createdFileData);
 	}
 
 	/**
