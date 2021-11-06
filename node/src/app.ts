@@ -124,7 +124,7 @@ app.use(
 );
 
 /**
- * サムネイル画像の表示
+ * サムネイル画像表示
  */
 app.get('/thumbimage/:path([^?]+)', async (req, res, next) => {
 	try {
