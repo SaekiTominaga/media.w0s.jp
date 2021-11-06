@@ -19,11 +19,11 @@ export default class ThumbImageCreateValidator {
 	}
 
 	/**
-	 * 画像表示
+	 * 画像生成
 	 *
 	 * @returns {Result<ValidationError>} 検証エラー
 	 */
-	async display(): Promise<Result<ValidationError>> {
+	async create(): Promise<Result<ValidationError>> {
 		await Promise.all([
 			body('type')
 				.isIn(Object.keys(this.#config.type))

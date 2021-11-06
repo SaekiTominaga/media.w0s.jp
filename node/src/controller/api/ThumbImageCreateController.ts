@@ -42,7 +42,7 @@ export default class ThumbImageCreateController extends Controller implements Co
 			return;
 		}
 
-		const validationResult = await new ThumbImageCreateValidator(req, this.#config).display();
+		const validationResult = await new ThumbImageCreateValidator(req, this.#config).create();
 		if (!validationResult.isEmpty()) {
 			this.logger.error('パラメーター不正', validationResult.array());
 			res.status(403).end();
