@@ -217,11 +217,6 @@ export default class ThumbImageRenderController extends Controller implements Co
 
 		this.logger.info(`画像生成完了（${Math.round(createProcessingTime / 1000)}秒）: ${thumbFileName} （${origFileSizeIec} → ${createdFileSizeIec}）`);
 
-		/* 管理者向け通知 */
-		if (createdFileSize >= origFileSize * 10 && createdFileSize > 10240) {
-			this.logger.warn(`元画像よりファイルサイズの大きな画像が生成: ${thumbFileName} （${origFileSizeIec} → ${createdFileSizeIec}）`);
-		}
-
 		/* DB に登録 */
 		switch (requestQuery.type) {
 			case 'avif': {
