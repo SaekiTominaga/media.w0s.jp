@@ -1,4 +1,4 @@
-import BlogUploadController from './controller/BlogUploadController.js';
+import BlogUploadController from './controller/api/BlogUploadController.js';
 import compression from 'compression';
 import Express, { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
