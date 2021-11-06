@@ -5,6 +5,7 @@ import fs from 'fs';
 import Log4js from 'log4js';
 import path from 'path';
 import qs from 'qs';
+import ThumbImageCreateController from './controller/api/ThumbImageCreateController.js';
 import ThumbImageRenderController from './controller/ThumbImageRenderController.js';
 import { MediaW0SJp as Configure } from '../configure/type/common';
 
@@ -129,6 +130,17 @@ app.use(
 app.get('/thumbimage/:path([^?]+)', async (req, res, next) => {
 	try {
 		await new ThumbImageRenderController(config).execute(req, res);
+	} catch (e) {
+		next(e);
+	}
+});
+
+/**
+ * サムネイル画像生成
+ */
+ app.post('/thumbimage/create', async (req, res, next) => {
+	try {
+		await new ThumbImageCreateController(config).execute(req, res);
 	} catch (e) {
 		next(e);
 	}

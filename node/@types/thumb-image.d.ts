@@ -7,3 +7,13 @@ declare namespace ThumbImageRequest {
 		quality: number;
 	}
 }
+
+declare namespace ThumbImageCreateRequest {
+	export interface Query {
+		path: string;
+		type: string;
+		width: number;
+		height: number;
+		quality: number;
+	}
+}
