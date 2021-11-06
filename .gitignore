@@ -1,9 +1,15 @@
+/coverage/
+
 /log/
+
 /node/configure/*.json
 /node/dist/
 /node/log4js*.json
+
 /node_modules/
+
 /public/audio/
 /public/image/
 /public/video/
+
 /thumbimage/

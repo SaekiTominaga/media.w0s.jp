@@ -36,6 +36,8 @@ export type FilepathFor404NotFound = string;
 export type NoName23 = string;
 export type NoName25 = string;
 export type Htpasswd = string;
+export type NoName27 = number;
+export type DBNode = string;
 
 export interface MediaW0SJp {
   port: HTTP;
@@ -44,6 +46,7 @@ export interface MediaW0SJp {
   errorpage: NoName22;
   logger: Logger;
   auth: NoName24;
+  sqlite: SQLite;
 }
 export interface NoName {
   header: NoName1;
@@ -102,4 +105,14 @@ export interface NoName24 {
 }
 export interface JSON {
   [k: string]: unknown;
+}
+export interface SQLite {
+  errno: NoName26;
+  db: DB;
+}
+export interface NoName26 {
+  [k: string]: NoName27;
+}
+export interface DB {
+  [k: string]: DBNode;
 }

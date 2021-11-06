@@ -1,25 +1,21 @@
 import Controller from '../Controller.js';
 import ControllerInterface from '../ControllerInterface.js';
-import FileSizeFormat from '@saekitominaga/file-size-format';
 import fs from 'fs';
 import HttpResponse from '../util/HttpResponse.js';
-import imageSize from 'image-size';
 import path from 'path';
-import Sharp from 'sharp';
 import ThumbImageValidator from '../validator/ThumbImageValidator.js';
 import { MediaW0SJp as ConfigureCommon } from '../../configure/type/common';
 import { NoName as Configure } from '../../configure/type/thumb-image';
 import { Request, Response } from 'express';
-
-type ImageSize = {
-	width: number;
-	height: number;
-};
+import imageSize from 'image-size';
+import ThumbImage from '../util/ThumbImage.js';
+import ThumbImageRenderDao from '../dao/ThumbImageRenderDao.js';
+import FileSizeFormat from '@saekitominaga/file-size-format';
 
 /**
- * サムネイル画像
+ * サムネイル画像の画面表示
  */
-export default class ThumbImageController extends Controller implements ControllerInterface {
+export default class ThumbImageRenderController extends Controller implements ControllerInterface {
 	#configCommon: ConfigureCommon;
 	#config: Configure;
 
@@ -76,15 +72,21 @@ export default class ThumbImageController extends Controller implements Controll
 		const origFileMtime = fs.statSync(origFilePath).mtime;
 
 		/* 出力するファイルのサイズを計算する */
-		const thumbImageSize = this.getThumbFileSize(requestQuery, origFilePath);
-		if (thumbImageSize === null) {
+		const dimensions = imageSize(origFilePath);
+		const origImageWidth = dimensions.width;
+		const origImageHeight = dimensions.height;
+
+		if (origImageWidth === undefined || origImageHeight === undefined) {
 			this.logger.info(`存在しないファイルパスが指定: ${req.url}`);
 			httpResponse.send403();
 			return;
 		}
 
+		const thumbImageSize = ThumbImage.getThumbSize(requestQuery.width, requestQuery.height, { width: origImageWidth, height: origImageHeight });
+
 		/* 出力するファイルパス */
-		const thumbFilePath = this.getThumbFilePath(requestQuery, thumbImageSize);
+		const thumbFileName = ThumbImage.getThumbFileName(requestQuery.path, requestQuery.type, requestQuery.quality, thumbImageSize, this.#config.type);
+		const thumbFilePath = path.resolve(`${this.#config.thumb_dir}/${thumbFileName}`);
 
 		let thumbFileData: Buffer | undefined;
 		try {
@@ -97,7 +99,7 @@ export default class ThumbImageController extends Controller implements Controll
 			if (origFileMtime > thumbFileMtime) {
 				this.logger.debug(`画像が生成済みだが、元画像が更新されているので差し替える: ${req.url}`);
 			} else {
-				this.logger.debug(`生成済みの画像を表示: ${thumbFilePath}`);
+				this.logger.debug(`生成済みの画像を表示: ${thumbFileName}`);
 
 				/* 生成済みの画像データを表示 */
 				this.responseImage(req, res, requestQuery, httpResponse, thumbFileData, thumbFileMtime);
@@ -193,155 +195,19 @@ export default class ThumbImageController extends Controller implements Controll
 			}
 		}
 
-		/* 新しい画像ファイルを生成する */
-		const createdFileData = await this.createImage(requestQuery, origFilePath, thumbFilePath, thumbImageSize); // 画像ファイルを生成
-		this.responseImage(req, res, requestQuery, httpResponse, createdFileData); // 生成した画像データを表示
-	}
-
-	/**
-	 * 出力する画像ファイルの大きさを計算する
-	 *
-	 * @param {object} requestQuery - URL クエリー情報
-	 * @param {string} origFilePath - オリジナル画像のパス
-	 *
-	 * @returns {object} 出力する画像ファイルの大きさ
-	 */
-	private getThumbFileSize(requestQuery: ThumbImageRequest.Query, origFilePath: string): ImageSize | null {
-		const dimensions = imageSize(origFilePath);
-		const origImageWidth = dimensions.width;
-		const origImageHeight = dimensions.height;
-
-		if (origImageWidth === undefined || origImageHeight === undefined) {
-			return null;
-		}
-		this.logger.debug('オリジナル画像サイズ', `${origImageWidth}x${origImageHeight}`);
-
-		let newImageWidth = origImageWidth;
-		let newImageHeight = origImageHeight;
-
-		if (requestQuery.height === null) {
-			/* 幅のみが指定された場合 */
-			if (requestQuery.width !== null && requestQuery.width < origImageWidth) {
-				/* 幅を基準に縮小する */
-				newImageWidth = requestQuery.width;
-				newImageHeight = Math.round((origImageHeight / origImageWidth) * requestQuery.width);
-
-				this.logger.debug('幅のみが指定された場合', `${newImageWidth}x${newImageHeight}`);
-			}
-		} else if (requestQuery.width === null) {
-			/* 高さのみが指定された場合 */
-			if (requestQuery.height !== null && requestQuery.height < origImageHeight) {
-				/* 高さを基準に縮小する */
-				newImageWidth = Math.round((origImageWidth / origImageHeight) * requestQuery.height);
-				newImageHeight = requestQuery.height;
-
-				this.logger.debug('高さのみが指定された場合', `${newImageWidth}x${newImageHeight}`);
-			}
-		} else {
-			/* 幅、高さが両方指定された場合 */
-			if (requestQuery.width !== null && requestQuery.height !== null && (requestQuery.width < origImageWidth || requestQuery.height < origImageHeight)) {
-				/* 幅か高さ、どちらかより縮小割合が大きい方を基準に縮小する */
-				const reductionRatio = Math.min(requestQuery.width / origImageWidth, requestQuery.height / origImageHeight);
-
-				newImageWidth = Math.round(origImageWidth * reductionRatio);
-				newImageHeight = Math.round(origImageHeight * reductionRatio);
-
-				this.logger.debug('幅、高さが両方指定された場合', `${newImageWidth}x${newImageHeight}`);
-			}
-		}
-
-		return { width: newImageWidth, height: newImageHeight };
-	}
-
-	/**
-	 * 出力する画像ファイルパスを組み立てる
-	 *
-	 * @param {object} requestQuery - URL クエリー情報
-	 * @param {ImageSize} imageSize - 出力画像の大きさ
-	 *
-	 * @returns {string} 出力する画像ファイルパス
-	 */
-	private getThumbFilePath(requestQuery: ThumbImageRequest.Query, imageSize: ImageSize): string {
-		const parse = path.parse(path.resolve(`${this.#config.thumb_dir}/${requestQuery.path}`));
-
-		const paramSize = `s=${imageSize.width}x${imageSize.height}`;
-		const paramQuality = `q=${requestQuery.quality}`;
-
-		const params = [paramSize];
-		if (requestQuery.type !== 'png') {
-			params.push(paramQuality);
-		}
-
-		return `${parse.dir}/${parse.base}@${params.join(';')}.${this.#config.type[requestQuery.type].extension}`;
-	}
-
-	/**
-	 * 画像ファイルを生成する
-	 *
-	 * @param {object} requestQuery - URL クエリー情報
-	 * @param {string} origFilePath - 元画像ファイルパス
-	 * @param {string} thumbFilePath - 生成するサムネイル画像ファイルパス
-	 * @param {ImageSize} thumbImageSize - 生成するサムネイル画像ファイルのサイズ
-	 *
-	 * @returns {object} 生成した画像データ
-	 */
-	private async createImage(requestQuery: ThumbImageRequest.Query, origFilePath: string, thumbFilePath: string, thumbImageSize: ImageSize): Promise<Buffer> {
-		/* ディレクトリのチェック */
-		fs.mkdirSync(path.dirname(thumbFilePath), {
-			recursive: true,
+		/* 新しい画像ファイルを生成 */
+		const createStartTime = Date.now();
+		const createdFileData = await ThumbImage.createImage(origFilePath, {
+			path: thumbFilePath,
+			type: requestQuery.type,
+			width: thumbImageSize.width,
+			height: thumbImageSize.height,
+			quality: requestQuery.quality,
 		});
+		const createProcessingTime = Date.now() - createStartTime;
 
-		/* 画像ファイル生成 */
-		this.logger.debug(`サムネイル画像を新規作成: ${thumbFilePath}`);
-
-		const startTime = Date.now();
-
-		/* sharp 設定 */
-		Sharp.cache(false);
-
-		const sharp = Sharp(origFilePath);
-		sharp.resize(thumbImageSize.width, thumbImageSize.height);
-		switch (requestQuery.type) {
-			case 'avif': {
-				sharp.avif({
-					quality: requestQuery.quality,
-				});
-				break;
-			}
-			case 'webp': {
-				sharp.webp({
-					quality: requestQuery.quality,
-				});
-				break;
-			}
-			case 'jpeg': {
-				sharp.jpeg({
-					quality: requestQuery.quality,
-				});
-				break;
-			}
-			case 'png': {
-				const sharpOptions: Sharp.PngOptions = {
-					compressionLevel: 9,
-				};
-
-				const metadata = await sharp.metadata();
-				// @ts-expect-error: ts(2339)
-				if (metadata.format === 'png' && metadata.paletteBitDepth === 8) {
-					/* PNG8 */
-					sharpOptions.palette = true;
-				}
-
-				sharp.png(sharpOptions);
-
-				break;
-			}
-		}
-
-		const fileData = await sharp.toBuffer();
-		await fs.promises.writeFile(thumbFilePath, fileData);
-
-		const processingTime = Date.now() - startTime;
+		/* 生成した画像データを表示 */
+		this.responseImage(req, res, requestQuery, httpResponse, createdFileData);
 
 		/* 生成後の処理 */
 		const origFileSize = fs.statSync(origFilePath).size;
@@ -349,20 +215,42 @@ export default class ThumbImageController extends Controller implements Controll
 		const createdFileSize = fs.statSync(thumbFilePath).size;
 		const createdFileSizeIec = FileSizeFormat.iec(createdFileSize, { digits: 1 });
 
-		this.logger.info(
-			`画像生成完了（${Math.round(processingTime / 1000)}秒）: ${thumbFilePath} （幅: ${requestQuery.width}px, 画質: ${
-				requestQuery.quality
-			}, サイズ: ${createdFileSizeIec}, 元画像サイズ: ${origFileSizeIec}）`
-		);
+		this.logger.info(`画像生成完了（${Math.round(createProcessingTime / 1000)}秒）: ${thumbFileName} （${origFileSizeIec} → ${createdFileSizeIec}）`);
 
 		/* 管理者向け通知 */
 		if (createdFileSize >= origFileSize * 10 && createdFileSize > 10240) {
-			this.logger.warn(
-				`元画像よりファイルサイズの大きな画像が生成: ${thumbFilePath} （幅: ${requestQuery.width}px, 画質: ${requestQuery.quality}, サイズ: ${createdFileSizeIec}, 元画像サイズ: ${origFileSizeIec}）`
-			);
+			this.logger.warn(`元画像よりファイルサイズの大きな画像が生成: ${thumbFileName} （${origFileSizeIec} → ${createdFileSizeIec}）`);
 		}
 
-		return fileData;
+		/* DB に登録 */
+		switch (requestQuery.type) {
+			case 'avif': {
+				const dao = new ThumbImageRenderDao(this.#configCommon);
+				try {
+					const insertedCount = await dao.insert(requestQuery.path, requestQuery.type, thumbImageSize.width, thumbImageSize.height, requestQuery.quality);
+					if (insertedCount > 0) {
+						this.logger.info(`ファイル生成情報を DB に登録: ${requestQuery.path}`);
+					}
+				} catch (e) {
+					if (!(e instanceof Error)) {
+						throw e;
+					}
+
+					// @ts-expect-error: ts(2339)
+					switch (e.errno) {
+						case this.#configCommon.sqlite.errno.unique_constraint: {
+							this.logger.info(`ファイル生成情報は DB 登録済み: ${requestQuery.path}`);
+							break;
+						}
+						default: {
+							throw e;
+						}
+					}
+				}
+
+				break;
+			}
+		}
 	}
 
 	/**

@@ -5,7 +5,7 @@ import fs from 'fs';
 import Log4js from 'log4js';
 import path from 'path';
 import qs from 'qs';
-import ThumbImageController from './controller/ThumbImageController.js';
+import ThumbImageRenderController from './controller/ThumbImageRenderController.js';
 import { MediaW0SJp as Configure } from '../configure/type/common';
 
 /* 設定ファイル読み込み */
@@ -128,7 +128,7 @@ app.use(
  */
 app.get('/thumbimage/:path([^?]+)', async (req, res, next) => {
 	try {
-		await new ThumbImageController(config).execute(req, res);
+		await new ThumbImageRenderController(config).execute(req, res);
 	} catch (e) {
 		next(e);
 	}

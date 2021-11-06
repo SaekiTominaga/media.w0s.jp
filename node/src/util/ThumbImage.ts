@@ -1,0 +1,150 @@
+import fs from 'fs';
+import path from 'path';
+import Sharp from 'sharp';
+import { MIME as Type } from '../../configure/type/thumb-image';
+
+type ImageSize = {
+	width: number;
+	height: number;
+};
+
+type ThumbFile = {
+	path: string;
+	type: string;
+	width: number;
+	height: number;
+	quality: number;
+};
+
+/**
+ * サムネイル画像
+ */
+export default class ThumbImage {
+	/**
+	 * 出力するサムネイル画像ファイルの大きさを計算する
+	 *
+	 * @param {number | null} requestWidth - リクエストされた幅
+	 * @param {number | null} requestHeight - リクエストされた高さ
+	 * @param {ImageSize} origImage - オリジナル画像のサイズ情報
+	 *
+	 * @returns {object} 出力するサムネイル画像ファイルの大きさ
+	 */
+	static getThumbSize(requestWidth: number | null, requestHeight: number | null, origImage: ImageSize): ImageSize {
+		let newImageWidth = origImage.width;
+		let newImageHeight = origImage.height;
+
+		if (requestHeight === null) {
+			/* 幅のみが指定された場合 */
+			if (requestWidth !== null && requestWidth < origImage.width) {
+				/* 幅を基準に縮小する */
+				newImageWidth = requestWidth;
+				newImageHeight = Math.round((origImage.height / origImage.width) * requestWidth);
+			}
+		} else if (requestWidth === null) {
+			/* 高さのみが指定された場合 */
+			if (requestHeight !== null && requestHeight < origImage.height) {
+				/* 高さを基準に縮小する */
+				newImageWidth = Math.round((origImage.width / origImage.height) * requestHeight);
+				newImageHeight = requestHeight;
+			}
+		} else {
+			/* 幅、高さが両方指定された場合 */
+			if (requestWidth !== null && requestHeight !== null && (requestWidth < origImage.width || requestHeight < origImage.height)) {
+				/* 幅か高さ、どちらかより縮小割合が大きい方を基準に縮小する */
+				const reductionRatio = Math.min(requestWidth / origImage.width, requestHeight / origImage.height);
+
+				newImageWidth = Math.round(origImage.width * reductionRatio);
+				newImageHeight = Math.round(origImage.height * reductionRatio);
+			}
+		}
+
+		return { width: newImageWidth, height: newImageHeight };
+	}
+
+	/**
+	 * 出力するサムネイル画像ファイル名を組み立てる
+	 *
+	 * @param {string} requestPath - リクエストされた画像パス
+	 * @param {string} requestType - リクエストされた画像タイプ
+	 * @param {string} requestQuality - リクエストされた画像品質
+	 * @param {ImageSize} imageSize - 出力画像のサイズ情報
+	 * @param {Type} typeDef - ファイルタイプ毎の MIME や拡張子の定義
+	 *
+	 * @returns {string} 出力するサムネイル画像ファイル名
+	 */
+	static getThumbFileName(requestPath: string, requestType: string, requestQuality: number, imageSize: ImageSize, typeDef: Type): string {
+		const type = typeDef[requestType];
+
+		const paramSize = `s=${imageSize.width}x${imageSize.height}`;
+		const paramQuality = `q=${requestQuality}`;
+
+		const params = type.quality ? [paramSize, paramQuality] : [paramSize];
+
+		return `${requestPath}@${params.join(';')}.${type.extension}`; // e.g `path/to.jpg@s=100x200;q=80.webp`
+	}
+
+	/**
+	 * 画像ファイルを生成する
+	 *
+	 * @param {string} origFilePath - 元画像ファイルパス
+	 * @param {ThumbFile} thumbFile - 生成するサムネイル画像ファイル情報
+	 *
+	 * @returns {object} 生成したサムネイル画像データ
+	 */
+	static async createImage(origFilePath: string, thumbFile: ThumbFile): Promise<Buffer> {
+		/* ディレクトリのチェック */
+		const thumbDirectory = path.dirname(thumbFile.path);
+		if (!fs.existsSync(thumbDirectory)) {
+			await fs.promises.mkdir(thumbDirectory, {
+				recursive: true,
+			});
+		}
+
+		/* sharp 設定 */
+		Sharp.cache(false);
+
+		const sharp = Sharp(origFilePath);
+		sharp.resize(thumbFile.width, thumbFile.height);
+		switch (thumbFile.type) {
+			case 'avif': {
+				sharp.avif({
+					quality: thumbFile.quality,
+				});
+				break;
+			}
+			case 'webp': {
+				sharp.webp({
+					quality: thumbFile.quality,
+				});
+				break;
+			}
+			case 'jpeg': {
+				sharp.jpeg({
+					quality: thumbFile.quality,
+				});
+				break;
+			}
+			case 'png': {
+				const sharpOptions: Sharp.PngOptions = {
+					compressionLevel: 9,
+				};
+
+				const metadata = await sharp.metadata();
+				// @ts-expect-error: ts(2339)
+				if (metadata.format === 'png' && metadata.paletteBitDepth === 8) {
+					/* PNG8 */
+					sharpOptions.palette = true;
+				}
+
+				sharp.png(sharpOptions);
+
+				break;
+			}
+		}
+
+		const fileData = await sharp.toBuffer();
+		await fs.promises.writeFile(thumbFile.path, fileData);
+
+		return fileData;
+	}
+}
