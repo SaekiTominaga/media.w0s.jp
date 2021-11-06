@@ -58,11 +58,11 @@ export default class ThumbImageRenderDao {
 
 		const sthSelect = await dbh.prepare(`
 			SELECT
-				COUNT(file_name) AS count
+				COUNT(file_path) AS count
 			FROM
 				d_queue
 			WHERE
-				file_name = :file_path AND
+				file_path = :file_path AND
 				file_type = :type AND
 				width = :width AND
 				height = :height AND
@@ -85,7 +85,7 @@ export default class ThumbImageRenderDao {
 				const sthInsert = await dbh.prepare(`
 					INSERT INTO
 						d_queue
-						(file_name, file_type, width, height, quality, registered_at)
+						(file_path, file_type, width, height, quality, registered_at)
 					VALUES
 						(:file_path, :type, :width, :height, :quality, :registered_at)
 				`);

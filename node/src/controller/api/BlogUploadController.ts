@@ -1,10 +1,10 @@
-import Controller from '../Controller.js';
-import ControllerInterface from '../ControllerInterface.js';
+import Controller from '../../Controller.js';
+import ControllerInterface from '../../ControllerInterface.js';
 import fs from 'fs';
-import HttpBasicAuth from '../util/HttpBasicAuth.js';
+import HttpBasicAuth from '../../util/HttpBasicAuth.js';
 import MIMEParser from '@saekitominaga/mime-parser';
-import { MediaW0SJp as ConfigureCommon } from '../../configure/type/common';
-import { NoName as Configure } from '../../configure/type/blog-upload';
+import { MediaW0SJp as ConfigureCommon } from '../../../configure/type/common';
+import { NoName as Configure } from '../../../configure/type/blog-upload';
 import { Request, Response } from 'express';
 
 interface ResponseJson {

@@ -3,7 +3,7 @@ import ControllerInterface from '../ControllerInterface.js';
 import fs from 'fs';
 import HttpResponse from '../util/HttpResponse.js';
 import path from 'path';
-import ThumbImageValidator from '../validator/ThumbImageValidator.js';
+import ThumbImageRenderValidator from '../validator/ThumbImageRenderValidator.js';
 import { MediaW0SJp as ConfigureCommon } from '../../configure/type/common';
 import { NoName as Configure } from '../../configure/type/thumb-image';
 import { Request, Response } from 'express';
@@ -13,7 +13,7 @@ import ThumbImageRenderDao from '../dao/ThumbImageRenderDao.js';
 import FileSizeFormat from '@saekitominaga/file-size-format';
 
 /**
- * サムネイル画像の画面表示
+ * サムネイル画像表示
  */
 export default class ThumbImageRenderController extends Controller implements ControllerInterface {
 	#configCommon: ConfigureCommon;
@@ -36,7 +36,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 	async execute(req: Request, res: Response): Promise<void> {
 		const httpResponse = new HttpResponse(res, this.#configCommon);
 
-		const validationResult = await new ThumbImageValidator(req, this.#config).display();
+		const validationResult = await new ThumbImageRenderValidator(req, this.#config).display();
 		if (!validationResult.isEmpty()) {
 			this.logger.info('パラメーター不正', validationResult.array());
 			httpResponse.send403();
@@ -216,11 +216,6 @@ export default class ThumbImageRenderController extends Controller implements Co
 		const createdFileSizeIec = FileSizeFormat.iec(createdFileSize, { digits: 1 });
 
 		this.logger.info(`画像生成完了（${Math.round(createProcessingTime / 1000)}秒）: ${thumbFileName} （${origFileSizeIec} → ${createdFileSizeIec}）`);
-
-		/* 管理者向け通知 */
-		if (createdFileSize >= origFileSize * 10 && createdFileSize > 10240) {
-			this.logger.warn(`元画像よりファイルサイズの大きな画像が生成: ${thumbFileName} （${origFileSizeIec} → ${createdFileSizeIec}）`);
-		}
 
 		/* DB に登録 */
 		switch (requestQuery.type) {
