@@ -3,9 +3,9 @@ import { query, Result, ValidationError, validationResult } from 'express-valida
 import { Request } from 'express';
 
 /**
- * サムネイル画像
+ * サムネイル画像表示
  */
-export default class ThumbImageValidator {
+export default class ThumbImageRenderValidator {
 	#req: Request;
 	#config: Configure;
 
