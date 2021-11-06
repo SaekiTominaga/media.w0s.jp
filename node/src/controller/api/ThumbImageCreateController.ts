@@ -50,22 +50,22 @@ export default class ThumbImageCreateController extends Controller implements Co
 		}
 
 		const requestQuery: ThumbImageCreateRequest.Query = {
-			path: req.body.path ?? null,
+			file_path: req.body.file_path ?? null,
 			type: req.body.type ?? null,
 			width: Number(req.body.width),
 			height: Number(req.body.height),
 			quality: Number(req.body.quality),
 		};
 
-		const origFilePath = path.resolve(`${this.#configCommon.static.root}/${this.#configCommon.static.directory.image}/${requestQuery.path}`);
+		const origFilePath = path.resolve(`${this.#configCommon.static.root}/${this.#configCommon.static.directory.image}/${requestQuery.file_path}`);
 		if (!fs.existsSync(origFilePath)) {
-			this.logger.info(`存在しないファイルパスが指定: ${requestQuery.path}`);
+			this.logger.info(`存在しないファイルパスが指定: ${requestQuery.file_path}`);
 			res.status(403).end();
 			return;
 		}
 
 		const thumbFileName = ThumbImage.getThumbFileName(
-			requestQuery.path,
+			requestQuery.file_path,
 			requestQuery.type,
 			requestQuery.quality,
 			{
