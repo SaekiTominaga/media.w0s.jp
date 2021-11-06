@@ -1,3 +1,4 @@
+import BlogUploadValidator from '../../validator/BlogUploadValiator.js';
 import Controller from '../../Controller.js';
 import ControllerInterface from '../../ControllerInterface.js';
 import fs from 'fs';
@@ -46,22 +47,13 @@ export default class BlogUploadController extends Controller implements Controll
 			return;
 		}
 
-		const requestQuery: BlogUploadRequest.Query = {
-			file_name: req.body.name ?? null,
-			mime: req.body.type ?? null,
-			temp_path: req.body.temppath ?? null,
-			size: req.body.size !== undefined ? Number(req.body.size) : null,
-			overwrite: Boolean(req.body.overwrite),
-		};
+		const validationResult = await new BlogUploadValidator(req).upload();
+		if (!validationResult.isEmpty()) {
+			this.logger.error('パラメーター不正', validationResult.array());
 
-		let responseJson: ResponseJson;
-
-		if (requestQuery.file_name === null || requestQuery.mime === null || requestQuery.temp_path === null || requestQuery.size === null) {
-			this.logger.warn('必要なパラメーターが存在しない', requestQuery);
-
-			responseJson = {
-				name: requestQuery.file_name,
-				size: requestQuery.size,
+			const responseJson: ResponseJson = {
+				name: req.body.name,
+				size: req.body.size,
 				code: this.#config.response.request_query.code,
 				message: this.#config.response.request_query.message,
 			};
@@ -69,7 +61,21 @@ export default class BlogUploadController extends Controller implements Controll
 			return;
 		}
 
-		switch (new MIMEParser(requestQuery.mime).getType()) {
+		const requestQuery: BlogUploadRequest.Query = {
+			file_name: req.body.name,
+			mime: req.body.type,
+			temp_path: req.body.temppath,
+			size: Number(req.body.size),
+			overwrite: Boolean(req.body.overwrite),
+		};
+
+		let mimeType: string | undefined;
+		try {
+			mimeType = new MIMEParser(requestQuery.mime).getType();
+		} catch (e) {}
+
+		let responseJson: ResponseJson;
+		switch (mimeType) {
 			case 'image': {
 				responseJson = await this.upload(
 					requestQuery.file_name,

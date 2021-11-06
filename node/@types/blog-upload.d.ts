@@ -1,9 +1,9 @@
 declare namespace BlogUploadRequest {
 	export interface Query {
-		file_name: string | null;
-		mime: string | null;
-		temp_path: string | null;
-		size: number | null;
+		file_name: string;
+		mime: string;
+		temp_path: string;
+		size: number;
 		overwrite: boolean;
 	}
 }
