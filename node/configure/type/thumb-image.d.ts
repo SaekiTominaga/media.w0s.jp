@@ -6,26 +6,32 @@
  */
 
 export type NoName1 = string;
-export type MIME1 = string;
-export type NoName2 = string;
-export type NoName3 = boolean;
+export type MIME = string;
+export type NoName3 = string;
+export type NoName4 = boolean;
+export type NoName5 = "avif" | "webp" | "jpeg" | "png";
 export type JPRGWebPAVIF = number;
 export type CacheControl = string;
-export type NoName4 = string[];
-export type NoName5 = string[];
+export type NoName6 = string[];
+export type NoName7 = string[];
 
 export interface NoName {
   thumb_dir: NoName1;
-  type: MIME;
+  type: NoName2;
   quality_default: JPRGWebPAVIF;
   cache_control: CacheControl;
-  allow_origins: NoName4;
-  referrer_exclusion_origins: NoName5;
+  allow_origins: NoName6;
+  referrer_exclusion_origins: NoName7;
 }
-export interface MIME {
+export interface NoName2 {
+  /**
+   * This interface was referenced by `NoName2`'s JSON-Schema definition
+   * via the `patternProperty` "^(avif|webp|jpeg|png)$".
+   */
   [k: string]: {
-    mime: MIME1;
-    extension: NoName2;
-    quality: NoName3;
+    mime: MIME;
+    extension: NoName3;
+    quality: NoName4;
+    alt_type?: NoName5;
   };
 }

@@ -6,6 +6,7 @@ import HttpBasicAuth from '../../util/HttpBasicAuth.js';
 import path from 'path';
 import ThumbImage from '../../util/ThumbImage.js';
 import ThumbImageCreateValidator from '../../validator/ThumbImageCreateValidator.js';
+import ThumbImageUtil from '../../util/ThumbImageUtil.js';
 import { MediaW0SJp as ConfigureCommon } from '../../../configure/type/common';
 import { NoName as Configure } from '../../../configure/type/thumb-image';
 import { Request, Response } from 'express';
@@ -57,44 +58,51 @@ export default class ThumbImageCreateController extends Controller implements Co
 			quality: Number(req.body.quality),
 		};
 
-		const origFilePath = path.resolve(`${this.#configCommon.static.root}/${this.#configCommon.static.directory.image}/${requestQuery.file_path}`);
-		if (!fs.existsSync(origFilePath)) {
+		const origFileFullPath = path.resolve(`${this.#configCommon.static.root}/${this.#configCommon.static.directory.image}/${requestQuery.file_path}`);
+		if (!fs.existsSync(origFileFullPath)) {
 			this.logger.info(`存在しないファイルパスが指定: ${requestQuery.file_path}`);
 			res.status(403).end();
 			return;
 		}
 
-		const thumbFileName = ThumbImage.getThumbFileName(
+		const thumbImage = new ThumbImage(
+			this.#config.type,
+			this.#config.thumb_dir,
 			requestQuery.file_path,
 			requestQuery.type,
-			requestQuery.quality,
 			{
 				width: requestQuery.width,
 				height: requestQuery.height,
 			},
-			this.#config.type
+			requestQuery.quality
 		);
-		const thumbFilePath = path.resolve(`${this.#config.thumb_dir}/${thumbFileName}`);
 
+		/* 画像ファイル生成 */
+		await this.create(origFileFullPath, thumbImage);
+
+		res.status(204).end();
+	}
+
+	/**
+	 * 画像ファイル生成
+	 *
+	 * @param {string} origFileFullPath - 元画像ファイルのフルパス
+	 * @param {ThumbImage} thumbImage - サムネイル画像
+	 *
+	 * @returns {object} 生成した画像データ
+	 */
+	private async create(origFileFullPath: string, thumbImage: ThumbImage): Promise<Buffer> {
 		/* 新しい画像ファイルを生成 */
 		const createStartTime = Date.now();
-		await ThumbImage.createImage(origFilePath, {
-			path: thumbFilePath,
-			type: requestQuery.type,
-			width: requestQuery.width,
-			height: requestQuery.height,
-			quality: requestQuery.quality,
-		});
+		const createdFileData = await ThumbImageUtil.createImage(origFileFullPath, thumbImage);
 		const createProcessingTime = Date.now() - createStartTime;
 
 		/* 生成後の処理 */
-		const origFileSize = fs.statSync(origFilePath).size;
-		const origFileSizeIec = FileSizeFormat.iec(origFileSize, { digits: 1 });
-		const createdFileSize = fs.statSync(thumbFilePath).size;
-		const createdFileSizeIec = FileSizeFormat.iec(createdFileSize, { digits: 1 });
+		const origFileSize = FileSizeFormat.iec(fs.statSync(origFileFullPath).size, { digits: 1 });
+		const createdFileSize = FileSizeFormat.iec(createdFileData.byteLength, { digits: 1 });
 
-		this.logger.info(`画像生成完了（${Math.round(createProcessingTime / 1000)}秒）: ${thumbFileName} （${origFileSizeIec} → ${createdFileSizeIec}）`);
+		this.logger.info(`画像生成完了（${Math.round(createProcessingTime / 1000)}秒）: ${thumbImage.filePath} （${origFileSize} → ${createdFileSize}）`);
 
-		res.status(204).end();
+		return createdFileData;
 	}
 }

@@ -47,13 +47,12 @@ export default class ThumbImageRenderDao {
 	 *
 	 * @param {string} filePath - ファイルパス
 	 * @param {string} type - 画像タイプ
-	 * @param {number} width - 画像幅
-	 * @param {number} height - 画像高さ
+	 * @param {object} size - 画像の大きさ
 	 * @param {number} quality - 画質
 	 *
 	 * @returns {number} 登録されたデータ数
 	 */
-	async insert(filePath: string, type: string, width: number, height: number, quality: number | null = null): Promise<number> {
+	async insert(filePath: string, type: string, size: ImageSize, quality: number | null = null): Promise<number> {
 		const dbh = await this.getDbh();
 
 		const sthSelect = await dbh.prepare(`
@@ -71,8 +70,8 @@ export default class ThumbImageRenderDao {
 		await sthSelect.bind({
 			':file_path': filePath,
 			':type': type,
-			':width': width,
-			':height': height,
+			':width': size.width,
+			':height': size.height,
 			':quality': quality,
 		});
 		const row = await sthSelect.get();
@@ -92,8 +91,8 @@ export default class ThumbImageRenderDao {
 				const result = await sthInsert.run({
 					':file_path': filePath,
 					':type': type,
-					':width': width,
-					':height': height,
+					':width': size.width,
+					':height': size.height,
 					':quality': quality,
 					':registered_at': DbUtil.dateToUnix(),
 				});

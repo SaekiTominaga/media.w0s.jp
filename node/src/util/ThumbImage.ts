@@ -1,150 +1,91 @@
-import fs from 'fs';
 import path from 'path';
-import Sharp from 'sharp';
-import { MIME as Type } from '../../configure/type/thumb-image';
-
-type ImageSize = {
-	width: number;
-	height: number;
-};
-
-type ThumbFile = {
-	path: string;
-	type: string;
-	width: number;
-	height: number;
-	quality: number;
-};
+import { NoName2 as ImageInfos } from '../../configure/type/thumb-image';
 
 /**
  * サムネイル画像
  */
 export default class ThumbImage {
+	/* ファイルタイプ毎の MIME や拡張子の定義 */
+	#imageInfo: ImageInfos;
+
+	/* サムネイル画像を保存するルートディレクトリ */
+	#dir: string;
+
+	/* ベースとなるファイルパス */
+	#fileBasePath: string;
+
+	/* 画像タイプ */
+	#type: ImageType;
+
+	/* 画像の大きさ */
+	#size: ImageSize;
+
+	/* 画像品質 */
+	#quality: number | undefined;
+
 	/**
-	 * 出力するサムネイル画像ファイルの大きさを計算する
-	 *
-	 * @param {number | null} requestWidth - リクエストされた幅
-	 * @param {number | null} requestHeight - リクエストされた高さ
-	 * @param {ImageSize} origImage - オリジナル画像のサイズ情報
-	 *
-	 * @returns {object} 出力するサムネイル画像ファイルの大きさ
+	 * @param {ImageInfos} imageInfos - ファイルタイプ毎の MIME や拡張子の定義
+	 * @param {string} dir - サムネイル画像を保存するルートディレクトリ
+	 * @param {string} fileBasePath - ベースとなるファイルパス
+	 * @param {object} type - 画像タイプ
+	 * @param {object} size - 画像サイズ
+	 * @param {number} quality - 画像品質
 	 */
-	static getThumbSize(requestWidth: number | null, requestHeight: number | null, origImage: ImageSize): ImageSize {
-		let newImageWidth = origImage.width;
-		let newImageHeight = origImage.height;
+	constructor(imageInfos: ImageInfos, dir: string, fileBasePath: string, type: ImageType, size: ImageSize, quality?: number) {
+		this.#imageInfo = imageInfos;
+		this.#dir = dir;
+		this.#fileBasePath = fileBasePath;
 
-		if (requestHeight === null) {
-			/* 幅のみが指定された場合 */
-			if (requestWidth !== null && requestWidth < origImage.width) {
-				/* 幅を基準に縮小する */
-				newImageWidth = requestWidth;
-				newImageHeight = Math.round((origImage.height / origImage.width) * requestWidth);
-			}
-		} else if (requestWidth === null) {
-			/* 高さのみが指定された場合 */
-			if (requestHeight !== null && requestHeight < origImage.height) {
-				/* 高さを基準に縮小する */
-				newImageWidth = Math.round((origImage.width / origImage.height) * requestHeight);
-				newImageHeight = requestHeight;
-			}
-		} else {
-			/* 幅、高さが両方指定された場合 */
-			if (requestWidth !== null && requestHeight !== null && (requestWidth < origImage.width || requestHeight < origImage.height)) {
-				/* 幅か高さ、どちらかより縮小割合が大きい方を基準に縮小する */
-				const reductionRatio = Math.min(requestWidth / origImage.width, requestHeight / origImage.height);
-
-				newImageWidth = Math.round(origImage.width * reductionRatio);
-				newImageHeight = Math.round(origImage.height * reductionRatio);
-			}
-		}
-
-		return { width: newImageWidth, height: newImageHeight };
+		this.#type = type;
+		this.#size = size;
+		this.#quality = quality;
 	}
 
-	/**
-	 * 出力するサムネイル画像ファイル名を組み立てる
-	 *
-	 * @param {string} requestPath - リクエストされた画像パス
-	 * @param {string} requestType - リクエストされた画像タイプ
-	 * @param {string} requestQuality - リクエストされた画像品質
-	 * @param {ImageSize} imageSize - 出力画像のサイズ情報
-	 * @param {Type} typeDef - ファイルタイプ毎の MIME や拡張子の定義
-	 *
-	 * @returns {string} 出力するサムネイル画像ファイル名
-	 */
-	static getThumbFileName(requestPath: string, requestType: string, requestQuality: number, imageSize: ImageSize, typeDef: Type): string {
-		const type = typeDef[requestType];
-
-		const paramSize = `s=${imageSize.width}x${imageSize.height}`;
-		const paramQuality = `q=${requestQuality}`;
-
-		const params = type.quality ? [paramSize, paramQuality] : [paramSize];
-
-		return `${requestPath}@${params.join(';')}.${type.extension}`; // e.g `path/to.jpg@s=100x200;q=80.webp`
+	get fileBasePath(): string {
+		return this.#fileBasePath;
 	}
 
-	/**
-	 * 画像ファイルを生成する
-	 *
-	 * @param {string} origFilePath - 元画像ファイルパス
-	 * @param {ThumbFile} thumbFile - 生成するサムネイル画像ファイル情報
-	 *
-	 * @returns {object} 生成したサムネイル画像データ
-	 */
-	static async createImage(origFilePath: string, thumbFile: ThumbFile): Promise<Buffer> {
-		/* ディレクトリのチェック */
-		const thumbDirectory = path.dirname(thumbFile.path);
-		if (!fs.existsSync(thumbDirectory)) {
-			await fs.promises.mkdir(thumbDirectory, {
-				recursive: true,
-			});
-		}
+	get filePath(): string {
+		const imageInfo = this.#imageInfo[this.#type];
 
-		/* sharp 設定 */
-		Sharp.cache(false);
+		const paramSize = `s=${this.#size.width}x${this.#size.height}`;
+		const paramQuality = `q=${this.#quality}`;
 
-		const sharp = Sharp(origFilePath);
-		sharp.resize(thumbFile.width, thumbFile.height);
-		switch (thumbFile.type) {
-			case 'avif': {
-				sharp.avif({
-					quality: thumbFile.quality,
-				});
-				break;
-			}
-			case 'webp': {
-				sharp.webp({
-					quality: thumbFile.quality,
-				});
-				break;
-			}
-			case 'jpeg': {
-				sharp.jpeg({
-					quality: thumbFile.quality,
-				});
-				break;
-			}
-			case 'png': {
-				const sharpOptions: Sharp.PngOptions = {
-					compressionLevel: 9,
-				};
+		const params = imageInfo.quality ? [paramSize, paramQuality] : [paramSize];
 
-				const metadata = await sharp.metadata();
-				// @ts-expect-error: ts(2339)
-				if (metadata.format === 'png' && metadata.paletteBitDepth === 8) {
-					/* PNG8 */
-					sharpOptions.palette = true;
-				}
+		return `${this.#fileBasePath}@${params.join(';')}.${imageInfo.extension}`; // e.g `path/to.jpg@s=100x200;q=80.webp`
+	}
 
-				sharp.png(sharpOptions);
+	get fileFullPath(): string {
+		return path.resolve(`${this.#dir}/${this.filePath}`);
+	}
 
-				break;
-			}
-		}
+	get mime(): string {
+		return this.#imageInfo[this.#type].mime;
+	}
 
-		const fileData = await sharp.toBuffer();
-		await fs.promises.writeFile(thumbFile.path, fileData);
+	get altType(): ImageType | undefined {
+		return this.#imageInfo[this.#type].alt_type;
+	}
 
-		return fileData;
+	get type(): ImageType {
+		return this.#type;
+	}
+	set type(type: ImageType) {
+		this.#type = type;
+	}
+
+	get size(): ImageSize {
+		return this.#size;
+	}
+	set size(size: ImageSize) {
+		this.#size = size;
+	}
+
+	get quality(): number | undefined {
+		return this.#quality;
+	}
+	set quality(quality: number | undefined) {
+		this.#quality = quality;
 	}
 }

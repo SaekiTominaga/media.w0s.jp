@@ -12,25 +12,33 @@
 		"type": {
 			"type": "object",
 			"title": "ファイルタイプの定義",
-			"additionalProperties": {
-				"type": "object",
-				"required": ["mime", "extension", "quality"],
-				"properties": {
-					"mime": {
-						"type": "string",
-						"title": "MIME"
+			"patternProperties": {
+				"^(avif|webp|jpeg|png)$": {
+					"type": "object",
+					"required": ["mime", "extension", "quality"],
+					"properties": {
+						"mime": {
+							"type": "string",
+							"title": "MIME"
+						},
+						"extension": {
+							"type": "string",
+							"title": "拡張子"
+						},
+						"quality": {
+							"type": "boolean",
+							"title": "品質を適用するか"
+						},
+						"alt_type": {
+							"type": "string",
+							"enum": ["avif", "webp", "jpeg", "png"],
+							"title": "未対応環境でアクセスされた時の代替タイプ"
+						}
 					},
-					"extension": {
-						"type": "string",
-						"title": "拡張子"
-					},
-					"quality": {
-						"type": "boolean",
-						"title": "品質を適用するか"
-					}
-				},
-				"additionalProperties": false
-			}
+					"additionalProperties": false
+				}
+			},
+			"additionalProperties": false
 		},
 		"quality_default": {
 			"type": "integer",
