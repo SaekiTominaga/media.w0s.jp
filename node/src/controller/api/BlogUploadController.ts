@@ -1,4 +1,4 @@
-import BlogUploadValidator from '../../validator/BlogUploadValiator.js';
+import BlogValidator from '../../validator/BlogValiator.js';
 import Controller from '../../Controller.js';
 import ControllerInterface from '../../ControllerInterface.js';
 import fs from 'fs';
@@ -47,7 +47,7 @@ export default class BlogUploadController extends Controller implements Controll
 			return;
 		}
 
-		const validationResult = await new BlogUploadValidator(req).upload();
+		const validationResult = await new BlogValidator(req).upload();
 		if (!validationResult.isEmpty()) {
 			this.logger.error('パラメーター不正', validationResult.array());
 

@@ -2,9 +2,9 @@ import { body, Result, ValidationError, validationResult } from 'express-validat
 import { Request } from 'express';
 
 /**
- * ブログ用ファイルアップロード
+ * ブログ
  */
-export default class BlogUploadValidator {
+export default class BlogValidator {
 	#req: Request;
 
 	/**
