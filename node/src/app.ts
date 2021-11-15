@@ -149,7 +149,7 @@ app.get('/thumbimage/:path([^?]+)', async (req, res, next) => {
 /**
  * ブログ用ファイルアップロード
  */
-app.post('/blogupload', async (req, res, next) => {
+app.post('/blog/upload', async (req, res, next) => {
 	try {
 		await new BlogUploadController(config).execute(req, res);
 	} catch (e) {
