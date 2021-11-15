@@ -5,7 +5,7 @@ import fs from 'fs';
 import HttpBasicAuth from '../../util/HttpBasicAuth.js';
 import path from 'path';
 import ThumbImage from '../../util/ThumbImage.js';
-import ThumbImageCreateValidator from '../../validator/ThumbImageCreateValidator.js';
+import ThumbImageValidator from '../../validator/ThumbImageValidator.js';
 import ThumbImageUtil from '../../util/ThumbImageUtil.js';
 import { MediaW0SJp as ConfigureCommon } from '../../../configure/type/common';
 import { NoName as Configure } from '../../../configure/type/thumb-image';
@@ -43,7 +43,7 @@ export default class ThumbImageCreateController extends Controller implements Co
 			return;
 		}
 
-		const validationResult = await new ThumbImageCreateValidator(req, this.#config).create();
+		const validationResult = await new ThumbImageValidator(req, this.#config).create();
 		if (!validationResult.isEmpty()) {
 			this.logger.error('パラメーター不正', validationResult.array());
 			res.status(403).end();

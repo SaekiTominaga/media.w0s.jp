@@ -7,7 +7,7 @@ import imageSize from 'image-size';
 import path from 'path';
 import ThumbImage from '../util/ThumbImage.js';
 import ThumbImageRenderDao from '../dao/ThumbImageRenderDao.js';
-import ThumbImageRenderValidator from '../validator/ThumbImageRenderValidator.js';
+import ThumbImageValidator from '../validator/ThumbImageValidator.js';
 import ThumbImageUtil from '../util/ThumbImageUtil.js';
 import { MediaW0SJp as ConfigureCommon } from '../../configure/type/common';
 import { NoName as Configure } from '../../configure/type/thumb-image';
@@ -37,7 +37,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 	async execute(req: Request, res: Response): Promise<void> {
 		const httpResponse = new HttpResponse(res, this.#configCommon);
 
-		const validationResult = await new ThumbImageRenderValidator(req, this.#config).display();
+		const validationResult = await new ThumbImageValidator(req, this.#config).render();
 		if (!validationResult.isEmpty()) {
 			this.logger.info('パラメーター不正', validationResult.array());
 			httpResponse.send403();

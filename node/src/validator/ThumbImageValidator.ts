@@ -1,11 +1,11 @@
+import { body, query, Result, ValidationError, validationResult } from 'express-validator';
 import { NoName as Configure } from '../../configure/type/thumb-image';
-import { query, Result, ValidationError, validationResult } from 'express-validator';
 import { Request } from 'express';
 
 /**
- * サムネイル画像表示
+ * サムネイル画像
  */
-export default class ThumbImageRenderValidator {
+export default class ThumbImageValidator {
 	#req: Request;
 	#config: Configure;
 
@@ -23,7 +23,7 @@ export default class ThumbImageRenderValidator {
 	 *
 	 * @returns {Result<ValidationError>} 検証エラー
 	 */
-	async display(): Promise<Result<ValidationError>> {
+	async render(): Promise<Result<ValidationError>> {
 		await Promise.all([
 			query(typeof this.#req.query.type === 'string' ? 'type' : 'type.*')
 				.isIn(Object.keys(this.#config.type))
@@ -37,6 +37,36 @@ export default class ThumbImageRenderValidator {
 				.isInt({ min: 1, max: 9999 })
 				.run(this.#req),
 			query('quality')
+				.optional({ checkFalsy: true })
+				.isInt({ min: 1, max: 100 })
+				.run(this.#req),
+		]);
+
+		return validationResult(this.#req);
+	}
+
+	/**
+	 * 画像生成
+	 *
+	 * @returns {Result<ValidationError>} 検証エラー
+	 */
+	async create(): Promise<Result<ValidationError>> {
+		await Promise.all([
+			body('file_path')
+				.notEmpty()
+				.run(this.#req),
+			body('type')
+				.isIn(Object.keys(this.#config.type))
+				.run(this.#req),
+			body('width')
+				.notEmpty()
+				.isInt({ min: 1, max: 9999 })
+				.run(this.#req),
+			body('height')
+				.notEmpty()
+				.isInt({ min: 1, max: 9999 })
+				.run(this.#req),
+			body('quality')
 				.optional({ checkFalsy: true })
 				.isInt({ min: 1, max: 100 })
 				.run(this.#req),
