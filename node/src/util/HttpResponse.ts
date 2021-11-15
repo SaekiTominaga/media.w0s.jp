@@ -2,6 +2,8 @@ import path from 'path';
 import { MediaW0SJp as Configure } from '../../configure/type/common';
 import { Request, Response } from 'express';
 
+type HttpAuthType = 'Basic' | 'Bearer' | 'Digest' | 'HOBA' | 'Mutual' | 'Negotiate' | 'OAuth' | 'SCRAM-SHA-1' | 'SCRAM-SHA-256' | 'vapid';
+
 /**
  * HttpResponse
  */
@@ -40,6 +42,15 @@ export default class HttpResponse {
 	}
 
 	/**
+	 * 200 OK (Json)
+	 *
+	 * @param {object} body - Response body
+	 */
+	send200Json(body: object): void {
+		this.#res.status(200).json(body);
+	}
+
+	/**
 	 * 204 No Content
 	 */
 	send204(): void {
@@ -47,16 +58,47 @@ export default class HttpResponse {
 	}
 
 	/**
-	 * 403 Forbidden
+	 * 401 Unauthorized (Json)
+	 *
+	 * @param {string} type - Authentication type <https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml>
+	 * @param {string} realm - A description of the protected area.
+	 */
+	send401Json(type: HttpAuthType, realm: string): void {
+		this.#res
+			.set('WWW-Authenticate', `${type} realm="${realm}"`)
+			.status(401)
+			.json(this.#config.auth.json_401);
+	}
+
+	/**
+	 * 403 Forbidden (HTML)
 	 */
 	send403(): void {
 		this.#res.status(403).sendFile(path.resolve(this.#config.errorpage.path_403));
 	}
 
 	/**
-	 * 404 Not Found
+	 * 403 Forbidden (Json)
+	 *
+	 * @param {object} body - Response body
+	 */
+	send403Json(body?: object): void {
+		this.#res.status(403).json(body);
+	}
+
+	/**
+	 * 404 Not Found (HTML)
 	 */
 	send404(): void {
 		this.#res.status(404).sendFile(path.resolve(this.#config.errorpage.path_404));
+	}
+
+	/**
+	 * 404 Not Found (Json)
+	 *
+	 * @param {object} body - Response body
+	 */
+	send404Json(body?: object): void {
+		this.#res.status(404).json(body);
 	}
 }

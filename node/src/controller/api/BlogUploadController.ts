@@ -3,6 +3,7 @@ import Controller from '../../Controller.js';
 import ControllerInterface from '../../ControllerInterface.js';
 import fs from 'fs';
 import HttpBasicAuth from '../../util/HttpBasicAuth.js';
+import HttpResponse from '../../util/HttpResponse.js';
 import MIMEParser from '@saekitominaga/mime-parser';
 import { MediaW0SJp as ConfigureCommon } from '../../../configure/type/common';
 import { NoName as Configure } from '../../../configure/type/blog-upload';
@@ -37,13 +38,12 @@ export default class BlogUploadController extends Controller implements Controll
 	 * @param {Response} res - Response
 	 */
 	async execute(req: Request, res: Response): Promise<void> {
+		const httpResponse = new HttpResponse(res, this.#configCommon);
+
 		/* Basic 認証 */
 		const httpBasicAuth = new HttpBasicAuth(req);
 		if (!(await httpBasicAuth.htpasswd(this.#configCommon.auth.htpasswd_file))) {
-			res
-				.status(401)
-				.set('WWW-Authenticate', `Basic realm="${this.#configCommon.auth.realm}"`)
-				.json(this.#configCommon.auth.json_401);
+			httpResponse.send401Json('Basic', this.#configCommon.auth.realm);
 			return;
 		}
 
@@ -57,7 +57,7 @@ export default class BlogUploadController extends Controller implements Controll
 				code: this.#config.response.request_query.code,
 				message: this.#config.response.request_query.message,
 			};
-			res.status(403).json(responseJson);
+			httpResponse.send403Json(responseJson);
 			return;
 		}
 
@@ -110,7 +110,7 @@ export default class BlogUploadController extends Controller implements Controll
 			}
 		}
 
-		res.status(200).json(responseJson);
+		httpResponse.send200Json(responseJson);
 	}
 
 	/**
@@ -122,6 +122,8 @@ export default class BlogUploadController extends Controller implements Controll
 	 * @param {string} fileDir - ファイルを保存するディレクトリ
 	 * @param {boolean} overwrite - 上書きを許可するか
 	 * @param {number} limitSize - 許可された最大サイズ
+	 *
+	 * @returns {ResponseJson} 返答内容
 	 */
 	private async upload(fileName: string, tempPath: string, size: number, fileDir: string, overwrite: boolean, limitSize: number): Promise<ResponseJson> {
 		const filePath = `${fileDir}/${fileName}`;

@@ -3,10 +3,11 @@ import ControllerInterface from '../../ControllerInterface.js';
 import FileSizeFormat from '@saekitominaga/file-size-format';
 import fs from 'fs';
 import HttpBasicAuth from '../../util/HttpBasicAuth.js';
+import HttpResponse from '../../util/HttpResponse.js';
 import path from 'path';
 import ThumbImage from '../../util/ThumbImage.js';
-import ThumbImageValidator from '../../validator/ThumbImageValidator.js';
 import ThumbImageUtil from '../../util/ThumbImageUtil.js';
+import ThumbImageValidator from '../../validator/ThumbImageValidator.js';
 import { MediaW0SJp as ConfigureCommon } from '../../../configure/type/common';
 import { NoName as Configure } from '../../../configure/type/thumb-image';
 import { Request, Response } from 'express';
@@ -33,20 +34,20 @@ export default class ThumbImageCreateController extends Controller implements Co
 	 * @param {Response} res - Response
 	 */
 	async execute(req: Request, res: Response): Promise<void> {
+		const httpResponse = new HttpResponse(res, this.#configCommon);
+
 		/* Basic 認証 */
 		const httpBasicAuth = new HttpBasicAuth(req);
 		if (!(await httpBasicAuth.htpasswd(this.#configCommon.auth.htpasswd_file))) {
-			res
-				.status(401)
-				.set('WWW-Authenticate', `Basic realm="${this.#configCommon.auth.realm}"`)
-				.json(this.#configCommon.auth.json_401);
+			httpResponse.send401Json('Basic', this.#configCommon.auth.realm);
 			return;
 		}
 
 		const validationResult = await new ThumbImageValidator(req, this.#config).create();
 		if (!validationResult.isEmpty()) {
 			this.logger.error('パラメーター不正', validationResult.array());
-			res.status(403).end();
+
+			httpResponse.send403Json();
 			return;
 		}
 
@@ -61,7 +62,8 @@ export default class ThumbImageCreateController extends Controller implements Co
 		const origFileFullPath = path.resolve(`${this.#configCommon.static.root}/${this.#configCommon.static.directory.image}/${requestQuery.file_path}`);
 		if (!fs.existsSync(origFileFullPath)) {
 			this.logger.info(`存在しないファイルパスが指定: ${requestQuery.file_path}`);
-			res.status(403).end();
+
+			httpResponse.send403Json();
 			return;
 		}
 
@@ -80,7 +82,7 @@ export default class ThumbImageCreateController extends Controller implements Co
 		/* 画像ファイル生成 */
 		await this.create(origFileFullPath, thumbImage);
 
-		res.status(204).end();
+		httpResponse.send204();
 	}
 
 	/**
