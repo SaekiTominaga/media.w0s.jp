@@ -328,7 +328,6 @@ export default class ThumbImageRenderController extends Controller implements Co
 
 		res.setHeader('Content-Type', mime);
 		res.setHeader('Cache-Control', this.#config.cache_control);
-		res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
 
 		res.send(fileData);
 	}

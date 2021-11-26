@@ -112,12 +112,8 @@ app.use(
 				res.setHeader('Cache-Control', cacheControlValue);
 			}
 
-			/* Cross-Origin-* */
-			if (
-				[config.static.directory.image, config.static.directory.audio, config.static.directory.video].find((urlPath) =>
-					requestUrlOrigin.startsWith(`/${urlPath}/`)
-				)
-			) {
+			/* Cross-Origin-*-Policy */
+			if ([config.static.directory.image].find((urlPath) => requestUrlOrigin.startsWith(`/${urlPath}/`))) {
 				res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
 			}
 		},
@@ -138,7 +134,7 @@ app.get('/thumbimage/:path([^?]+)', async (req, res, next) => {
 /**
  * サムネイル画像生成
  */
- app.post('/thumbimage/create', async (req, res, next) => {
+app.post('/thumbimage/create', async (req, res, next) => {
 	try {
 		await new ThumbImageCreateController(config).execute(req, res);
 	} catch (e) {
