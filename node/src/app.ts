@@ -111,11 +111,6 @@ app.use(
 
 				res.setHeader('Cache-Control', cacheControlValue);
 			}
-
-			/* Cross-Origin-*-Policy */
-			if ([config.static.directory.image].find((urlPath) => requestUrlOrigin.startsWith(`/${urlPath}/`))) {
-				res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
-			}
 		},
 	})
 );
