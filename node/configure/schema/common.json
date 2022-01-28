@@ -242,22 +242,22 @@
 		"sqlite": {
 			"type": "object",
 			"title": "SQLite",
-			"required": ["errno", "db"],
+			"required": ["db", "errno"],
 			"properties": {
-				"errno": {
-					"type": "object",
-					"title": "エラーコード情報",
-					"additionalProperties": {
-						"type": "integer",
-						"title": "エラーコード"
-					}
-				},
 				"db": {
 					"type": "object",
 					"title": "DB ファイル情報",
 					"additionalProperties": {
 						"type": "string",
 						"title": "DB ファイルパス（絶対パス、または `node` ディレクトリを基準にした相対パス）"
+					}
+				},
+				"errno": {
+					"type": "object",
+					"title": "エラーコード情報",
+					"additionalProperties": {
+						"type": "integer",
+						"title": "エラーコード"
 					}
 				}
 			},
