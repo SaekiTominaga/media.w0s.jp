@@ -136,11 +136,11 @@ export default class ThumbImageRenderController extends Controller implements Co
 				// @ts-expect-error: ts(2339)
 				switch (e.errno) {
 					case this.#configCommon.sqlite.errno.locked: {
-						this.logger.warn(`DB ロック: ${thumbImage.fileBasePath}`);
+						this.logger.warn('DB ロック', thumbImage.fileBasePath, thumbImage.type, thumbImage.size, thumbImage.quality);
 						break;
 					}
 					case this.#configCommon.sqlite.errno.unique_constraint: {
-						this.logger.info(`ファイル生成情報は DB 登録済み: ${thumbImage.fileBasePath}`);
+						this.logger.info('ファイル生成情報は DB 登録済み', thumbImage.fileBasePath, thumbImage.type, thumbImage.size, thumbImage.quality);
 						break;
 					}
 					default: {
