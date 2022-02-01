@@ -27,7 +27,7 @@ export default class BlogValidator {
 			body('type')
 				.notEmpty()
 				.run(this.#req),
-			body('temp_path')
+			body('temppath')
 				.notEmpty()
 				.run(this.#req),
 			body('size')
