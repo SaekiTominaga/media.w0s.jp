@@ -1,6 +1,6 @@
 import BlogUploadController from './controller/api/BlogUploadController.js';
 import compression from 'compression';
-import Express, { NextFunction, Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
 import Log4js from 'log4js';
 import path from 'path';
@@ -16,75 +16,71 @@ const config = <Configure>JSON.parse(fs.readFileSync('node/configure/common.json
 Log4js.configure(config.logger.path);
 const logger = Log4js.getLogger();
 
-const app = Express();
+const app = express();
+
+app.set('query parser', (query: string) => qs.parse(query, { delimiter: /[&;]/ }));
+app.set('trust proxy', true);
+app.set('x-powered-by', false);
 
 const EXTENTIONS: { readonly [s: string]: string } = {
 	brotli: '.br',
 	map: '.map',
 }; // 静的ファイル拡張子の定義
 
-app.set('query parser', (query: string) => qs.parse(query, { delimiter: /[&;]/ }));
-app.set('trust proxy', true);
-app.set('x-powered-by', false);
-app.use((req, res, next) => {
-	const requestPath = req.path;
-
-	let requestFilePath: string | undefined; // 実ファイルパス
-	if (requestPath.endsWith('/')) {
-		/* ディレクトリトップ（e.g. /foo/ ） */
-		const fileName = config.static.indexes?.find((name) => fs.existsSync(`${config.static.root}/${requestPath}${name}`));
-		if (fileName !== undefined) {
-			requestFilePath = `${requestPath}${fileName}`;
-		}
-	} else if (path.extname(requestPath) === '') {
-		/* 拡張子のない URL（e.g. /foo ） */
-		const extension = config.static.extensions?.find((ext) => fs.existsSync(`${config.static.root}/${requestPath}.${ext}`));
-		if (extension !== undefined) {
-			requestFilePath = `${requestPath}.${extension}`;
-		}
-	} else {
-		/* 拡張子のある URL（e.g. /foo.txt ） */
-		if (fs.existsSync(`${config.static.root}/${requestPath}`)) {
-			requestFilePath = requestPath;
-		}
-	}
-
-	/* Brotli */
-	if (requestFilePath !== undefined && req.method === 'GET' && req.acceptsEncodings('br') === 'br') {
-		const brotliFilePath = `${requestFilePath}${EXTENTIONS.brotli}`;
-		if (fs.existsSync(`${config.static.root}/${brotliFilePath}`)) {
-			req.url = brotliFilePath;
-			res.setHeader('Content-Encoding', 'br');
-		}
-	}
-
-	/* HSTS */
-	res.setHeader('Strict-Transport-Security', config.response.header.hsts);
-
-	/* CSP */
-	if (['.html', '.xhtml'].some((ext) => requestFilePath?.endsWith(ext))) {
-		res.setHeader('Content-Security-Policy', config.response.header.csp_html);
-	} else {
-		res.setHeader('Content-Security-Policy', config.response.header.csp);
-	}
-
-	/* MIME スニッフィング抑止 */
-	res.setHeader('X-Content-Type-Options', 'nosniff');
-
-	next();
-});
 app.use(
+	(_req, res, next) => {
+		/* HSTS */
+		res.setHeader('Strict-Transport-Security', config.response.header.hsts);
+
+		/* CSP */
+		res.setHeader('Content-Security-Policy', config.response.header.csp);
+
+		/* MIME スニッフィング抑止 */
+		res.setHeader('X-Content-Type-Options', 'nosniff');
+
+		next();
+	},
 	compression({
 		threshold: config.response.compression.threshold,
-	})
-);
-app.use(
-	Express.urlencoded({
+	}),
+	express.urlencoded({
 		extended: true,
-	})
-);
-app.use(
-	Express.static(config.static.root, {
+	}),
+	(req, res, next) => {
+		const requestPath = req.path;
+
+		let requestFilePath: string | undefined; // 実ファイルパス
+		if (requestPath.endsWith('/')) {
+			/* ディレクトリトップ（e.g. /foo/ ） */
+			const fileName = config.static.indexes?.find((name) => fs.existsSync(`${config.static.root}/${requestPath}${name}`));
+			if (fileName !== undefined) {
+				requestFilePath = `${requestPath}${fileName}`;
+			}
+		} else if (path.extname(requestPath) === '') {
+			/* 拡張子のない URL（e.g. /foo ） */
+			const extension = config.static.extensions?.find((ext) => fs.existsSync(`${config.static.root}/${requestPath}.${ext}`));
+			if (extension !== undefined) {
+				requestFilePath = `${requestPath}.${extension}`;
+			}
+		} else {
+			/* 拡張子のある URL（e.g. /foo.txt ） */
+			if (fs.existsSync(`${config.static.root}/${requestPath}`)) {
+				requestFilePath = requestPath;
+			}
+		}
+
+		/* Brotli */
+		if (requestFilePath !== undefined && req.method === 'GET' && req.acceptsEncodings('br') === 'br') {
+			const brotliFilePath = `${requestFilePath}${EXTENTIONS.brotli}`;
+			if (fs.existsSync(`${config.static.root}/${brotliFilePath}`)) {
+				req.url = brotliFilePath;
+				res.setHeader('Content-Encoding', 'br');
+			}
+		}
+
+		next();
+	},
+	express.static(config.static.root, {
 		extensions: config.static.extensions,
 		index: config.static.indexes,
 		setHeaders: (res, localPath) => {
@@ -110,6 +106,11 @@ app.use(
 					config.static.headers.cache_control.default;
 
 				res.setHeader('Cache-Control', cacheControlValue);
+			}
+
+			/* CSP */
+			if (['.html', '.xhtml'].includes(extensionOrigin)) {
+				res.setHeader('Content-Security-Policy', config.response.header.csp_html);
 			}
 		},
 	})
