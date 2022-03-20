@@ -63,7 +63,7 @@ export default class ThumbImageCreateController extends Controller implements Co
 		if (!fs.existsSync(origFileFullPath)) {
 			this.logger.info(`存在しないファイルパスが指定: ${requestQuery.file_path}`);
 
-			httpResponse.send403Json();
+			httpResponse.send204(); // TODO: 正常時と区別が付かないので、本来は 200 にしてボディ内に情報を含めるべき
 			return;
 		}
 
