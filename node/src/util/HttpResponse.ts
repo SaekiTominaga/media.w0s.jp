@@ -1,6 +1,6 @@
 import path from 'path';
-import { MediaW0SJp as Configure } from '../../configure/type/common';
 import { Request, Response } from 'express';
+import { MediaW0SJp as Configure } from '../../configure/type/common';
 
 type HttpAuthType = 'Basic' | 'Bearer' | 'Digest' | 'HOBA' | 'Mutual' | 'Negotiate' | 'OAuth' | 'SCRAM-SHA-1' | 'SCRAM-SHA-256' | 'vapid';
 
@@ -9,6 +9,7 @@ type HttpAuthType = 'Basic' | 'Bearer' | 'Digest' | 'HOBA' | 'Mutual' | 'Negotia
  */
 export default class HttpResponse {
 	#res: Response;
+
 	#config: Configure;
 
 	/**

@@ -1,22 +1,23 @@
-import Controller from '../../Controller.js';
-import ControllerInterface from '../../ControllerInterface.js';
 import FileSizeFormat from '@saekitominaga/file-size-format';
 import fs from 'fs';
+import path from 'path';
+import { Request, Response } from 'express';
+import Controller from '../../Controller.js';
+import ControllerInterface from '../../ControllerInterface.js';
 import HttpBasicAuth from '../../util/HttpBasicAuth.js';
 import HttpResponse from '../../util/HttpResponse.js';
-import path from 'path';
 import ThumbImage from '../../util/ThumbImage.js';
 import ThumbImageUtil from '../../util/ThumbImageUtil.js';
 import ThumbImageValidator from '../../validator/ThumbImageValidator.js';
 import { MediaW0SJp as ConfigureCommon } from '../../../configure/type/common';
 import { NoName as Configure } from '../../../configure/type/thumb-image';
-import { Request, Response } from 'express';
 
 /**
  * サムネイル画像生成
  */
 export default class ThumbImageCreateController extends Controller implements ControllerInterface {
 	#configCommon: ConfigureCommon;
+
 	#config: Configure;
 
 	/**

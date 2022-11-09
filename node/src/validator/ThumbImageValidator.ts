@@ -1,12 +1,13 @@
 import { body, query, Result, ValidationError, validationResult } from 'express-validator';
-import { NoName as Configure } from '../../configure/type/thumb-image';
 import { Request } from 'express';
+import { NoName as Configure } from '../../configure/type/thumb-image';
 
 /**
  * サムネイル画像
  */
 export default class ThumbImageValidator {
 	#req: Request;
+
 	#config: Configure;
 
 	/**

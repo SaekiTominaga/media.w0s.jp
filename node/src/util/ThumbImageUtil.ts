@@ -34,15 +34,12 @@ export default class ThumbImageUtil {
 				newImageWidth = Math.round((origImage.width / origImage.height) * requestHeight);
 				newImageHeight = requestHeight;
 			}
-		} else {
-			/* 幅、高さが両方指定された場合 */
-			if (requestWidth !== null && requestHeight !== null && (requestWidth < origImage.width || requestHeight < origImage.height)) {
-				/* 幅か高さ、どちらかより縮小割合が大きい方を基準に縮小する */
-				const reductionRatio = Math.min(requestWidth / origImage.width, requestHeight / origImage.height);
+		} else if (requestWidth !== null && requestHeight !== null && (requestWidth < origImage.width || requestHeight < origImage.height)) {
+			/* 幅、高さが両方指定された場合（幅か高さ、どちらかより縮小割合が大きい方を基準に縮小する） */
+			const reductionRatio = Math.min(requestWidth / origImage.width, requestHeight / origImage.height);
 
-				newImageWidth = Math.round(origImage.width * reductionRatio);
-				newImageHeight = Math.round(origImage.height * reductionRatio);
-			}
+			newImageWidth = Math.round(origImage.width * reductionRatio);
+			newImageHeight = Math.round(origImage.height * reductionRatio);
 		}
 
 		return { width: newImageWidth, height: newImageHeight };
@@ -105,6 +102,7 @@ export default class ThumbImageUtil {
 
 				break;
 			}
+			default:
 		}
 
 		const fileData = await sharp.toBuffer();
