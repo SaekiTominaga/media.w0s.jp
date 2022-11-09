@@ -71,6 +71,7 @@ export default class ThumbImage {
 	get type(): ImageType {
 		return this.#type;
 	}
+
 	set type(type: ImageType) {
 		this.#type = type;
 	}
@@ -78,6 +79,7 @@ export default class ThumbImage {
 	get size(): ImageSize {
 		return this.#size;
 	}
+
 	set size(size: ImageSize) {
 		this.#size = size;
 	}
@@ -85,6 +87,7 @@ export default class ThumbImage {
 	get quality(): number | undefined {
 		return this.#quality;
 	}
+
 	set quality(quality: number | undefined) {
 		this.#quality = quality;
 	}

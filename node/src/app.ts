@@ -1,10 +1,10 @@
-import BlogUploadController from './controller/api/BlogUploadController.js';
 import compression from 'compression';
 import express, { NextFunction, Request, Response } from 'express';
 import fs from 'fs';
 import Log4js from 'log4js';
 import path from 'path';
 import qs from 'qs';
+import BlogUploadController from './controller/api/BlogUploadController.js';
 import ThumbImageCreateController from './controller/api/ThumbImageCreateController.js';
 import ThumbImageRenderController from './controller/ThumbImageRenderController.js';
 import { MediaW0SJp as Configure } from '../configure/type/common';
@@ -62,11 +62,9 @@ app.use(
 			if (extension !== undefined) {
 				requestFilePath = `${requestPath}.${extension}`;
 			}
-		} else {
+		} else if (fs.existsSync(`${config.static.root}/${requestPath}`)) {
 			/* 拡張子のある URL（e.g. /foo.txt ） */
-			if (fs.existsSync(`${config.static.root}/${requestPath}`)) {
-				requestFilePath = requestPath;
-			}
+			requestFilePath = requestPath;
 		}
 
 		/* Brotli */
@@ -101,8 +99,8 @@ app.use(
 			/* Cache-Control */
 			if (config.static.headers.cache_control !== undefined) {
 				const cacheControlValue =
-					config.static.headers.cache_control.path.find((path) => path.paths.includes(requestUrlOrigin))?.value ??
-					config.static.headers.cache_control.extension.find((ext) => ext.extensions.includes(extensionOrigin))?.value ??
+					config.static.headers.cache_control.path.find((ccPath) => ccPath.paths.includes(requestUrlOrigin))?.value ??
+					config.static.headers.cache_control.extension.find((ccExt) => ccExt.extensions.includes(extensionOrigin))?.value ??
 					config.static.headers.cache_control.default;
 
 				res.setHeader('Cache-Control', cacheControlValue);

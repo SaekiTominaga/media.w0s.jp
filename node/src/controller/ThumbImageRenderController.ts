@@ -1,23 +1,24 @@
-import Controller from '../Controller.js';
-import ControllerInterface from '../ControllerInterface.js';
 import FileSizeFormat from '@saekitominaga/file-size-format';
 import fs from 'fs';
-import HttpResponse from '../util/HttpResponse.js';
 import imageSize from 'image-size';
 import path from 'path';
+import { Request, Response } from 'express';
+import Controller from '../Controller.js';
+import ControllerInterface from '../ControllerInterface.js';
+import HttpResponse from '../util/HttpResponse.js';
 import ThumbImage from '../util/ThumbImage.js';
 import ThumbImageRenderDao from '../dao/ThumbImageRenderDao.js';
 import ThumbImageValidator from '../validator/ThumbImageValidator.js';
 import ThumbImageUtil from '../util/ThumbImageUtil.js';
 import { MediaW0SJp as ConfigureCommon } from '../../configure/type/common';
 import { NoName as Configure } from '../../configure/type/thumb-image';
-import { Request, Response } from 'express';
 
 /**
  * サムネイル画像表示
  */
 export default class ThumbImageRenderController extends Controller implements ControllerInterface {
 	#configCommon: ConfigureCommon;
+
 	#config: Configure;
 
 	/**
@@ -99,24 +100,21 @@ export default class ThumbImageRenderController extends Controller implements Co
 				this.response(req, res, httpResponse, thumbImage.mime, thumbFileData, thumbFileMtime);
 				return;
 			}
-		} else {
-			/* 画像ファイルが生成されていない場合 */
-			if (!this.judgeCreate(req, res, requestQuery)) {
-				/* 元画像を表示する */
-				const origFileData = await fs.promises.readFile(origFileFullPath);
-				const origFileExtension = path.extname(origFileFullPath);
-				const origFileMime = Object.entries(this.#configCommon.static.headers.mime.extension).find(([, extensions]) =>
-					extensions.includes(origFileExtension.substring(1))
-				)?.[0];
-				if (origFileMime === undefined) {
-					this.logger.info(`MIME が定義されていない画像が指定: ${req.url}`);
-					httpResponse.send403();
-					return;
-				}
-
-				this.response(req, res, httpResponse, origFileMime, origFileData, origFileMtime);
+		} else if (!this.judgeCreate(req, res, requestQuery)) {
+			/* 画像ファイルが生成されていない場合（元画像を表示する） */
+			const origFileData = await fs.promises.readFile(origFileFullPath);
+			const origFileExtension = path.extname(origFileFullPath);
+			const origFileMime = Object.entries(this.#configCommon.static.headers.mime.extension).find(([, extensions]) =>
+				extensions.includes(origFileExtension.substring(1))
+			)?.[0];
+			if (origFileMime === undefined) {
+				this.logger.info(`MIME が定義されていない画像が指定: ${req.url}`);
+				httpResponse.send403();
 				return;
 			}
+
+			this.response(req, res, httpResponse, origFileMime, origFileData, origFileMtime);
+			return;
 		}
 
 		const thumbTypeAlt = thumbImage.altType;
@@ -151,16 +149,16 @@ export default class ThumbImageRenderController extends Controller implements Co
 
 			thumbImage.type = thumbTypeAlt;
 
-			let thumbFileData: Buffer | undefined;
+			let thumbFileDataAlt: Buffer | undefined;
 			try {
-				thumbFileData = await fs.promises.readFile(thumbImage.fileFullPath);
+				thumbFileDataAlt = await fs.promises.readFile(thumbImage.fileFullPath);
 			} catch (e) {}
-			if (thumbFileData !== undefined) {
+			if (thumbFileDataAlt !== undefined) {
 				/* 代替画像ファイルが生成済みだった場合は、生成済みの画像データを表示 */
 				this.logger.debug(`生成済みの代替画像を表示: ${thumbImage.filePath}`);
 
 				const thumbFileMtime = fs.statSync(thumbImage.fileFullPath).mtime;
-				this.response(req, res, httpResponse, thumbImage.mime, thumbFileData, thumbFileMtime);
+				this.response(req, res, httpResponse, thumbImage.mime, thumbFileDataAlt, thumbFileMtime);
 				return;
 			}
 		}
@@ -238,17 +236,17 @@ export default class ThumbImageRenderController extends Controller implements Co
 						if (this.#config.allow_origins.includes(referrerOrigin)) {
 							/* 開発環境からのアクセスの場合 */
 							return true;
-						} else {
-							this.logger.debug(`別サイトから '${requestHeaderSecFetchDest}' でリクエストされたので元画像を表示: ${req.url}`);
+						}
 
-							res.append('Vary', 'Sec-Fetch-Site');
+						this.logger.debug(`別サイトから '${requestHeaderSecFetchDest}' でリクエストされたので元画像を表示: ${req.url}`);
 
-							if (['image', 'iframe', 'object', 'embed'].includes(requestHeaderSecFetchDest)) {
-								if (!this.#config.referrer_exclusion_origins.includes(referrerOrigin)) {
-									this.logger.warn(
-										`画像ファイル ${requestQuery.path} が別オリジンから埋め込まれている（リファラー: ${referrer} 、DEST: ${requestHeaderSecFetchDest} ）`
-									);
-								}
+						res.append('Vary', 'Sec-Fetch-Site');
+
+						if (['image', 'iframe', 'object', 'embed'].includes(requestHeaderSecFetchDest)) {
+							if (!this.#config.referrer_exclusion_origins.includes(referrerOrigin)) {
+								this.logger.warn(
+									`画像ファイル ${requestQuery.path} が別オリジンから埋め込まれている（リファラー: ${referrer} 、DEST: ${requestHeaderSecFetchDest} ）`
+								);
 							}
 						}
 					}
@@ -269,11 +267,11 @@ export default class ThumbImageRenderController extends Controller implements Co
 					/* 同一オリジンのリファラーがある、ないし開発環境からのアクセスの場合 */
 					if (req.url !== `${referrerUrl.pathname}${referrerUrl.search}`) {
 						return true;
-					} else {
-						this.logger.debug(`リファラーが画像ファイル自身なので元画像を表示: ${req.url}`);
-
-						res.append('Vary', 'referer');
 					}
+
+					this.logger.debug(`リファラーが画像ファイル自身なので元画像を表示: ${req.url}`);
+
+					res.append('Vary', 'referer');
 				} else {
 					this.logger.debug(`別ドメインからリンクないし埋め込まれているので元画像を表示: ${req.url}`);
 
