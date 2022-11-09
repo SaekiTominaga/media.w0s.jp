@@ -19,10 +19,11 @@
 		"build-all": "tsc",
 		"lint": "eslint node/src/**/*.ts node/__tests__/*.test.ts node/@types/*.d.ts",
 		"test": "jest --coverage",
-		"config:tsconvert": "json2ts -i node/configure/schema -o node/configure/type",
-		"config:validate:common": "ajv --spec=draft7 -s node/configure/schema/common.json -d node/configure/common.json",
-		"config:validate:blog-upload": "ajv --spec=draft7 -s node/configure/schema/blog-upload.json -d node/configure/blog-upload.json",
-		"config:validate:thumb-image": "ajv --spec=draft7 -s node/configure/schema/thumb-image.json -d node/configure/thumb-image.json"
+		"config-convert": "json2ts -i node/configure/schema -o node/configure/type",
+		"config-validate": "run-p _config-validate:*",
+		"_config-validate:common": "ajv --spec=draft7 -s node/configure/schema/common.json -d node/configure/common.json",
+		"_config-validate:blog-upload": "ajv --spec=draft7 -s node/configure/schema/blog-upload.json -d node/configure/blog-upload.json",
+		"_config-validate:thumb-image": "ajv --spec=draft7 -s node/configure/schema/thumb-image.json -d node/configure/thumb-image.json"
 	},
 	"dependencies": {
 		"@log4js-node/smtp": "^2.0.7",
@@ -53,6 +54,7 @@
 		"jest": "^27.5.1",
 		"json-schema-to-typescript": "^10.1.5",
 		"nodemon": "^2.0.16",
+		"npm-run-all": "^4.1.5",
 		"prettier": "^2.6.2",
 		"stylelint": "^14.8.1",
 		"stylelint-config-prettier": "^9.0.3",
