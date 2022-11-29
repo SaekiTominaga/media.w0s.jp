@@ -1,4 +1,6 @@
-import ThumbImageUtil from '../src/util/ThumbImageUtil';
+/* eslint-disable import/no-extraneous-dependencies */
+import { describe, expect, test } from '@jest/globals';
+import ThumbImageUtil from '../dist/util/ThumbImageUtil.js';
 
 describe('getThumbSize()', () => {
 	test('幅、高さとも未指定', () => {
