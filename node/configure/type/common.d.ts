@@ -36,7 +36,7 @@ export type FilepathFor404NotFound = string;
 export type NoName23 = string;
 export type NoName25 = string;
 export type Htpasswd = string;
-export type DBNode = string;
+export type Thumbimage = string;
 export type NoName27 = number;
 
 export interface MediaW0SJp {
@@ -111,7 +111,7 @@ export interface SQLite {
   errno: NoName26;
 }
 export interface DB {
-  [k: string]: DBNode;
+  thumbimage: Thumbimage;
 }
 export interface NoName26 {
   [k: string]: NoName27;

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import Sharp from 'sharp';
-import ThumbImage from './ThumbImage';
+import ThumbImage from './ThumbImage.js';
 
 /**
  * サムネイル画像のユーティリティー
