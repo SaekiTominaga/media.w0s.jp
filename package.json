@@ -15,8 +15,8 @@
 	},
 	"scripts": {
 		"app:dev": "nodemon --inspect node/dist/app.js",
-		"build-watch": "tsc -w",
-		"build-all": "tsc",
+		"build-watch": "tsc -w -p node/tsconfig.json",
+		"build-all": "tsc -p node/tsconfig.json",
 		"lint": "eslint node/src/**/*.ts node/__tests__/*.test.ts node/@types/*.d.ts",
 		"test": "jest --coverage",
 		"config-convert": "json2ts -i node/configure/schema -o node/configure/type",
