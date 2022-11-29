@@ -5,7 +5,7 @@ on:
       - main
     paths:
       - 'node/src/**/*.ts'
-      - 'node/__tests__/*.test.ts'
+      - 'node/__tests__/*.test.js'
       - 'node/@types/*.d.ts'
       - '.eslintrc.json'
 
