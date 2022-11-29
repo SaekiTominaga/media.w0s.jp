@@ -119,6 +119,10 @@ describe('setter', () => {
 describe('filePath', () => {
 	const thumbImage = new ThumbImage(TYPE, 'dir', 'path/to.jpg', 'avif', { width: 100, height: 200 }, 80);
 
+	beforeEach(() => {
+		thumbImage.type = 'avif';
+	});
+
 	test('invalid image type', () => {
 		thumbImage.type = 'foo';
 		expect(() => {
