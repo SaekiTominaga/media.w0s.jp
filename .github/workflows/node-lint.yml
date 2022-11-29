@@ -1,4 +1,4 @@
-name: lint
+name: node-lint
 on:
   push:
     branches: 
@@ -18,4 +18,4 @@ jobs:
         with:
           node-version: 18
       - run: npm ci
-      - run: npm run lint
+      - run: npm run node-lint
