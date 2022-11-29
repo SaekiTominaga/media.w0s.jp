@@ -15,16 +15,16 @@
 	},
 	"scripts": {
 		"app:dev": "nodemon --inspect node/dist/app.js",
-		"build-watch": "tsc -w -p node/tsconfig.json",
-		"build-all": "tsc -p node/tsconfig.json",
-		"lint": "eslint node/src/**/*.ts node/__tests__/*.test.ts node/@types/*.d.ts",
-		"test": "jest --coverage",
-		"config-convert": "json2ts -i node/configure/schema -o node/configure/type",
-		"config-validate": "run-p _config-validate:*",
+		"node-build-watch": "tsc -w -p node/tsconfig.json",
+		"node-build-all": "tsc -p node/tsconfig.json",
+		"node-lint": "eslint node/src/**/*.ts node/__tests__/*.test.ts node/@types/*.d.ts",
+		"node-test": "jest --coverage",
+		"node-config-convert": "json2ts -i node/configure/schema -o node/configure/type",
+		"node-config-validate": "run-p _node-config-validate:*",
 		"css-lint": "stylelint public/*.css",
-		"_config-validate:common": "ajv --spec=draft7 -s node/configure/schema/common.json -d node/configure/common.json",
-		"_config-validate:blog-upload": "ajv --spec=draft7 -s node/configure/schema/blog-upload.json -d node/configure/blog-upload.json",
-		"_config-validate:thumb-image": "ajv --spec=draft7 -s node/configure/schema/thumb-image.json -d node/configure/thumb-image.json"
+		"_node-config-validate:common": "ajv --spec=draft7 -s node/configure/schema/common.json -d node/configure/common.json",
+		"_node-config-validate:blog-upload": "ajv --spec=draft7 -s node/configure/schema/blog-upload.json -d node/configure/blog-upload.json",
+		"_node-config-validate:thumb-image": "ajv --spec=draft7 -s node/configure/schema/thumb-image.json -d node/configure/thumb-image.json"
 	},
 	"dependencies": {
 		"@log4js-node/smtp": "^2.0.8",
