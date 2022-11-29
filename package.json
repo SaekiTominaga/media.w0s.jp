@@ -17,7 +17,7 @@
 		"app:dev": "nodemon --inspect node/dist/app.js",
 		"node-build-watch": "tsc -w -p node/tsconfig.json",
 		"node-build-all": "tsc -p node/tsconfig.json",
-		"node-lint": "eslint node/src/**/*.ts node/__tests__/*.test.ts node/@types/*.d.ts",
+		"node-lint": "eslint node/src/**/*.ts node/__tests__/*.test.js node/@types/*.d.ts",
 		"node-test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
 		"node-config-convert": "json2ts -i node/configure/schema -o node/configure/type",
 		"node-config-validate": "run-p _node-config-validate:*",
