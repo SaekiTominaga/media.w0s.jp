@@ -1,7 +1,3 @@
-/* eslint-disable no-unused-expressions */
-/* eslint-disable import/no-extraneous-dependencies */
-/* eslint-disable import/no-named-as-default */
-/* eslint-disable import/no-named-as-default-member */
 import path from 'path';
 import { describe, expect, test, beforeEach } from '@jest/globals';
 import ThumbImage from '../dist/util/ThumbImage.js';

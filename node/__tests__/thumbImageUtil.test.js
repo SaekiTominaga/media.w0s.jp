@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import { describe, expect, test } from '@jest/globals';
 import ThumbImageUtil from '../dist/util/ThumbImageUtil.js';
 
