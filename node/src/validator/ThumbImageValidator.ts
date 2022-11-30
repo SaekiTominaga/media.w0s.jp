@@ -1,6 +1,6 @@
 import { body, query, Result, ValidationError, validationResult } from 'express-validator';
 import { Request } from 'express';
-import { NoName as Configure } from '../../configure/type/thumb-image';
+import { NoName as Configure } from '../../configure/type/thumb-image.js';
 
 /**
  * サムネイル画像
@@ -26,7 +26,7 @@ export default class ThumbImageValidator {
 	 */
 	async render(): Promise<Result<ValidationError>> {
 		await Promise.all([
-			query(typeof this.#req.query.type === 'string' ? 'type' : 'type.*')
+			query(typeof this.#req.query['type'] === 'string' ? 'type' : 'type.*')
 				.isIn(Object.keys(this.#config.type))
 				.run(this.#req),
 			query('w')

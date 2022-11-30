@@ -19,7 +19,7 @@
 					"properties": {
 						"mime": {
 							"type": "string",
-							"title": "MIME"
+							"title": "MIME タイプ"
 						},
 						"extension": {
 							"type": "string",

@@ -7,7 +7,7 @@ import qs from 'qs';
 import BlogUploadController from './controller/api/BlogUploadController.js';
 import ThumbImageCreateController from './controller/api/ThumbImageCreateController.js';
 import ThumbImageRenderController from './controller/ThumbImageRenderController.js';
-import { MediaW0SJp as Configure } from '../configure/type/common';
+import { MediaW0SJp as Configure } from '../configure/type/common.js';
 
 /* 設定ファイル読み込み */
 const config = <Configure>JSON.parse(fs.readFileSync('node/configure/common.json', 'utf8'));
@@ -22,7 +22,7 @@ app.set('query parser', (query: string) => qs.parse(query, { delimiter: /[&;]/ }
 app.set('trust proxy', true);
 app.set('x-powered-by', false);
 
-const EXTENTIONS: { readonly [s: string]: string } = {
+const EXTENTIONS = {
 	brotli: '.br',
 	map: '.map',
 }; // 静的ファイル拡張子の定義

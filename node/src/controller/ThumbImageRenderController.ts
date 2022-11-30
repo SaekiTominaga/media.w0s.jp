@@ -1,6 +1,6 @@
 import FileSizeFormat from '@saekitominaga/file-size-format';
 import fs from 'fs';
-import imageSize from 'image-size';
+import { imageSize } from 'image-size';
 import path from 'path';
 import { Request, Response } from 'express';
 import Controller from '../Controller.js';
@@ -10,8 +10,8 @@ import ThumbImage from '../util/ThumbImage.js';
 import ThumbImageRenderDao from '../dao/ThumbImageRenderDao.js';
 import ThumbImageValidator from '../validator/ThumbImageValidator.js';
 import ThumbImageUtil from '../util/ThumbImageUtil.js';
-import { MediaW0SJp as ConfigureCommon } from '../../configure/type/common';
-import { NoName as Configure } from '../../configure/type/thumb-image';
+import { MediaW0SJp as ConfigureCommon } from '../../configure/type/common.js';
+import { NoName as Configure } from '../../configure/type/thumb-image.js';
 
 /**
  * サムネイル画像表示
@@ -46,22 +46,22 @@ export default class ThumbImageRenderController extends Controller implements Co
 		}
 
 		let type: ImageType;
-		if (typeof req.query.type === 'string') {
-			type = <ImageType>req.query.type;
+		if (typeof req.query['type'] === 'string') {
+			type = <ImageType>req.query['type'];
 		} else {
 			/* type パラメーターが複数指定されていた場合、 accept リクエストヘッダーと見比べて先頭から順に適用可能な値を抜き出す（適用可能な値が存在しない場合、末尾の値を強制適用する） */
-			const types = <ImageType[]>req.query.type;
+			const types = <ImageType[]>req.query['type'];
 			const acceptType = req.accepts(types);
-			type = acceptType !== false ? <ImageType>acceptType : types[types.length - 1];
+			type = acceptType !== false ? <ImageType>acceptType : <ImageType>types.at(-1);
 			this.logger.debug('決定 Type', type);
 		}
 
 		const requestQuery: ThumbImageRequest.Query = {
-			path: req.params.path,
+			path: req.params['path'] ?? '', // TS エラー防止のためデフォルト値を設定しているが、 app.js 内の処理により path パラメーターは必ず存在する想定
 			type: type,
-			width: req.query.w !== undefined ? Number(req.query.w) : null,
-			height: req.query.h !== undefined ? Number(req.query.h) : null,
-			quality: req.query.quality !== undefined ? Number(req.query.quality) : this.#config.quality_default,
+			width: req.query['w'] !== undefined ? Number(req.query['w']) : null,
+			height: req.query['h'] !== undefined ? Number(req.query['h']) : null,
+			quality: req.query['quality'] !== undefined ? Number(req.query['quality']) : this.#config.quality_default,
 		};
 
 		const origFileFullPath = path.resolve(`${this.#configCommon.static.root}/${this.#configCommon.static.directory.image}/${requestQuery.path}`);
@@ -133,11 +133,11 @@ export default class ThumbImageRenderController extends Controller implements Co
 
 				// @ts-expect-error: ts(2339)
 				switch (e.errno) {
-					case this.#configCommon.sqlite.errno.locked: {
+					case this.#configCommon.sqlite.errno['locked']: {
 						this.logger.warn('DB ロック', thumbImage.fileBasePath, thumbImage.type, thumbImage.size, thumbImage.quality);
 						break;
 					}
-					case this.#configCommon.sqlite.errno.unique_constraint: {
+					case this.#configCommon.sqlite.errno['unique_constraint']: {
 						this.logger.info('ファイル生成情報は DB 登録済み', thumbImage.fileBasePath, thumbImage.type, thumbImage.size, thumbImage.quality);
 						break;
 					}

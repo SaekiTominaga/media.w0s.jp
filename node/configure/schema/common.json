@@ -247,10 +247,14 @@
 				"db": {
 					"type": "object",
 					"title": "DB ファイル情報",
-					"additionalProperties": {
-						"type": "string",
-						"title": "DB ファイルパス（絶対パス、または `node` ディレクトリを基準にした相対パス）"
-					}
+					"required": ["thumbimage"],
+					"properties": {
+						"thumbimage": {
+							"type": "string",
+							"title": "thumbimage テーブル"
+						}
+					},
+					"additionalProperties": false
 				},
 				"errno": {
 					"type": "object",
