@@ -101,7 +101,7 @@ export default class ThumbImageCreateController extends Controller implements Co
 		const createProcessingTime = Date.now() - createStartTime;
 
 		/* 生成後の処理 */
-		const origFileSize = FileSizeFormat.iec(fs.statSync(origFileFullPath).size, { digits: 1 });
+		const origFileSize = FileSizeFormat.iec((await fs.promises.stat(origFileFullPath)).size, { digits: 1 });
 		const createdFileSize = FileSizeFormat.iec(createdFileData.byteLength, { digits: 1 });
 
 		this.logger.info(`画像生成完了（${Math.round(createProcessingTime / 1000)}秒）: ${thumbImage.filePath} （${origFileSize} → ${createdFileSize}）`);
