@@ -101,9 +101,9 @@ export default class ThumbImageRenderDao {
 
 				insertedCount = result.changes ?? 0;
 
-				dbh.exec('COMMIT');
+				await dbh.exec('COMMIT');
 			} catch (e) {
-				dbh.exec('ROLLBACK');
+				await dbh.exec('ROLLBACK');
 				throw e;
 			}
 		}
