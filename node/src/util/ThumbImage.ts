@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 import { NoName2 as ImageInfo } from '../../configure/type/thumb-image.js';
 
 /**

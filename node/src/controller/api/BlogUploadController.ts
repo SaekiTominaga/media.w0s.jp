@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from 'node:fs';
 import MIMEParser from '@saekitominaga/mime-parser';
 import { Request, Response } from 'express';
 import BlogValidator from '../../validator/BlogValiator.js';

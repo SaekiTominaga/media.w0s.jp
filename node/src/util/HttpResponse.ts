@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 import { Request, Response } from 'express';
 import { MediaW0SJp as Configure } from '../../configure/type/common.js';
 
