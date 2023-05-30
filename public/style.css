@@ -6,7 +6,7 @@
 	outline: 1px solid #4d90fe;
 }
 
-:any-link:is(:focus, :hover) {
+:any-link:hover {
 	color: var(--anchor-hover-color);
 }
 
@@ -64,7 +64,7 @@ code {
 	background: var(--bullet-color);
 }
 
-.link a:is(:focus, :hover)::before {
+.link a:hover::before {
 	--bullet-color: var(--anchor-hover-color);
 }
 
