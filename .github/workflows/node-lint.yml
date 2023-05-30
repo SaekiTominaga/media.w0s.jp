@@ -1,5 +1,13 @@
 name: node-lint
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'node/src/**/*.ts'
+      - 'node/__tests__/*.test.js'
+      - 'node/@types/*.d.ts'
+      - '.eslintrc.json'
   push:
     branches:
       - main
@@ -8,6 +16,7 @@ on:
       - 'node/__tests__/*.test.js'
       - 'node/@types/*.d.ts'
       - '.eslintrc.json'
+  workflow_dispatch:
 
 jobs:
   build:

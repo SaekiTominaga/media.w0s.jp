@@ -1,11 +1,18 @@
 name: css-lint
 on:
-  push:
-    branches: 
+  pull_request:
+    branches:
       - main
     paths:
       - 'public/*.css'
       - '.stylelintrc.json'
+  push:
+    branches:
+      - main
+    paths:
+      - 'public/*.css'
+      - '.stylelintrc.json'
+  workflow_dispatch:
 
 jobs:
   build:
