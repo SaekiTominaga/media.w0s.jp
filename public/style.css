@@ -14,20 +14,20 @@ body {
 	margin: auto;
 	padding: 0 2vw;
 	box-sizing: border-box;
-	width: min(100vw, 1280px);
+	inline-size: min(100vw, 1280px);
 }
 
 body > footer {
-	margin-top: 3em;
-	border-top: 1px solid;
+	margin-block-start: 3em;
+	border-block-start: 1px solid;
 }
 
 main > :is(section, nav) {
-	margin-top: 4em;
+	margin-block-start: 4em;
 }
 
 main > section > section + section {
-	margin-top: 3em;
+	margin-block-start: 3em;
 }
 
 table {
@@ -55,12 +55,12 @@ code {
 }
 
 .link a::before {
-	margin-right: 0.5em;
+	margin-inline-end: 0.5em;
 	content: "";
 	display: inline-block;
 	clip-path: polygon(0 0, 0 100%, 100% 50%);
-	width: calc(var(--bullet-size) * 0.6);
-	height: var(--bullet-size);
+	inline-size: calc(var(--bullet-size) * 0.6);
+	block-size: var(--bullet-size);
 	background: var(--bullet-color);
 }
 
@@ -73,27 +73,26 @@ code {
 }
 
 .backlink a::before {
-	margin-right: 0.5em;
+	margin-inline-end: 0.5em;
 	content: "👈";
 	display: inline-block;
 }
 
 .details {
-	margin-top: 2em;
-	padding-left: 1em;
+	margin-block-start: 2em;
+	padding-inline-start: 1em;
 }
 
 .details :is(p, ul, table) {
-	margin-top: 0.5em;
-	margin-bottom: 0.5em;
+	margin-block: 0.5em;
 }
 
 .details > li > ul {
-	padding-left: 1em;
+	padding-inline-start: 1em;
 }
 
 .details > li + li {
-	margin-top: 1em;
+	margin-block-start: 1em;
 }
 
 .sample-spec {
@@ -112,6 +111,6 @@ code {
 }
 
 .sample-spec dt {
-	padding-right: 1em;
+	padding-inline-end: 1em;
 	font-weight: bold;
 }
