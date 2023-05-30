@@ -1,7 +1,7 @@
 import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
 import DbUtil from '../util/DbUtil.js';
-import { MediaW0SJp as Configure } from '../../configure/type/common.js';
+import { MediaW0SJp as Configure } from '../../../configure/type/common.js';
 
 /**
  * サムネイル画像の画面表示

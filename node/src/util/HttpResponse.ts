@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { Request, Response } from 'express';
-import { MediaW0SJp as Configure } from '../../configure/type/common.js';
+import { MediaW0SJp as Configure } from '../../../configure/type/common.js';
 
 type HttpAuthType = 'Basic' | 'Bearer' | 'Digest' | 'HOBA' | 'Mutual' | 'Negotiate' | 'OAuth' | 'SCRAM-SHA-1' | 'SCRAM-SHA-256' | 'vapid';
 
