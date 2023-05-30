@@ -1,7 +1,7 @@
 name: node-test
 on:
   push:
-    branches: 
+    branches:
       - main
     paths:
       - 'node/src/**/*.ts'
@@ -17,4 +17,4 @@ jobs:
         with:
           node-version: 18
       - run: npm ci
-      - run: npm run node-test
+      - run: npm run test
