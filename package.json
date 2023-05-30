@@ -11,6 +11,7 @@
 		"config-convert": "json2ts -i node/configure/schema -o node/configure/type",
 		"config-validate": "run-p _config-validate:*",
 		"css-lint": "stylelint public/*.css",
+		"github-actions-lint": "yamllint .github/workflows/*.yml",
 		"_config-validate:common": "ajv --spec=draft7 -s node/configure/schema/common.json -d node/configure/common.json",
 		"_config-validate:blog-upload": "ajv --spec=draft7 -s node/configure/schema/blog-upload.json -d node/configure/blog-upload.json",
 		"_config-validate:thumb-image": "ajv --spec=draft7 -s node/configure/schema/thumb-image.json -d node/configure/thumb-image.json"
@@ -50,6 +51,7 @@
 		"npm-run-all": "^4.1.5",
 		"prettier": "^2.8.8",
 		"stylelint": "^15.6.2",
-		"typescript": "^5.0.4"
+		"typescript": "^5.0.4",
+		"yaml-lint": "^1.7.0"
 	}
 }
