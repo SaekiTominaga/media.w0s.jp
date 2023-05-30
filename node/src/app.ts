@@ -7,10 +7,10 @@ import qs from 'qs';
 import BlogUploadController from './controller/api/BlogUploadController.js';
 import ThumbImageCreateController from './controller/api/ThumbImageCreateController.js';
 import ThumbImageRenderController from './controller/ThumbImageRenderController.js';
-import { MediaW0SJp as Configure } from '../configure/type/common.js';
+import { MediaW0SJp as Configure } from '../../configure/type/common.js';
 
 /* 設定ファイル読み込み */
-const config = <Configure>JSON.parse(await fs.promises.readFile('node/configure/common.json', 'utf8'));
+const config: Configure = JSON.parse(await fs.promises.readFile('configure/common.json', 'utf8'));
 
 /* Logger 設定 */
 Log4js.configure(config.logger.path);

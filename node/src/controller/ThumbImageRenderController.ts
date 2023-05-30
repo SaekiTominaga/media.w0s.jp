@@ -10,8 +10,8 @@ import ThumbImage from '../util/ThumbImage.js';
 import ThumbImageRenderDao from '../dao/ThumbImageRenderDao.js';
 import ThumbImageValidator from '../validator/ThumbImageValidator.js';
 import ThumbImageUtil from '../util/ThumbImageUtil.js';
-import { MediaW0SJp as ConfigureCommon } from '../../configure/type/common.js';
-import { NoName as Configure } from '../../configure/type/thumb-image.js';
+import { MediaW0SJp as ConfigureCommon } from '../../../configure/type/common.js';
+import { NoName as Configure } from '../../../configure/type/thumb-image.js';
 
 /**
  * サムネイル画像表示
@@ -28,7 +28,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 		super();
 
 		this.#configCommon = configCommon;
-		this.#config = <Configure>JSON.parse(fs.readFileSync('node/configure/thumb-image.json', 'utf8'));
+		this.#config = JSON.parse(fs.readFileSync('configure/thumb-image.json', 'utf8'));
 	}
 
 	/**

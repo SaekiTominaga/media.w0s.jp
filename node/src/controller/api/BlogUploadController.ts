@@ -6,8 +6,8 @@ import Controller from '../../Controller.js';
 import ControllerInterface from '../../ControllerInterface.js';
 import HttpBasicAuth from '../../util/HttpBasicAuth.js';
 import HttpResponse from '../../util/HttpResponse.js';
-import { MediaW0SJp as ConfigureCommon } from '../../../configure/type/common.js';
-import { NoName as Configure } from '../../../configure/type/blog-upload.js';
+import { MediaW0SJp as ConfigureCommon } from '../../../../configure/type/common.js';
+import { NoName as Configure } from '../../../../configure/type/blog-upload.js';
 
 interface ResponseJson {
 	name: string | null;
@@ -31,7 +31,7 @@ export default class BlogUploadController extends Controller implements Controll
 		super();
 
 		this.#configCommon = configCommon;
-		this.#config = <Configure>JSON.parse(fs.readFileSync('node/configure/blog-upload.json', 'utf8'));
+		this.#config = JSON.parse(fs.readFileSync('configure/blog-upload.json', 'utf8'));
 	}
 
 	/**

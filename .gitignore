@@ -1,8 +1,12 @@
+/.thumbimage/
+
+/configure/*.json
+/configure/type/
+
 /coverage/
 
 /log/
 
-/node/configure/*.json
 /node/dist/
 /node/log4js*.json
 
@@ -11,5 +15,3 @@
 /public/audio/
 /public/image/
 /public/video/
-
-/thumbimage/

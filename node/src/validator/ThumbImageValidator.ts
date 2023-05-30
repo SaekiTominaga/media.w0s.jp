@@ -1,6 +1,6 @@
 import { body, query, Result, ValidationError, validationResult } from 'express-validator';
 import { Request } from 'express';
-import { NoName as Configure } from '../../configure/type/thumb-image.js';
+import { NoName as Configure } from '../../../configure/type/thumb-image.js';
 
 /**
  * サムネイル画像
