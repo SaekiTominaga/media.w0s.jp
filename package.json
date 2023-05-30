@@ -7,7 +7,7 @@
 		"watch": "tsc -w -p node/tsconfig.json",
 		"build": "tsc -p node/tsconfig.json",
 		"lint": "eslint node/src/**/*.ts node/__tests__/*.test.js node/@types/*.d.ts",
-		"test": "npm run build && cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+		"test": "npm run config-convert && npm run build && cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
 		"config-convert": "json2ts -i node/configure/schema -o node/configure/type",
 		"config-validate": "run-p _config-validate:*",
 		"css-lint": "stylelint public/*.css",
