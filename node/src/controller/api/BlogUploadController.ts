@@ -31,7 +31,7 @@ export default class BlogUploadController extends Controller implements Controll
 		super();
 
 		this.#configCommon = configCommon;
-		this.#config = <Configure>JSON.parse(fs.readFileSync('configure/blog-upload.json', 'utf8'));
+		this.#config = JSON.parse(fs.readFileSync('configure/blog-upload.json', 'utf8'));
 	}
 
 	/**
