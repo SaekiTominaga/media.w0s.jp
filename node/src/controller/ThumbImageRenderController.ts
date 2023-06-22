@@ -120,7 +120,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 		const thumbTypeAlt = thumbImage.altType;
 		if (thumbTypeAlt !== undefined) {
 			/* 代替タイプが設定されている場合はリアルタイム生成を行わず、ファイル生成情報を DB に登録する（別途、バッチ処理でファイル生成を行うため） */
-			const dao = new ThumbImageRenderDao(this.#configCommon);
+			const dao = new ThumbImageRenderDao(this.#configCommon.sqlite.db.thumbimage);
 			try {
 				const insertedCount = await dao.insert(thumbImage.fileBasePath, thumbImage.type, thumbImage.size, thumbImage.quality);
 				if (insertedCount > 0) {
