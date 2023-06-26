@@ -24,12 +24,12 @@ export default class ThumbImage {
 	#quality: number | undefined;
 
 	/**
-	 * @param {ImageInfo} imageInfo - ファイルタイプ毎の MIME タイプや拡張子の定義
-	 * @param {string} dir - サムネイル画像を保存するルートディレクトリ
-	 * @param {string} fileBasePath - ベースとなるファイルパス
-	 * @param {object} type - 画像タイプ
-	 * @param {object} size - 画像サイズ
-	 * @param {number} quality - 画像品質
+	 * @param imageInfo - ファイルタイプ毎の MIME タイプや拡張子の定義
+	 * @param dir - サムネイル画像を保存するルートディレクトリ
+	 * @param fileBasePath - ベースとなるファイルパス
+	 * @param type - 画像タイプ
+	 * @param size - 画像サイズ
+	 * @param quality - 画像品質
 	 */
 	constructor(imageInfo: ImageInfo, dir: string, fileBasePath: string, type: ImageType, size: ImageSize, quality?: number) {
 		this.#imageInfo = imageInfo;
@@ -44,7 +44,7 @@ export default class ThumbImage {
 	/**
 	 * 画像定義を取得する
 	 *
-	 * @returns {object} MIME タイプや拡張子の定義
+	 * @returns MIME タイプや拡張子の定義
 	 */
 	#getImageInfo() {
 		const imageInfo = this.#imageInfo[this.#type];

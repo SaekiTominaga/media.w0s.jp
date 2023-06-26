@@ -11,8 +11,8 @@ export default class ThumbImageRenderDao {
 	readonly #filepath: string;
 
 	/**
-	 * @param {string} filepath - DB ファイルパス
-	 * @param {sqlite.Database} dbh - DB 接続情報
+	 * @param filepath - DB ファイルパス
+	 * @param dbh - DB 接続情報
 	 */
 	constructor(filepath: string, dbh?: sqlite.Database<sqlite3.Database, sqlite3.Statement>) {
 		this.#filepath = filepath;
@@ -25,7 +25,7 @@ export default class ThumbImageRenderDao {
 	/**
 	 * DB 接続情報を取得する
 	 *
-	 * @returns {sqlite.Database} DB 接続情報
+	 * @returns DB 接続情報
 	 */
 	async getDbh(): Promise<sqlite.Database<sqlite3.Database, sqlite3.Statement>> {
 		if (this.#dbh !== null) {
@@ -45,12 +45,12 @@ export default class ThumbImageRenderDao {
 	/**
 	 * 生成する画像情報をキューに登録する
 	 *
-	 * @param {string} filePath - ファイルパス
-	 * @param {string} type - 画像タイプ
-	 * @param {object} size - 画像の大きさ
-	 * @param {number} quality - 画質
+	 * @param filePath - ファイルパス
+	 * @param type - 画像タイプ
+	 * @param size - 画像の大きさ
+	 * @param quality - 画質
 	 *
-	 * @returns {number} 登録されたデータ数
+	 * @returns 登録されたデータ数
 	 */
 	async insert(filePath: string, type: string, size: ImageSize, quality: number | null = null): Promise<number> {
 		const dbh = await this.getDbh();

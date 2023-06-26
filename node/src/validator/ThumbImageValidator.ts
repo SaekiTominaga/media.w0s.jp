@@ -11,8 +11,8 @@ export default class ThumbImageValidator {
 	#config: Configure;
 
 	/**
-	 * @param {Request} req - Request
-	 * @param {Configure} config - 設定ファイル
+	 * @param req - Request
+	 * @param config - 設定ファイル
 	 */
 	constructor(req: Request, config: Configure) {
 		this.#req = req;
@@ -22,7 +22,7 @@ export default class ThumbImageValidator {
 	/**
 	 * 画像表示
 	 *
-	 * @returns {Result<ValidationError>} 検証エラー
+	 * @returns 検証エラー
 	 */
 	async render(): Promise<Result<ValidationError>> {
 		await Promise.all([
@@ -49,7 +49,7 @@ export default class ThumbImageValidator {
 	/**
 	 * 画像生成
 	 *
-	 * @returns {Result<ValidationError>} 検証エラー
+	 * @returns 検証エラー
 	 */
 	async create(): Promise<Result<ValidationError>> {
 		await Promise.all([

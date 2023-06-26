@@ -22,7 +22,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 	#config: Configure;
 
 	/**
-	 * @param {ConfigureCommon} configCommon - 共通設定
+	 * @param configCommon - 共通設定
 	 */
 	constructor(configCommon: ConfigureCommon) {
 		super();
@@ -32,8 +32,8 @@ export default class ThumbImageRenderController extends Controller implements Co
 	}
 
 	/**
-	 * @param {Request} req - Request
-	 * @param {Response} res - Response
+	 * @param req - Request
+	 * @param res - Response
 	 */
 	async execute(req: Request, res: Response): Promise<void> {
 		const httpResponse = new HttpResponse(res, this.#configCommon);
@@ -173,10 +173,10 @@ export default class ThumbImageRenderController extends Controller implements Co
 	/**
 	 * 出力するファイルの大きさを計算する
 	 *
-	 * @param {object} requestQuery - URL クエリー情報
-	 * @param {string} origFileFullPath - 元画像ファイルのフルパス
+	 * @param requestQuery - URL クエリー情報
+	 * @param origFileFullPath - 元画像ファイルのフルパス
 	 *
-	 * @returns {object} 出力するサムネイル画像ファイルの大きさ
+	 * @returns 出力するサムネイル画像ファイルの大きさ
 	 */
 	private getSize(requestQuery: ThumbImageRequest.Query, origFileFullPath: string): ImageSize | null {
 		let origImageWidth: number | undefined;
@@ -200,11 +200,11 @@ export default class ThumbImageRenderController extends Controller implements Co
 	/**
 	 * サムネイル画像を新規生成するかどうか判定する
 	 *
-	 * @param {Request} req - Request
-	 * @param {Response} res - Response
-	 * @param {object} requestQuery - URL クエリー情報
+	 * @param req - Request
+	 * @param res - Response
+	 * @param requestQuery - URL クエリー情報
 	 *
-	 * @returns {boolean} 新規生成する場合は true
+	 * @returns 新規生成する場合は true
 	 */
 	private judgeCreate(req: Request, res: Response, requestQuery: ThumbImageRequest.Query): boolean {
 		const requestHeaderSecFetchDest = req.get('Sec-Fetch-Dest');
@@ -290,10 +290,10 @@ export default class ThumbImageRenderController extends Controller implements Co
 	/**
 	 * 画像ファイル生成
 	 *
-	 * @param {string} origFileFullPath - 元画像ファイルのフルパス
-	 * @param {ThumbImage} thumbImage - サムネイル画像
+	 * @param origFileFullPath - 元画像ファイルのフルパス
+	 * @param thumbImage - サムネイル画像
 	 *
-	 * @returns {object} 生成した画像データ
+	 * @returns 生成した画像データ
 	 */
 	private async create(origFileFullPath: string, thumbImage: ThumbImage): Promise<Buffer> {
 		/* 新しい画像ファイルを生成 */
@@ -313,12 +313,12 @@ export default class ThumbImageRenderController extends Controller implements Co
 	/**
 	 * 画像ファイルを画面に出力する
 	 *
-	 * @param {Request} req - Request
-	 * @param {Response} res - Response
-	 * @param {HttpResponse} httpResponse - HttpResponse
-	 * @param {string} mime - MIME
-	 * @param {object} fileData - 画像データ
-	 * @param {Date} fileMtime - 最終更新日時
+	 * @param req - Request
+	 * @param res - Response
+	 * @param httpResponse - HttpResponse
+	 * @param mime - MIMEタイプ
+	 * @param fileData - 画像データ
+	 * @param fileMtime - 最終更新日時
 	 */
 	private response(req: Request, res: Response, httpResponse: HttpResponse, mime: string, fileData: Buffer, fileMtime?: Date): void {
 		if (fileMtime !== undefined) {

@@ -10,11 +10,11 @@ export default class ThumbImageUtil {
 	/**
 	 * 出力するサムネイル画像ファイルの大きさを計算する
 	 *
-	 * @param {number | null} requestWidth - リクエストされた幅
-	 * @param {number | null} requestHeight - リクエストされた高さ
-	 * @param {object} origImage - オリジナル画像のサイズ情報
+	 * @param requestWidth - リクエストされた幅
+	 * @param requestHeight - リクエストされた高さ
+	 * @param origImage - オリジナル画像のサイズ情報
 	 *
-	 * @returns {object} 出力するサムネイル画像ファイルの大きさ
+	 * @returns 出力するサムネイル画像ファイルの大きさ
 	 */
 	static getThumbSize(requestWidth: number | null, requestHeight: number | null, origImage: ImageSize): ImageSize {
 		let newImageWidth = origImage.width;
@@ -48,10 +48,10 @@ export default class ThumbImageUtil {
 	/**
 	 * 画像ファイルを生成する
 	 *
-	 * @param {string} origFilePath - 元画像ファイルのフルパス
-	 * @param {object} thumbImage - 生成するサムネイル画像のファイル情報
+	 * @param origFilePath - 元画像ファイルのフルパス
+	 * @param thumbImage - 生成するサムネイル画像のファイル情報
 	 *
-	 * @returns {object} 生成したサムネイル画像データ
+	 * @returns 生成したサムネイル画像データ
 	 */
 	static async createImage(origFilePath: string, thumbImage: ThumbImage): Promise<Buffer> {
 		/* ディレクトリのチェック */

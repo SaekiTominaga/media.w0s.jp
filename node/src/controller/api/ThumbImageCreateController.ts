@@ -21,7 +21,7 @@ export default class ThumbImageCreateController extends Controller implements Co
 	#config: Configure;
 
 	/**
-	 * @param {ConfigureCommon} configCommon - 共通設定
+	 * @param configCommon - 共通設定
 	 */
 	constructor(configCommon: ConfigureCommon) {
 		super();
@@ -31,8 +31,8 @@ export default class ThumbImageCreateController extends Controller implements Co
 	}
 
 	/**
-	 * @param {Request} req - Request
-	 * @param {Response} res - Response
+	 * @param req - Request
+	 * @param res - Response
 	 */
 	async execute(req: Request, res: Response): Promise<void> {
 		const httpResponse = new HttpResponse(res, this.#configCommon);
@@ -89,10 +89,10 @@ export default class ThumbImageCreateController extends Controller implements Co
 	/**
 	 * 画像ファイル生成
 	 *
-	 * @param {string} origFileFullPath - 元画像ファイルのフルパス
-	 * @param {ThumbImage} thumbImage - サムネイル画像
+	 * @param origFileFullPath - 元画像ファイルのフルパス
+	 * @param thumbImage - サムネイル画像
 	 *
-	 * @returns {object} 生成した画像データ
+	 * @returns 生成した画像データ
 	 */
 	private async create(origFileFullPath: string, thumbImage: ThumbImage): Promise<Buffer> {
 		/* 新しい画像ファイルを生成 */
