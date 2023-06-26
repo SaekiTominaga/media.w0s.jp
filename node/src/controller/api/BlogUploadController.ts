@@ -25,7 +25,7 @@ export default class BlogUploadController extends Controller implements Controll
 	#config: Configure;
 
 	/**
-	 * @param {ConfigureCommon} configCommon - 共通設定
+	 * @param configCommon - 共通設定
 	 */
 	constructor(configCommon: ConfigureCommon) {
 		super();
@@ -35,8 +35,8 @@ export default class BlogUploadController extends Controller implements Controll
 	}
 
 	/**
-	 * @param {Request} req - Request
-	 * @param {Response} res - Response
+	 * @param req - Request
+	 * @param res - Response
 	 */
 	async execute(req: Request, res: Response): Promise<void> {
 		const httpResponse = new HttpResponse(res, this.#configCommon);
@@ -117,14 +117,14 @@ export default class BlogUploadController extends Controller implements Controll
 	/**
 	 * ファイルアップロードを実行する（実際はアップロードされたファイルを media.w0s.jp の適切な場所に移動する）
 	 *
-	 * @param {string} fileName - ファイル名
-	 * @param {string} tempPath - 仮で保存されたファイルパス
-	 * @param {number} size - ファイルサイズ
-	 * @param {string} fileDir - ファイルを保存するディレクトリ
-	 * @param {boolean} overwrite - 上書きを許可するか
-	 * @param {number} limitSize - 許可された最大サイズ
+	 * @param fileName - ファイル名
+	 * @param tempPath - 仮で保存されたファイルパス
+	 * @param size - ファイルサイズ
+	 * @param fileDir - ファイルを保存するディレクトリ
+	 * @param overwrite - 上書きを許可するか
+	 * @param limitSize - 許可された最大サイズ
 	 *
-	 * @returns {ResponseJson} 返答内容
+	 * @returns 返答内容
 	 */
 	private async upload(fileName: string, tempPath: string, size: number, fileDir: string, overwrite: boolean, limitSize: number): Promise<ResponseJson> {
 		const filePath = `${fileDir}/${fileName}`;

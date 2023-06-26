@@ -13,8 +13,8 @@ export default class HttpResponse {
 	#config: Configure;
 
 	/**
-	 * @param {Response} res - Request
-	 * @param {Configure} config - 共通設定ファイル
+	 * @param res - Request
+	 * @param config - 共通設定ファイル
 	 */
 	constructor(res: Response, config: Configure) {
 		this.#res = res;
@@ -24,10 +24,10 @@ export default class HttpResponse {
 	/**
 	 * 最終更新日時を確認する（ドキュメントに変更がなければ 304 を返して終了、変更があれば Last-Modified ヘッダをセットする）
 	 *
-	 * @param {Request} req - Request
-	 * @param {Date} lastModified - 今回のアクセスに対して発行する最終更新日時
+	 * @param req - Request
+	 * @param lastModified - 今回のアクセスに対して発行する最終更新日時
 	 *
-	 * @returns {boolean} ドキュメントに変更がなければ true
+	 * @returns ドキュメントに変更がなければ true
 	 */
 	checkLastModified(req: Request, lastModified: Date): boolean {
 		const ifModifiedSince = req.get('If-Modified-Since');
@@ -45,7 +45,7 @@ export default class HttpResponse {
 	/**
 	 * 200 OK (Json)
 	 *
-	 * @param {object} body - Response body
+	 * @param body - Response body
 	 */
 	send200Json(body: object): void {
 		this.#res.status(200).json(body);
@@ -61,8 +61,8 @@ export default class HttpResponse {
 	/**
 	 * 401 Unauthorized (Json)
 	 *
-	 * @param {string} type - Authentication type <https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml>
-	 * @param {string} realm - A description of the protected area.
+	 * @param type - Authentication type <https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml>
+	 * @param realm - A description of the protected area.
 	 */
 	send401Json(type: HttpAuthType, realm: string): void {
 		this.#res
@@ -81,7 +81,7 @@ export default class HttpResponse {
 	/**
 	 * 403 Forbidden (Json)
 	 *
-	 * @param {object} body - Response body
+	 * @param body - Response body
 	 */
 	send403Json(body?: object): void {
 		this.#res.status(403).json(body);
@@ -97,7 +97,7 @@ export default class HttpResponse {
 	/**
 	 * 404 Not Found (Json)
 	 *
-	 * @param {object} body - Response body
+	 * @param body - Response body
 	 */
 	send404Json(body?: object): void {
 		this.#res.status(404).json(body);

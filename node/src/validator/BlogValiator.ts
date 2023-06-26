@@ -8,7 +8,7 @@ export default class BlogValidator {
 	#req: Request;
 
 	/**
-	 * @param {Request} req - Request
+	 * @param req - Request
 	 */
 	constructor(req: Request) {
 		this.#req = req;
@@ -17,7 +17,7 @@ export default class BlogValidator {
 	/**
 	 * ファイルアップロード
 	 *
-	 * @returns {Result<ValidationError>} 検証エラー
+	 * @returns 検証エラー
 	 */
 	async upload(): Promise<Result<ValidationError>> {
 		await Promise.all([
