@@ -1,16 +1,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import FileSizeFormat from '@saekitominaga/file-size-format';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import Controller from '../../Controller.js';
-import ControllerInterface from '../../ControllerInterface.js';
+import type ControllerInterface from '../../ControllerInterface.js';
 import HttpBasicAuth from '../../util/HttpBasicAuth.js';
 import HttpResponse from '../../util/HttpResponse.js';
 import ThumbImage from '../../util/ThumbImage.js';
 import ThumbImageUtil from '../../util/ThumbImageUtil.js';
 import ThumbImageValidator from '../../validator/ThumbImageValidator.js';
-import { MediaW0SJp as ConfigureCommon } from '../../../../configure/type/common.js';
-import { NoName as Configure } from '../../../../configure/type/thumb-image.js';
+import type { MediaW0SJp as ConfigureCommon } from '../../../../configure/type/common.js';
+import type { NoName as Configure } from '../../../../configure/type/thumb-image.js';
 
 /**
  * サムネイル画像生成

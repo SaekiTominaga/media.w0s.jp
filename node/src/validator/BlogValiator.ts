@@ -1,5 +1,5 @@
-import { body, Result, ValidationError, validationResult } from 'express-validator';
-import { Request } from 'express';
+import { body, type Result, type ValidationError, validationResult } from 'express-validator';
+import type { Request } from 'express';
 
 /**
  * ブログ
