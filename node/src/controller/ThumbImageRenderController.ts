@@ -47,12 +47,12 @@ export default class ThumbImageRenderController extends Controller implements Co
 
 		let type: ImageType;
 		if (typeof req.query['type'] === 'string') {
-			type = <ImageType>req.query['type'];
+			type = req.query['type'] as ImageType;
 		} else {
 			/* type パラメーターが複数指定されていた場合、 accept リクエストヘッダーと見比べて先頭から順に適用可能な値を抜き出す（適用可能な値が存在しない場合、末尾の値を強制適用する） */
-			const types = <ImageType[]>req.query['type'];
+			const types = req.query['type'] as ImageType[];
 			const acceptType = req.accepts(types);
-			type = acceptType !== false ? <ImageType>acceptType : <ImageType>types.at(-1);
+			type = acceptType !== false ? (acceptType as ImageType) : types.at(-1)!;
 			this.logger.debug('決定 Type', type);
 		}
 
@@ -105,7 +105,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 			const origFileData = await fs.promises.readFile(origFileFullPath);
 			const origFileExtension = path.extname(origFileFullPath);
 			const origFileMime = Object.entries(this.#configCommon.static.headers.mime.extension).find(([, extensions]) =>
-				extensions.includes(origFileExtension.substring(1))
+				extensions.includes(origFileExtension.substring(1)),
 			)?.[0];
 			if (origFileMime === undefined) {
 				this.logger.info(`MIME が定義されていない画像が指定: ${req.url}`);
@@ -245,7 +245,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 						if (['image', 'iframe', 'object', 'embed'].includes(requestHeaderSecFetchDest)) {
 							if (!this.#config.referrer_exclusion_origins.includes(referrerOrigin)) {
 								this.logger.warn(
-									`画像ファイル ${requestQuery.path} が別オリジンから埋め込まれている（リファラー: ${referrer} 、DEST: ${requestHeaderSecFetchDest} ）`
+									`画像ファイル ${requestQuery.path} が別オリジンから埋め込まれている（リファラー: ${referrer} 、DEST: ${requestHeaderSecFetchDest} ）`,
 								);
 							}
 						}

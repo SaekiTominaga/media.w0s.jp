@@ -29,12 +29,12 @@ export default class ThumbImageUtil {
 			}
 		} else if (requestWidth === null) {
 			/* 高さのみが指定された場合 */
-			if (requestHeight !== null && requestHeight < origImage.height) {
+			if (requestHeight < origImage.height) {
 				/* 高さを基準に縮小する */
 				newImageWidth = Math.round((origImage.width / origImage.height) * requestHeight);
 				newImageHeight = requestHeight;
 			}
-		} else if (requestWidth !== null && requestHeight !== null && (requestWidth < origImage.width || requestHeight < origImage.height)) {
+		} else if (requestWidth < origImage.width || requestHeight < origImage.height) {
 			/* 幅、高さが両方指定された場合（幅か高さ、どちらかより縮小割合が大きい方を基準に縮小する） */
 			const reductionRatio = Math.min(requestWidth / origImage.width, requestHeight / origImage.height);
 

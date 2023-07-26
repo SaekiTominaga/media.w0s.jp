@@ -84,7 +84,7 @@ export default class BlogUploadController extends Controller implements Controll
 					requestQuery.size,
 					this.#config.image.dir,
 					requestQuery.overwrite,
-					this.#config.image.limit
+					this.#config.image.limit,
 				);
 				break;
 			}
@@ -95,7 +95,7 @@ export default class BlogUploadController extends Controller implements Controll
 					requestQuery.size,
 					this.#config.video.dir,
 					requestQuery.overwrite,
-					this.#config.video.limit
+					this.#config.video.limit,
 				);
 				break;
 			}

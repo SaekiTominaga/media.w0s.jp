@@ -1,9 +1,9 @@
 type ImageType = 'avif' | 'webp' | 'jpeg' | 'png'; // ../configure/thimb-image.json#type のキーに合わせる
 
-type ImageSize = {
+interface ImageSize {
 	width: number;
 	height: number;
-};
+}
 
 declare namespace ThumbImageRequest {
 	export interface Query {
