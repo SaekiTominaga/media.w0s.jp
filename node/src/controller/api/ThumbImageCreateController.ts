@@ -77,7 +77,7 @@ export default class ThumbImageCreateController extends Controller implements Co
 				width: requestQuery.width,
 				height: requestQuery.height,
 			},
-			requestQuery.quality
+			requestQuery.quality,
 		);
 
 		/* 画像ファイル生成 */

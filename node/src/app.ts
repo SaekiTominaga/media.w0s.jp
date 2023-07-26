@@ -10,7 +10,7 @@ import ThumbImageRenderController from './controller/ThumbImageRenderController.
 import type { MediaW0SJp as Configure } from '../../configure/type/common.js';
 
 /* 設定ファイル読み込み */
-const config: Configure = JSON.parse(await fs.promises.readFile('configure/common.json', 'utf8'));
+const config = JSON.parse(await fs.promises.readFile('configure/common.json', 'utf8')) as Configure;
 
 /* Logger 設定 */
 Log4js.configure(config.logger.path);
@@ -111,7 +111,7 @@ app.use(
 				res.setHeader('Content-Security-Policy', config.response.header.csp_html);
 			}
 		},
-	})
+	}),
 );
 
 /**
