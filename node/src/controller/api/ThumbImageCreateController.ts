@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import FileSizeFormat from '@saekitominaga/file-size-format';
+import FileSizeFormat from '@w0s/file-size-format';
 import type { Request, Response } from 'express';
 import Controller from '../../Controller.js';
 import type ControllerInterface from '../../ControllerInterface.js';
