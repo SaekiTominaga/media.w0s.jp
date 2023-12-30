@@ -1,6 +1,6 @@
 import fs from 'node:fs';
-import MIMEParser from '@saekitominaga/mime-parser';
 import type { Request, Response } from 'express';
+import MIMEType from 'whatwg-mimetype';
 import BlogValidator from '../../validator/BlogValiator.js';
 import Controller from '../../Controller.js';
 import type ControllerInterface from '../../ControllerInterface.js';
@@ -70,13 +70,8 @@ export default class BlogUploadController extends Controller implements Controll
 			overwrite: Boolean(req.body.overwrite),
 		};
 
-		let mimeType: string | undefined;
-		try {
-			mimeType = new MIMEParser(requestQuery.mime).getType();
-		} catch (e) {}
-
 		let responseJson: ResponseJson;
-		switch (mimeType) {
+		switch (new MIMEType(requestQuery.mime).type) {
 			case 'image': {
 				responseJson = await this.upload(
 					requestQuery.file_name,
