@@ -8,13 +8,13 @@
 		"build": "tsc -p node/tsconfig.json",
 		"lint": "eslint node/src/**/*.ts node/__tests__/*.test.js node/@types/*.d.ts",
 		"test": "npm run config-convert && npm run build && cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
-		"config-convert": "json2ts -i configure/schema -o configure/type",
-		"config-validate": "run-p _config-validate:*",
+		"config": "run-p _config:*",
 		"css-lint": "stylelint public/*.css",
 		"github-actions-lint": "yamllint .github/workflows/*.yml",
-		"_config-validate:common": "ajv --spec=draft7 -s configure/schema/common.json -d configure/common.json",
-		"_config-validate:blog-upload": "ajv --spec=draft7 -s configure/schema/blog-upload.json -d configure/blog-upload.json",
-		"_config-validate:thumb-image": "ajv --spec=draft7 -s configure/schema/thumb-image.json -d configure/thumb-image.json"
+		"_config:convert": "json2ts -i configure/schema -o configure/type",
+		"_config:validate-common": "ajv --spec=draft7 -s configure/schema/common.json -d configure/common.json",
+		"_config:validate-blog-upload": "ajv --spec=draft7 -s configure/schema/blog-upload.json -d configure/blog-upload.json",
+		"_config:validate-thumb-image": "ajv --spec=draft7 -s configure/schema/thumb-image.json -d configure/thumb-image.json"
 	},
 	"dependencies": {
 		"@log4js-node/smtp": "^2.0.8",
