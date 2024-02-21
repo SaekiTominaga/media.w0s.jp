@@ -40,7 +40,7 @@
 		"@types/sharp": "^0.31.1",
 		"@types/whatwg-mimetype": "^3.0.2",
 		"@w0s/eslint-config": "^5.0.1",
-		"@w0s/stylelint-config": "^2.0.0",
+		"@w0s/stylelint-config": "^4.0.1",
 		"@w0s/tsconfig": "^1.4.0",
 		"ajv-cli": "^5.0.0",
 		"coveralls": "^3.1.1",
@@ -51,7 +51,7 @@
 		"nodemon": "^3.0.2",
 		"npm-run-all": "^4.1.5",
 		"prettier": "^3.1.1",
-		"stylelint": "^16.1.0",
+		"stylelint": "^16.2.1",
 		"typescript": "^5.0.4",
 		"yaml-lint": "^1.7.0"
 	}
