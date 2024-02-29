@@ -21,19 +21,10 @@ export default class BlogValidator {
 	 */
 	async upload(): Promise<Result<ValidationError>> {
 		await Promise.all([
-			body('name')
-				.notEmpty()
-				.run(this.#req),
-			body('type')
-				.notEmpty()
-				.run(this.#req),
-			body('temppath')
-				.notEmpty()
-				.run(this.#req),
-			body('size')
-				.notEmpty()
-				.isInt({ min: 0 })
-				.run(this.#req),
+			body('name').notEmpty().run(this.#req),
+			body('type').notEmpty().run(this.#req),
+			body('temppath').notEmpty().run(this.#req),
+			body('size').notEmpty().isInt({ min: 0 }).run(this.#req),
 		]);
 
 		return validationResult(this.#req);

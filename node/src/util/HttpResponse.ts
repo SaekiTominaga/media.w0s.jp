@@ -65,10 +65,7 @@ export default class HttpResponse {
 	 * @param realm - A description of the protected area.
 	 */
 	send401Json(type: HttpAuthType, realm: string): void {
-		this.#res
-			.set('WWW-Authenticate', `${type} realm="${realm}"`)
-			.status(401)
-			.json(this.#config.auth.json_401);
+		this.#res.set('WWW-Authenticate', `${type} realm="${realm}"`).status(401).json(this.#config.auth.json_401);
 	}
 
 	/**
