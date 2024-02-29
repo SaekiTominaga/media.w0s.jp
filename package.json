@@ -10,6 +10,7 @@
 		"test": "npm run config-convert && npm run build && cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage",
 		"config": "run-p _config:*",
 		"css-lint": "stylelint public/*.css",
+		"format": "prettier -w .",
 		"github-actions-lint": "yamllint .github/workflows/*.yml",
 		"_config:convert": "json2ts -i configure/schema -o configure/type",
 		"_config:validate-common": "ajv --spec=draft7 -s configure/schema/common.json -d configure/common.json",
