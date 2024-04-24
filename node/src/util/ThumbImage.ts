@@ -62,8 +62,8 @@ export default class ThumbImage {
 	get filePath(): string {
 		const imageInfo = this.#getImageInfo();
 
-		const paramSize = `s=${this.#size.width}x${this.#size.height}`;
-		const paramQuality = `q=${this.#quality}`;
+		const paramSize = `s=${String(this.#size.width)}x${String(this.#size.height)}`;
+		const paramQuality = `q=${String(this.#quality)}`;
 
 		const params = imageInfo.quality ? [paramSize, paramQuality] : [paramSize];
 

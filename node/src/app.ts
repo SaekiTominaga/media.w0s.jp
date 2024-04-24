@@ -167,5 +167,5 @@ app.use((err: Error, req: Request, res: Response, _next: NextFunction /* eslint-
  * HTTP サーバー起動
  */
 app.listen(config.port, () => {
-	logger.info(`Example app listening at http://localhost:${config.port}`);
+	logger.info(`Example app listening at http://localhost:${String(config.port)}`);
 });
