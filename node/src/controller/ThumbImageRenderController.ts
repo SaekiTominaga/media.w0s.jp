@@ -305,7 +305,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 		const origFileSize = FileSizeFormat.iec((await fs.promises.stat(origFileFullPath)).size, { digits: 1 });
 		const createdFileSize = FileSizeFormat.iec(createdFileData.byteLength, { digits: 1 });
 
-		this.logger.info(`画像生成完了（${Math.round(createProcessingTime / 1000)}秒）: ${thumbImage.filePath} （${origFileSize} → ${createdFileSize}）`);
+		this.logger.info(`画像生成完了（${String(Math.round(createProcessingTime / 1000))}秒）: ${thumbImage.filePath} （${origFileSize} → ${createdFileSize}）`);
 
 		return createdFileData;
 	}
