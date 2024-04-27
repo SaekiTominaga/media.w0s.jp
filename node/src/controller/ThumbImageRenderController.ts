@@ -45,20 +45,9 @@ export default class ThumbImageRenderController extends Controller implements Co
 			return;
 		}
 
-		let type: ImageType;
-		if (typeof req.query['type'] === 'string') {
-			type = req.query['type'] as ImageType;
-		} else {
-			/* type パラメーターが複数指定されていた場合、accept リクエストヘッダーと見比べて先頭から順に適用可能な値を抜き出す（適用可能な値が存在しない場合、末尾の値を強制適用する） */
-			const types = req.query['type'] as ImageType[];
-			const acceptType = req.accepts(types);
-			type = acceptType !== false ? (acceptType as ImageType) : types.at(-1)!;
-			this.logger.debug('決定 Type', type);
-		}
-
 		const requestQuery: ThumbImageRequest.Query = {
 			path: req.params['path']!, // app.js 内の処理により path パラメーターは必ず存在する想定
-			type: type,
+			type: this.#decideType(req),
 			width: req.query['w'] !== undefined ? Number(req.query['w']) : null,
 			height: req.query['h'] !== undefined ? Number(req.query['h']) : null,
 			quality: req.query['quality'] !== undefined ? Number(req.query['quality']) : this.#config.quality_default,
@@ -169,6 +158,29 @@ export default class ThumbImageRenderController extends Controller implements Co
 
 		/* 生成した画像データを表示 */
 		this.#response(req, res, httpResponse, thumbImage.mime, createdFileData);
+	}
+
+	/**
+	 * type パラメーターに指定された値から実際に使用する値を決定する
+	 *
+	 * @param req - Request
+	 *
+	 * @returns 実際に使用する type 値
+	 */
+	#decideType(req: Request): string {
+		const requestType = req.query['type'] as string | string[];
+
+		if (typeof requestType === 'string') {
+			return requestType;
+		}
+
+		/* type パラメーターが複数指定されていた場合、accept リクエストヘッダーと見比べて先頭から順に適用可能な値を抜き出す（適用可能な値が存在しない場合、末尾の値を強制適用する） */
+		const acceptType = req.accepts(requestType);
+
+		const type = acceptType !== false ? acceptType : requestType.at(-1)!;
+		this.logger.debug('決定 Type', type);
+
+		return type;
 	}
 
 	/**
