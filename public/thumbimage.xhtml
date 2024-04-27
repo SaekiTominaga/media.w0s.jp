@@ -29,16 +29,25 @@
 			<section>
 				<h2>URL Parameters</h2>
 
-				<p>e.g. <code>/thumbimage/<strong>path/to/sample.jpg</strong>?type=<strong>webp</strong>;w=<strong>360</strong>;h=<strong>240</strong>;quality=<strong>30</strong></code></p>
+				<p>
+					e.g.
+					<code
+						>/thumbimage/<strong>path/to/sample.jpg</strong>?type=<strong>webp</strong>;w=<strong>360</strong>;h=<strong>240</strong>;quality=<strong
+							>30</strong
+						></code
+					>
+				</p>
 
 				<ul class="details">
 					<li>
 						The type, width, height, and quality can be specified in the URL parameters.
 						<table>
+							<colgroup></colgroup>
+							<colgroup span="4"></colgroup>
 							<thead>
 								<tr>
 									<th scope="col" rowspan="2">Image Type</th>
-									<th scope="col" colspan="4">URL parameters</th>
+									<th scope="colgroup" colspan="4">URL parameters</th>
 								</tr>
 								<tr>
 									<th scope="col"><code>type</code> (Required)</th>
@@ -197,14 +206,14 @@
 						<pre><code>&lt;picture&gt;
 	&lt;source type="image/avif" srcset="/thumbimage/sample.jpg?type=avif;w=360;quality=30" /&gt;
 	&lt;source type="image/webp" srcset="/thumbimage/sample.jpg?type=webp;w=360;quality=30" /&gt;
-	&lt;img src="/thumbimage/sample.jpg?type=jpeg;w=360;quality=30" alt="Sample Image" /&gt;
+	&lt;img src="/thumbimage/sample.jpg?type=jpeg;w=360;quality=30" alt="Sample Image" crossorigin="" /&gt;
 &lt;/picture&gt;</code></pre>
 
 						<p>
 							<picture>
 								<source type="image/avif" srcset="/thumbimage/sample.jpg?type=avif;w=360;quality=30" />
 								<source type="image/webp" srcset="/thumbimage/sample.jpg?type=webp;w=360;quality=30" />
-								<img src="/thumbimage/sample.jpg?type=jpeg;w=360;quality=30" alt="Sample Image" />
+								<img src="/thumbimage/sample.jpg?type=jpeg;w=360;quality=30" alt="Sample Image" crossorigin="" />
 							</picture>
 						</p>
 					</section>
@@ -212,10 +221,10 @@
 					<section>
 						<h4>Optimal image type selection by using the <code>accept</code> request header</h4>
 
-						<pre><code>&lt;img src="/thumbimage/sample.jpg?type[]=avif;type[]=webp;type[]=jpeg;w=360;quality=30" alt="Sample Image" /&gt;</code></pre>
+						<pre><code>&lt;img src="/thumbimage/sample.jpg?type[]=avif;type[]=webp;type[]=jpeg;w=360;quality=30" alt="Sample Image" crossorigin="" /&gt;</code></pre>
 
 						<p>
-							<img src="/thumbimage/sample.jpg?type[]=avif;type[]=webp;type[]=jpeg;w=360;quality=30" alt="Sample Image" />
+							<img src="/thumbimage/sample.jpg?type[]=avif;type[]=webp;type[]=jpeg;w=360;quality=30" alt="Sample Image" crossorigin="" />
 						</p>
 					</section>
 				</section>
