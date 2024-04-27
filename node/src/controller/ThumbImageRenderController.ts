@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import FileSizeFormat from '@w0s/file-size-format';
-import { imageSize } from 'image-size';
 import type { Request, Response } from 'express';
+import { imageSize } from 'image-size';
 import Controller from '../Controller.js';
 import type ControllerInterface from '../ControllerInterface.js';
 import HttpResponse from '../util/HttpResponse.js';
@@ -71,7 +71,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 			return;
 		}
 
-		const thumbSize = this.getSize(requestQuery, origFileFullPath);
+		const thumbSize = this.#getSize(requestQuery, origFileFullPath);
 		if (thumbSize === null) {
 			this.logger.info(`サイズが取得できない画像が指定: ${req.url}`);
 			httpResponse.send403();
@@ -97,10 +97,10 @@ export default class ThumbImageRenderController extends Controller implements Co
 				/* 生成済みの画像データを表示 */
 				this.logger.debug(`生成済みの画像を表示: ${thumbImage.filePath}`);
 
-				this.response(req, res, httpResponse, thumbImage.mime, thumbFileData, thumbFileMtime);
+				this.#response(req, res, httpResponse, thumbImage.mime, thumbFileData, thumbFileMtime);
 				return;
 			}
-		} else if (!this.judgeCreate(req, res, requestQuery)) {
+		} else if (!this.#judgeCreate(req, res, requestQuery)) {
 			/* 画像ファイルが生成されていない場合（元画像を表示する） */
 			const origFileData = await fs.promises.readFile(origFileFullPath);
 			const origFileExtension = path.extname(origFileFullPath);
@@ -113,7 +113,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 				return;
 			}
 
-			this.response(req, res, httpResponse, origFileMime, origFileData, origFileMtime);
+			this.#response(req, res, httpResponse, origFileMime, origFileData, origFileMtime);
 			return;
 		}
 
@@ -158,16 +158,16 @@ export default class ThumbImageRenderController extends Controller implements Co
 				this.logger.debug(`生成済みの代替画像を表示: ${thumbImage.filePath}`);
 
 				const thumbFileMtime = fs.statSync(thumbImage.fileFullPath).mtime;
-				this.response(req, res, httpResponse, thumbImage.mime, thumbFileDataAlt, thumbFileMtime);
+				this.#response(req, res, httpResponse, thumbImage.mime, thumbFileDataAlt, thumbFileMtime);
 				return;
 			}
 		}
 
 		/* 画像ファイル生成 */
-		const createdFileData = await this.create(origFileFullPath, thumbImage);
+		const createdFileData = await this.#create(origFileFullPath, thumbImage);
 
 		/* 生成した画像データを表示 */
-		this.response(req, res, httpResponse, thumbImage.mime, createdFileData);
+		this.#response(req, res, httpResponse, thumbImage.mime, createdFileData);
 	}
 
 	/**
@@ -178,7 +178,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 	 *
 	 * @returns 出力するサムネイル画像ファイルの大きさ
 	 */
-	private getSize(requestQuery: ThumbImageRequest.Query, origFileFullPath: string): ImageSize | null {
+	#getSize(requestQuery: ThumbImageRequest.Query, origFileFullPath: string): ImageSize | null {
 		let origImageWidth: number | undefined;
 		let origImageHeight: number | undefined;
 		try {
@@ -206,7 +206,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 	 *
 	 * @returns 新規生成する場合は true
 	 */
-	private judgeCreate(req: Request, res: Response, requestQuery: ThumbImageRequest.Query): boolean {
+	#judgeCreate(req: Request, res: Response, requestQuery: ThumbImageRequest.Query): boolean {
 		const requestHeaderSecFetchDest = req.get('Sec-Fetch-Dest');
 		if (requestHeaderSecFetchDest !== undefined) {
 			/* Fetch Metadata Request Headers 対応ブラウザ（Firefox 90+, Chrome 80+）https://caniuse.com/mdn-http_headers_sec-fetch-dest */
@@ -295,7 +295,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 	 *
 	 * @returns 生成した画像データ
 	 */
-	private async create(origFileFullPath: string, thumbImage: ThumbImage): Promise<Buffer> {
+	async #create(origFileFullPath: string, thumbImage: ThumbImage): Promise<Buffer> {
 		/* 新しい画像ファイルを生成 */
 		const createStartTime = Date.now();
 		const createdFileData = await ThumbImageUtil.createImage(origFileFullPath, thumbImage);
@@ -320,7 +320,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 	 * @param fileData - 画像データ
 	 * @param fileMtime - 最終更新日時
 	 */
-	private response(req: Request, res: Response, httpResponse: HttpResponse, mime: string, fileData: Buffer, fileMtime?: Date): void {
+	#response(req: Request, res: Response, httpResponse: HttpResponse, mime: string, fileData: Buffer, fileMtime?: Date): void {
 		if (fileMtime !== undefined) {
 			/* キャッシュ確認 */
 			if (httpResponse.checkLastModified(req, fileMtime)) {
