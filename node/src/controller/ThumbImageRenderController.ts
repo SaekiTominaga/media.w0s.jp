@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import FileSizeFormat from '@w0s/file-size-format';
-import { imageSize } from 'image-size';
 import type { Request, Response } from 'express';
+import { imageSize } from 'image-size';
 import Controller from '../Controller.js';
 import type ControllerInterface from '../ControllerInterface.js';
 import HttpResponse from '../util/HttpResponse.js';
@@ -40,25 +40,14 @@ export default class ThumbImageRenderController extends Controller implements Co
 
 		const validationResult = await new ThumbImageValidator(req, this.#config).render();
 		if (!validationResult.isEmpty()) {
-			this.logger.info('パラメーター不正', validationResult.array());
+			this.logger.warn('パラメーター不正', validationResult.array());
 			httpResponse.send403();
 			return;
 		}
 
-		let type: ImageType;
-		if (typeof req.query['type'] === 'string') {
-			type = req.query['type'] as ImageType;
-		} else {
-			/* type パラメーターが複数指定されていた場合、 accept リクエストヘッダーと見比べて先頭から順に適用可能な値を抜き出す（適用可能な値が存在しない場合、末尾の値を強制適用する） */
-			const types = req.query['type'] as ImageType[];
-			const acceptType = req.accepts(types);
-			type = acceptType !== false ? (acceptType as ImageType) : types.at(-1)!;
-			this.logger.debug('決定 Type', type);
-		}
-
 		const requestQuery: ThumbImageRequest.Query = {
-			path: req.params['path'] ?? '', // TS エラー防止のためデフォルト値を設定しているが、 app.js 内の処理により path パラメーターは必ず存在する想定
-			type: type,
+			path: req.params['path']!, // app.js 内の処理により path パラメーターは必ず存在する想定
+			type: this.#decideType(req),
 			width: req.query['w'] !== undefined ? Number(req.query['w']) : null,
 			height: req.query['h'] !== undefined ? Number(req.query['h']) : null,
 			quality: req.query['quality'] !== undefined ? Number(req.query['quality']) : this.#config.quality_default,
@@ -66,15 +55,19 @@ export default class ThumbImageRenderController extends Controller implements Co
 
 		const origFileFullPath = path.resolve(`${this.#configCommon.static.root}/${this.#configCommon.static.directory.image}/${requestQuery.path}`);
 		if (!fs.existsSync(origFileFullPath)) {
-			this.logger.info(`存在しないファイルパスが指定: ${req.url}`);
+			this.logger.warn(`存在しないファイルパスが指定: ${req.url}`);
 			httpResponse.send404();
 			return;
 		}
 
-		const thumbSize = this.getSize(requestQuery, origFileFullPath);
+		const thumbSize = this.#getSize(requestQuery, origFileFullPath);
 		if (thumbSize === null) {
-			this.logger.info(`サイズが取得できない画像が指定: ${req.url}`);
+			this.logger.warn(`サイズが取得できない画像が指定: ${req.url}`);
 			httpResponse.send403();
+			return;
+		}
+
+		if (!(await this.#cors(req, res, httpResponse, origFileFullPath))) {
 			return;
 		}
 
@@ -86,35 +79,21 @@ export default class ThumbImageRenderController extends Controller implements Co
 		try {
 			thumbFileData = await fs.promises.readFile(thumbImage.fileFullPath);
 		} catch (e) {}
+
 		if (thumbFileData !== undefined) {
 			/* 画像ファイルが生成済みだった場合 */
 			const thumbFileMtime = fs.statSync(thumbImage.fileFullPath).mtime;
 
-			if (origFileMtime > thumbFileMtime) {
-				/* 元画像が更新されている場合 */
-				this.logger.info(`画像が生成済みだが、元画像が更新されているので差し替える: ${req.url}`);
-			} else {
+			if (origFileMtime <= thumbFileMtime) {
 				/* 生成済みの画像データを表示 */
 				this.logger.debug(`生成済みの画像を表示: ${thumbImage.filePath}`);
 
-				this.response(req, res, httpResponse, thumbImage.mime, thumbFileData, thumbFileMtime);
-				return;
-			}
-		} else if (!this.judgeCreate(req, res, requestQuery)) {
-			/* 画像ファイルが生成されていない場合（元画像を表示する） */
-			const origFileData = await fs.promises.readFile(origFileFullPath);
-			const origFileExtension = path.extname(origFileFullPath);
-			const origFileMime = Object.entries(this.#configCommon.static.headers.mime.extension).find(([, extensions]) =>
-				extensions.includes(origFileExtension.substring(1)),
-			)?.[0];
-			if (origFileMime === undefined) {
-				this.logger.info(`MIME が定義されていない画像が指定: ${req.url}`);
-				httpResponse.send403();
+				this.#response(req, res, httpResponse, thumbImage.mime, thumbFileData, thumbFileMtime);
 				return;
 			}
 
-			this.response(req, res, httpResponse, origFileMime, origFileData, origFileMtime);
-			return;
+			/* 元画像が更新されている場合 */
+			this.logger.info(`画像が生成済みだが、元画像が更新されているので差し替える: ${req.url}`);
 		}
 
 		const thumbTypeAlt = thumbImage.altType;
@@ -158,16 +137,85 @@ export default class ThumbImageRenderController extends Controller implements Co
 				this.logger.debug(`生成済みの代替画像を表示: ${thumbImage.filePath}`);
 
 				const thumbFileMtime = fs.statSync(thumbImage.fileFullPath).mtime;
-				this.response(req, res, httpResponse, thumbImage.mime, thumbFileDataAlt, thumbFileMtime);
+				this.#response(req, res, httpResponse, thumbImage.mime, thumbFileDataAlt, thumbFileMtime);
 				return;
 			}
 		}
 
 		/* 画像ファイル生成 */
-		const createdFileData = await this.create(origFileFullPath, thumbImage);
+		const createdFileData = await this.#create(origFileFullPath, thumbImage);
 
 		/* 生成した画像データを表示 */
-		this.response(req, res, httpResponse, thumbImage.mime, createdFileData);
+		this.#response(req, res, httpResponse, thumbImage.mime, createdFileData);
+	}
+
+	/**
+	 * type パラメーターに指定された値から実際に使用する値を決定する
+	 *
+	 * @param req - Request
+	 *
+	 * @returns 実際に使用する type 値
+	 */
+	#decideType(req: Request): string {
+		const requestType = req.query['type'] as string | string[];
+
+		if (typeof requestType === 'string') {
+			return requestType;
+		}
+
+		/* type パラメーターが複数指定されていた場合、accept リクエストヘッダーと見比べて先頭から順に適用可能な値を抜き出す（適用可能な値が存在しない場合、末尾の値を強制適用する） */
+		const acceptType = req.accepts(requestType);
+
+		const type = acceptType !== false ? acceptType : requestType.at(-1)!;
+		this.logger.debug('決定 Type', type);
+
+		return type;
+	}
+
+	/**
+	 * CORS
+	 *
+	 * @param req - Request
+	 * @param res - Response
+	 * @param httpResponse - HttpResponse
+	 * @param origFileFullPath - オリジナル画像のファイルパス
+	 *
+	 * @returns サムネイル画像の生成・表示を行う場合は true
+	 */
+	async #cors(req: Request, res: Response, httpResponse: HttpResponse, origFileFullPath: string): Promise<boolean> {
+		const origin = req.get('Origin');
+		if (origin !== undefined) {
+			/* クロスオリジンからの <img crossorigin> による呼び出し */
+			if (!this.#config.allow_origins.includes(origin)) {
+				this.logger.warn(`許可されていないオリジンからのアクセス: ${origin}`);
+
+				httpResponse.send403();
+				return false;
+			}
+
+			res.setHeader('Access-Control-Allow-Origin', origin);
+			res.vary('Origin');
+
+			return true;
+		}
+
+		const fetchMode = req.get('Sec-Fetch-Mode');
+		if (fetchMode !== 'cors') {
+			/* <a href>, <img> 等による呼び出し */
+			this.logger.debug(`Origin ヘッダがなく、Sec-Fetch-Mode: ${String(fetchMode)} なアクセス`);
+
+			res.vary('Origin');
+			res.vary('Sec-Fetch-Mode');
+
+			await this.#responseOriginal(req, res, httpResponse, origFileFullPath);
+			return false;
+		}
+
+		/* 同一オリジンからの <img crossorigin> による呼び出し */
+		res.vary('Origin');
+		res.vary('Sec-Fetch-Mode');
+
+		return true;
 	}
 
 	/**
@@ -178,7 +226,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 	 *
 	 * @returns 出力するサムネイル画像ファイルの大きさ
 	 */
-	private getSize(requestQuery: ThumbImageRequest.Query, origFileFullPath: string): ImageSize | null {
+	#getSize(requestQuery: ThumbImageRequest.Query, origFileFullPath: string): ImageSize | null {
 		let origImageWidth: number | undefined;
 		let origImageHeight: number | undefined;
 		try {
@@ -186,7 +234,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 			origImageWidth = dimensions.width;
 			origImageHeight = dimensions.height;
 		} catch (e) {
-			this.logger.info(e);
+			this.logger.warn(e);
 			return null;
 		}
 
@@ -198,96 +246,6 @@ export default class ThumbImageRenderController extends Controller implements Co
 	}
 
 	/**
-	 * サムネイル画像を新規生成するかどうか判定する
-	 *
-	 * @param req - Request
-	 * @param res - Response
-	 * @param requestQuery - URL クエリー情報
-	 *
-	 * @returns 新規生成する場合は true
-	 */
-	private judgeCreate(req: Request, res: Response, requestQuery: ThumbImageRequest.Query): boolean {
-		const requestHeaderSecFetchDest = req.get('Sec-Fetch-Dest');
-		if (requestHeaderSecFetchDest !== undefined) {
-			/* Fetch Metadata Request Headers 対応ブラウザ（Firefox 90+, Chrome 80+）https://caniuse.com/mdn-http_headers_sec-fetch-dest */
-			switch (req.get('Sec-Fetch-Site')) {
-				case 'same-origin':
-				case 'same-site': {
-					/* 自サイト内の埋め込みやリンク遷移時は新規画像生成を行う */
-					return true;
-				}
-				case 'none': {
-					this.logger.debug(`画像が URL 直打ち等でリクエストされたので元画像を表示: ${req.url}`);
-
-					res.append('Vary', 'Sec-Fetch-Site');
-					break;
-				}
-				default: {
-					/* Sec-Fetch-Site: cross-site */
-					const referrer = req.headers.referer;
-					if (referrer === undefined) {
-						this.logger.debug(`リファラーが送出されていないので元画像を表示: ${req.url}`);
-
-						res.append('Vary', 'Sec-Fetch-Site');
-					} else {
-						const referrerUrl = new URL(referrer);
-						const referrerOrigin = referrerUrl.origin;
-
-						if (this.#config.allow_origins.includes(referrerOrigin)) {
-							/* 開発環境からのアクセスの場合 */
-							return true;
-						}
-
-						this.logger.debug(`別サイトから '${requestHeaderSecFetchDest}' でリクエストされたので元画像を表示: ${req.url}`);
-
-						res.append('Vary', 'Sec-Fetch-Site');
-
-						if (['image', 'iframe', 'object', 'embed'].includes(requestHeaderSecFetchDest)) {
-							if (!this.#config.referrer_exclusion_origins.includes(referrerOrigin)) {
-								this.logger.warn(
-									`画像ファイル ${requestQuery.path} が別オリジンから埋め込まれている（リファラー: ${referrer} 、DEST: ${requestHeaderSecFetchDest} ）`,
-								);
-							}
-						}
-					}
-				}
-			}
-		} else {
-			/* Fetch Metadata Request Headers 未対応ブラウザ（Safari, IE） */
-			const referrer = req.headers.referer;
-			if (referrer === undefined) {
-				this.logger.debug(`リファラーが送出されていないので元画像を表示: ${req.url}`);
-
-				res.append('Vary', 'referer');
-			} else {
-				const referrerUrl = new URL(referrer);
-				const referrerOrigin = referrerUrl.origin;
-
-				if (this.#config.allow_origins.includes(referrerOrigin)) {
-					/* 同一オリジンのリファラーがある、ないし開発環境からのアクセスの場合 */
-					if (req.url !== `${referrerUrl.pathname}${referrerUrl.search}`) {
-						return true;
-					}
-
-					this.logger.debug(`リファラーが画像ファイル自身なので元画像を表示: ${req.url}`);
-
-					res.append('Vary', 'referer');
-				} else {
-					this.logger.debug(`別ドメインからリンクないし埋め込まれているので元画像を表示: ${req.url}`);
-
-					res.append('Vary', 'referer');
-
-					if (!this.#config.referrer_exclusion_origins.includes(referrerOrigin)) {
-						this.logger.warn(`画像ファイル ${requestQuery.path} が別オリジンから埋め込まれている（リファラー: ${referrer} ）`);
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	/**
 	 * 画像ファイル生成
 	 *
 	 * @param origFileFullPath - 元画像ファイルのフルパス
@@ -295,7 +253,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 	 *
 	 * @returns 生成した画像データ
 	 */
-	private async create(origFileFullPath: string, thumbImage: ThumbImage): Promise<Buffer> {
+	async #create(origFileFullPath: string, thumbImage: ThumbImage): Promise<Buffer> {
 		/* 新しい画像ファイルを生成 */
 		const createStartTime = Date.now();
 		const createdFileData = await ThumbImageUtil.createImage(origFileFullPath, thumbImage);
@@ -316,11 +274,11 @@ export default class ThumbImageRenderController extends Controller implements Co
 	 * @param req - Request
 	 * @param res - Response
 	 * @param httpResponse - HttpResponse
-	 * @param mime - MIMEタイプ
+	 * @param mimeType - MIME タイプ
 	 * @param fileData - 画像データ
 	 * @param fileMtime - 最終更新日時
 	 */
-	private response(req: Request, res: Response, httpResponse: HttpResponse, mime: string, fileData: Buffer, fileMtime?: Date): void {
+	#response(req: Request, res: Response, httpResponse: HttpResponse, mimeType: string, fileData: Buffer, fileMtime?: Date): void {
 		if (fileMtime !== undefined) {
 			/* キャッシュ確認 */
 			if (httpResponse.checkLastModified(req, fileMtime)) {
@@ -328,8 +286,33 @@ export default class ThumbImageRenderController extends Controller implements Co
 			}
 		}
 
-		res.setHeader('Content-Type', mime);
+		res.setHeader('Content-Type', mimeType);
 		res.setHeader('Cache-Control', this.#config.cache_control);
+
+		res.send(fileData);
+	}
+
+	/**
+	 * オリジナル画像ファイルを画面に出力する
+	 *
+	 * @param req - Request
+	 * @param res - Response
+	 * @param httpResponse - HttpResponse
+	 * @param fullPath - オリジナル画像のファイルパス
+	 */
+	async #responseOriginal(req: Request, res: Response, httpResponse: HttpResponse, fullPath: string): Promise<void> {
+		const fileData = await fs.promises.readFile(fullPath);
+		const extension = path.extname(fullPath);
+		const mimeType = Object.entries(this.#configCommon.static.headers.mime.extension).find(([, extensions]) =>
+			extensions.includes(extension.substring(1)),
+		)?.[0];
+		if (mimeType === undefined) {
+			this.logger.warn(`MIME タイプが定義されていない画像が指定: ${req.url}`);
+			httpResponse.send403();
+			return;
+		}
+
+		res.setHeader('Content-Type', mimeType);
 
 		res.send(fileData);
 	}

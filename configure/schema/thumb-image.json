@@ -3,7 +3,7 @@
 	"$id": "https://schema.w0s.jp/thumb-image.json",
 	"type": "object",
 	"title": "サムネイル画像",
-	"required": ["thumb_dir", "type", "quality_default", "cache_control", "allow_origins", "referrer_exclusion_origins"],
+	"required": ["thumb_dir", "type", "quality_default", "cache_control", "allow_origins"],
 	"properties": {
 		"thumb_dir": {
 			"type": "string",
@@ -55,14 +55,7 @@
 			"items": {
 				"type": "string"
 			},
-			"title": "開発環境のオリジン"
-		},
-		"referrer_exclusion_origins": {
-			"type": "array",
-			"items": {
-				"type": "string"
-			},
-			"title": "リファラーチェックで除外するオリジン"
+			"title": "CORS の許可オリジン"
 		}
 	},
 	"additionalProperties": false

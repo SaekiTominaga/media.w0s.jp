@@ -15,7 +15,7 @@ export default class ThumbImage {
 	#fileBasePath: string;
 
 	/* 画像タイプ */
-	#type: ImageType;
+	#type: string;
 
 	/* 画像の大きさ */
 	#size: ImageSize;
@@ -31,7 +31,7 @@ export default class ThumbImage {
 	 * @param size - 画像サイズ
 	 * @param quality - 画像品質
 	 */
-	constructor(imageInfo: ImageInfo, dir: string, fileBasePath: string, type: ImageType, size: ImageSize, quality?: number) {
+	constructor(imageInfo: ImageInfo, dir: string, fileBasePath: string, type: string, size: ImageSize, quality?: number) {
 		this.#imageInfo = imageInfo;
 		this.#dir = dir;
 		this.#fileBasePath = fileBasePath;
@@ -78,15 +78,15 @@ export default class ThumbImage {
 		return this.#getImageInfo().mime;
 	}
 
-	get altType(): ImageType | undefined {
+	get altType(): string | undefined {
 		return this.#getImageInfo().alt_type;
 	}
 
-	get type(): ImageType {
+	get type(): string {
 		return this.#type;
 	}
 
-	set type(type: ImageType) {
+	set type(type: string) {
 		this.#type = type;
 	}
 
