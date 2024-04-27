@@ -49,7 +49,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 		if (typeof req.query['type'] === 'string') {
 			type = req.query['type'] as ImageType;
 		} else {
-			/* type パラメーターが複数指定されていた場合、 accept リクエストヘッダーと見比べて先頭から順に適用可能な値を抜き出す（適用可能な値が存在しない場合、末尾の値を強制適用する） */
+			/* type パラメーターが複数指定されていた場合、accept リクエストヘッダーと見比べて先頭から順に適用可能な値を抜き出す（適用可能な値が存在しない場合、末尾の値を強制適用する） */
 			const types = req.query['type'] as ImageType[];
 			const acceptType = req.accepts(types);
 			type = acceptType !== false ? (acceptType as ImageType) : types.at(-1)!;
@@ -57,7 +57,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 		}
 
 		const requestQuery: ThumbImageRequest.Query = {
-			path: req.params['path'] ?? '', // TS エラー防止のためデフォルト値を設定しているが、 app.js 内の処理により path パラメーターは必ず存在する想定
+			path: req.params['path']!, // app.js 内の処理により path パラメーターは必ず存在する想定
 			type: type,
 			width: req.query['w'] !== undefined ? Number(req.query['w']) : null,
 			height: req.query['h'] !== undefined ? Number(req.query['h']) : null,
@@ -86,6 +86,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 		try {
 			thumbFileData = await fs.promises.readFile(thumbImage.fileFullPath);
 		} catch (e) {}
+
 		if (thumbFileData !== undefined) {
 			/* 画像ファイルが生成済みだった場合 */
 			const thumbFileMtime = fs.statSync(thumbImage.fileFullPath).mtime;
@@ -108,7 +109,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 				extensions.includes(origFileExtension.substring(1)),
 			)?.[0];
 			if (origFileMime === undefined) {
-				this.logger.info(`MIME が定義されていない画像が指定: ${req.url}`);
+				this.logger.info(`MIME タイプが定義されていない画像が指定: ${req.url}`);
 				httpResponse.send403();
 				return;
 			}
@@ -316,11 +317,11 @@ export default class ThumbImageRenderController extends Controller implements Co
 	 * @param req - Request
 	 * @param res - Response
 	 * @param httpResponse - HttpResponse
-	 * @param mime - MIMEタイプ
+	 * @param mimeType - MIME タイプ
 	 * @param fileData - 画像データ
 	 * @param fileMtime - 最終更新日時
 	 */
-	#response(req: Request, res: Response, httpResponse: HttpResponse, mime: string, fileData: Buffer, fileMtime?: Date): void {
+	#response(req: Request, res: Response, httpResponse: HttpResponse, mimeType: string, fileData: Buffer, fileMtime?: Date): void {
 		if (fileMtime !== undefined) {
 			/* キャッシュ確認 */
 			if (httpResponse.checkLastModified(req, fileMtime)) {
@@ -328,7 +329,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 			}
 		}
 
-		res.setHeader('Content-Type', mime);
+		res.setHeader('Content-Type', mimeType);
 		res.setHeader('Cache-Control', this.#config.cache_control);
 
 		res.send(fileData);
