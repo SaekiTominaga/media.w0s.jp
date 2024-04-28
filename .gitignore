@@ -1,9 +1,8 @@
+/.coverage/
 /.thumbimage/
 
 /configure/*.json
 /configure/type/
-
-/coverage/
 
 /log/
 
