@@ -1,5 +1,6 @@
+import { strict as assert } from 'node:assert';
+import { test } from 'node:test';
 import path from 'node:path';
-import { describe, expect, test, beforeEach } from '@jest/globals';
 import ThumbImage from '../dist/util/ThumbImage.js';
 
 const TYPE = {
@@ -26,112 +27,116 @@ const TYPE = {
 	},
 };
 
-describe('getter', () => {
+test('getter', async (t) => {
 	const thumbImage = new ThumbImage(TYPE, 'dir', 'path/to.jpg', 'avif', { width: 100, height: 200 }, 80);
 
-	test('fileBasePath', () => {
-		expect(thumbImage.fileBasePath).toBe('path/to.jpg');
+	await t.test('fileBasePath', () => {
+		assert.equal(thumbImage.fileBasePath, 'path/to.jpg');
 	});
 
-	test('filePath', () => {
-		expect(thumbImage.filePath).toBe('path/to.jpg@s=100x200;q=80.avif');
+	await t.test('filePath', () => {
+		assert.equal(thumbImage.filePath, 'path/to.jpg@s=100x200;q=80.avif');
 	});
 
-	test('fileFullPath', () => {
-		expect(thumbImage.fileFullPath).toBe(path.resolve('dir/path/to.jpg@s=100x200;q=80.avif'));
+	await t.test('fileFullPath', () => {
+		assert.equal(thumbImage.fileFullPath, path.resolve('dir/path/to.jpg@s=100x200;q=80.avif'));
 	});
 
-	test('mime', () => {
-		expect(thumbImage.mime).toBe('image/avif');
+	await t.test('mime', () => {
+		assert.equal(thumbImage.mime, 'image/avif');
 	});
 
-	test('altType', () => {
-		expect(thumbImage.altType).toBe('webp');
+	await t.test('altType', () => {
+		assert.equal(thumbImage.altType, 'webp');
 	});
 
-	test('type', () => {
-		expect(thumbImage.type).toBe('avif');
+	await t.test('type', () => {
+		assert.equal(thumbImage.type, 'avif');
 	});
 
-	test('size.width', () => {
-		expect(thumbImage.size.width).toBe(100);
+	await t.test('size.width', () => {
+		assert.equal(thumbImage.size.width, 100);
 	});
 
-	test('size.height', () => {
-		expect(thumbImage.size.height).toBe(200);
+	await t.test('size.height', () => {
+		assert.equal(thumbImage.size.height, 200);
 	});
 
-	test('quality', () => {
-		expect(thumbImage.quality).toBe(80);
+	await t.test('quality', () => {
+		assert.equal(thumbImage.quality, 80);
 	});
 });
 
-describe('setter', () => {
+test('setter', async (t) => {
 	const thumbImage = new ThumbImage(TYPE, 'dir', 'path/to.jpg', 'avif', { width: 100, height: 200 }, 80);
 
-	beforeEach(() => {
+	t.beforeEach(() => {
 		thumbImage.type = 'webp';
 		thumbImage.size = { width: 200, height: 400 };
 		thumbImage.quality = 50;
 	});
 
-	test('fileBasePath', () => {
-		expect(thumbImage.fileBasePath).toBe('path/to.jpg');
+	await t.test('fileBasePath', () => {
+		assert.equal(thumbImage.fileBasePath, 'path/to.jpg');
 	});
 
-	test('filePath', () => {
-		expect(thumbImage.filePath).toBe('path/to.jpg@s=200x400;q=50.webp');
+	await t.test('filePath', () => {
+		assert.equal(thumbImage.filePath, 'path/to.jpg@s=200x400;q=50.webp');
 	});
 
-	test('fileFullPath', () => {
-		expect(thumbImage.fileFullPath).toBe(path.resolve('dir/path/to.jpg@s=200x400;q=50.webp'));
+	await t.test('fileFullPath', () => {
+		assert.equal(thumbImage.fileFullPath, path.resolve('dir/path/to.jpg@s=200x400;q=50.webp'));
 	});
 
-	test('mime', () => {
-		expect(thumbImage.mime).toBe('image/webp');
+	await t.test('mime', () => {
+		assert.equal(thumbImage.mime, 'image/webp');
 	});
 
-	test('altType', () => {
-		expect(thumbImage.altType).toBeUndefined();
+	await t.test('altType', () => {
+		assert.equal(thumbImage.altType, undefined);
 	});
 
-	test('type', () => {
-		expect(thumbImage.type).toBe('webp');
+	await t.test('type', () => {
+		assert.equal(thumbImage.type, 'webp');
 	});
 
-	test('size.width', () => {
-		expect(thumbImage.size.width).toBe(200);
+	await t.test('size.width', () => {
+		assert.equal(thumbImage.size.width, 200);
 	});
 
-	test('size.height', () => {
-		expect(thumbImage.size.height).toBe(400);
+	await t.test('size.height', () => {
+		assert.equal(thumbImage.size.height, 400);
 	});
 
-	test('quality', () => {
-		expect(thumbImage.quality).toBe(50);
+	await t.test('quality', () => {
+		assert.equal(thumbImage.quality, 50);
 	});
 });
 
-describe('filePath', () => {
+test('filePath', async (t) => {
 	const thumbImage = new ThumbImage(TYPE, 'dir', 'path/to.jpg', 'avif', { width: 100, height: 200 }, 80);
 
-	beforeEach(() => {
+	t.beforeEach(() => {
 		thumbImage.type = 'avif';
 	});
 
-	test('invalid image type', () => {
+	await t.test('invalid image type', () => {
 		thumbImage.type = 'foo';
-		expect(() => {
-			thumbImage.mime;
-		}).toThrow('Specified image type information is not registered.');
+
+		assert.throws(
+			() => {
+				thumbImage.mime;
+			},
+			{ name: 'Error', message: 'Specified image type information is not registered.' },
+		);
 	});
 
-	test('quality: true', () => {
-		expect(thumbImage.filePath).toBe('path/to.jpg@s=100x200;q=80.avif');
+	await t.test('quality: true', () => {
+		assert.equal(thumbImage.filePath, 'path/to.jpg@s=100x200;q=80.avif');
 	});
 
-	test('quality: false', () => {
+	await t.test('quality: false', () => {
 		thumbImage.type = 'png';
-		expect(thumbImage.filePath).toBe('path/to.jpg@s=100x200.png');
+		assert.equal(thumbImage.filePath, 'path/to.jpg@s=100x200.png');
 	});
 });
