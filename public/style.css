@@ -53,6 +53,18 @@ code {
 	tab-size: 4;
 }
 
+.list {
+	padding-inline-start: 1em;
+
+	& > li + li {
+		margin-block-start: 1em;
+	}
+
+	& :is(p, ul, table) {
+		margin-block: 0.5em;
+	}
+}
+
 .link {
 	& a {
 		--bullet-size: 0.75em;
@@ -85,23 +97,6 @@ code {
 			margin-inline-end: 0.5em;
 			content: "👈";
 		}
-	}
-}
-
-.details {
-	margin-block-start: 2em;
-	padding-inline-start: 1em;
-
-	& :is(p, ul, table) {
-		margin-block: 0.5em;
-	}
-
-	& > li > ul {
-		padding-inline-start: 1em;
-	}
-
-	& > li + li {
-		margin-block-start: 1em;
 	}
 }
 

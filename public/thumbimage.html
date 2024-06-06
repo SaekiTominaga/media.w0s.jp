@@ -11,14 +11,9 @@
 		</header>
 
 		<main>
-			<ul class="details">
+			<ul class="list">
 				<li>Generates and displays a thumbnail image of the size specified by the URL parameter.</li>
-				<li>
-					Check the <code>Sec-Fetch-Dest</code> header to prevent generation when URLs are typed directly or embedded from other sites without permission.
-					<ul>
-						<li>For browsers that do not support the <code>Sec-Fetch-Dest</code> header, substitute a check in the <code>referer</code> header.</li>
-					</ul>
-				</li>
+				<li>The <code>Origin</code> header is checked in the program. This prevents the image generation process from running if the URL is entered directly or embedded from another site without permission.</li>
 				<li>
 					If a thumbnail image has already been generated (in the case of the second or later requests), the generated image will be displayed instead of
 					processing the generation.
@@ -38,7 +33,7 @@
 					>
 				</p>
 
-				<ul class="details">
+				<ul class="list">
 					<li>
 						The type, width, height, and quality can be specified in the URL parameters.
 						<table>
