@@ -13,8 +13,8 @@
 body {
 	box-sizing: border-box;
 	margin: auto;
-	padding: 0 2vw;
-	inline-size: min(100vw, 1280px);
+	padding: 0 2vi;
+	inline-size: min(100vi, 1280px);
 }
 
 body > footer {
@@ -112,5 +112,5 @@ code {
 
 .sample-spec dt {
 	padding-inline-end: 1em;
-	font-weight: bold;
+	font-weight: 700;
 }
