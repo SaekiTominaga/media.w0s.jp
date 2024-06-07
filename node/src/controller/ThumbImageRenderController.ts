@@ -303,9 +303,9 @@ export default class ThumbImageRenderController extends Controller implements Co
 	async #responseOriginal(req: Request, res: Response, httpResponse: HttpResponse, fullPath: string): Promise<void> {
 		const fileData = await fs.promises.readFile(fullPath);
 		const extension = path.extname(fullPath);
-		const mimeType = Object.entries(this.#configCommon.static.headers.mime.extension).find(([, extensions]) =>
-			extensions.includes(extension.substring(1)),
-		)?.[0];
+		const mimeType = Object.entries(this.#configCommon.static.headers.mime_type.extension)
+			.find(([fileExtension]) => fileExtension === extension)
+			?.at(1);
 		if (mimeType === undefined) {
 			this.logger.warn(`MIME タイプが定義されていない画像が指定: ${req.url}`);
 			httpResponse.send403();
