@@ -3,13 +3,25 @@
 	"$id": "https://schema.w0s.jp/common.json",
 	"type": "object",
 	"title": "media.w0s.jp",
-	"required": ["port", "response", "static", "errorpage", "logger", "auth", "sqlite"],
+	"required": ["port", "extension", "response", "static", "errorpage", "logger", "auth", "sqlite"],
 	"properties": {
 		"port": {
 			"type": "integer",
 			"minimum": 1,
 			"maximum": 65535,
 			"title": "HTTP サーバーのポート番号"
+		},
+		"extension": {
+			"type": "object",
+			"title": "ファイル拡張子",
+			"required": ["brotli"],
+			"properties": {
+				"brotli": {
+					"type": "string",
+					"title": "Brotli"
+				}
+			},
+			"additionalProperties": false
 		},
 		"response": {
 			"type": "object",
@@ -97,33 +109,27 @@
 				"headers": {
 					"type": "object",
 					"title": "レスポンスヘッダー関連",
-					"required": ["mime"],
+					"required": ["mime_type"],
 					"properties": {
-						"mime": {
+						"mime_type": {
 							"type": "object",
 							"required": ["path", "extension"],
-							"title": "MIME 定義",
+							"title": "MIME タイプ定義",
 							"properties": {
 								"path": {
 									"type": "object",
-									"title": "MIME とファイルパスの紐付け",
+									"title": "MIME タイプとファイルパスの紐付け",
 									"additionalProperties": {
-										"type": "array",
-										"items": {
-											"type": "string"
-										},
-										"title": "ファイルパス"
+										"type": "string",
+										"title": "ファイルパス（e.g. index.html）"
 									}
 								},
 								"extension": {
 									"type": "object",
-									"title": "MIME と拡張子の紐付け",
+									"title": "MIME タイプと拡張子の紐付け",
 									"additionalProperties": {
-										"type": "array",
-										"items": {
-											"type": "string"
-										},
-										"title": "拡張子（ドットなし）"
+										"type": "string",
+										"title": "拡張子（e.g. .html）"
 									}
 								}
 							},
