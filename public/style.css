@@ -6,7 +6,7 @@
 	outline: 1px solid #4d90fe;
 }
 
-:any-link:hover {
+:any-link {
 	&:hover {
 		color: var(--anchor-hover-color);
 	}
@@ -14,8 +14,8 @@
 
 body {
 	box-sizing: border-box;
-	margin: auto;
-	padding: 0 2vi;
+	margin-inline: auto;
+	padding-inline: 2vi;
 	inline-size: min(100vi, 1280px);
 
 	& > footer {
