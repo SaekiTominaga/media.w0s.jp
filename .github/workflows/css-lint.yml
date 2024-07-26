@@ -5,13 +5,13 @@ on:
       - main
     paths:
       - 'public/*.css'
-      - '.stylelintrc.json'
+      - 'stylelint.config.js'
   push:
     branches:
       - main
     paths:
       - 'public/*.css'
-      - '.stylelintrc.json'
+      - 'stylelint.config.js'
   workflow_dispatch:
 
 jobs:
