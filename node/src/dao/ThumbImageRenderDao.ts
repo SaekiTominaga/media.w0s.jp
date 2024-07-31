@@ -53,6 +53,10 @@ export default class ThumbImageRenderDao {
 	 * @returns 登録されたデータ数
 	 */
 	async insert(filePath: string, type: string, size: ImageSize, quality: number | null = null): Promise<number> {
+		interface Select {
+			count: number;
+		}
+
 		const dbh = await this.getDbh();
 
 		const sthSelect = await dbh.prepare(`
@@ -74,37 +78,40 @@ export default class ThumbImageRenderDao {
 			':height': size.height,
 			':quality': quality,
 		});
-		const row = await sthSelect.get();
+		const row: Select | undefined = await sthSelect.get();
 		await sthSelect.finalize();
 
+		if (row === undefined || row.count > 0 /* 既にキューにある場合 */) {
+			return 0;
+		}
+
 		let insertedCount = 0; // 登録されたデータ数
-		if (row.count === 0) {
-			await dbh.exec('BEGIN');
-			try {
-				const sthInsert = await dbh.prepare(`
+
+		await dbh.exec('BEGIN');
+		try {
+			const sthInsert = await dbh.prepare(`
 					INSERT INTO
 						d_queue
 						(file_path, file_type, width, height, quality, registered_at)
 					VALUES
 						(:file_path, :type, :width, :height, :quality, :registered_at)
 				`);
-				const result = await sthInsert.run({
-					':file_path': filePath,
-					':type': type,
-					':width': size.width,
-					':height': size.height,
-					':quality': quality,
-					':registered_at': DbUtil.dateToUnix(),
-				});
-				await sthInsert.finalize();
+			const result = await sthInsert.run({
+				':file_path': filePath,
+				':type': type,
+				':width': size.width,
+				':height': size.height,
+				':quality': quality,
+				':registered_at': DbUtil.dateToUnix(),
+			});
+			await sthInsert.finalize();
 
-				insertedCount = result.changes ?? 0;
+			insertedCount = result.changes ?? 0;
 
-				await dbh.exec('COMMIT');
-			} catch (e) {
-				await dbh.exec('ROLLBACK');
-				throw e;
-			}
+			await dbh.exec('COMMIT');
+		} catch (e) {
+			await dbh.exec('ROLLBACK');
+			throw e;
 		}
 
 		return insertedCount;

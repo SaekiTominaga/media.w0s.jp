@@ -28,7 +28,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 		super();
 
 		this.#configCommon = configCommon;
-		this.#config = JSON.parse(fs.readFileSync('configure/thumb-image.json', 'utf8'));
+		this.#config = JSON.parse(fs.readFileSync('configure/thumb-image.json', 'utf8')) as Configure;
 	}
 
 	/**

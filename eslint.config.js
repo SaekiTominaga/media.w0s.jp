@@ -1,11 +1,18 @@
 // @ts-check
 
-import tseslint from 'typescript-eslint';
 import w0sConfig from '@w0s/eslint-config';
 
 /** @type {import("@typescript-eslint/utils/ts-eslint").FlatConfig.ConfigArray} */
-export default tseslint.config(
+export default [
 	...w0sConfig,
+	{
+		files: ['node/src/controller/**/*.ts'],
+		rules: {
+			'@typescript-eslint/dot-notation': 'off',
+			'@typescript-eslint/no-non-null-assertion': 'off',
+			'@typescript-eslint/no-unsafe-member-access': 'off',
+		},
+	},
 	{
 		files: ['node/src/app.ts'],
 		rules: {
@@ -18,4 +25,4 @@ export default tseslint.config(
 			semi: 'off',
 		},
 	},
-);
+];

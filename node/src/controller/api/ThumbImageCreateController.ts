@@ -27,7 +27,7 @@ export default class ThumbImageCreateController extends Controller implements Co
 		super();
 
 		this.#configCommon = configCommon;
-		this.#config = JSON.parse(fs.readFileSync('configure/thumb-image.json', 'utf8'));
+		this.#config = JSON.parse(fs.readFileSync('configure/thumb-image.json', 'utf8')) as Configure;
 	}
 
 	/**
@@ -53,11 +53,11 @@ export default class ThumbImageCreateController extends Controller implements Co
 		}
 
 		const requestQuery: ThumbImageCreateRequest.Query = {
-			file_path: req.body.file_path ?? null,
-			type: req.body.type ?? null,
-			width: Number(req.body.width),
-			height: Number(req.body.height),
-			quality: Number(req.body.quality),
+			file_path: req.body['file_path'] as string,
+			type: req.body['type'] as string,
+			width: Number(req.body['width']),
+			height: Number(req.body['height']),
+			quality: Number(req.body['quality']),
 		};
 
 		const origFileFullPath = path.resolve(`${this.#configCommon.static.root}/${this.#configCommon.static.directory.image}/${requestQuery.file_path}`);

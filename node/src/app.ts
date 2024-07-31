@@ -4,10 +4,10 @@ import compression from 'compression';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import Log4js from 'log4js';
 import qs from 'qs';
+import type { MediaW0SJp as Configure } from '../../configure/type/common.js';
 import BlogUploadController from './controller/api/BlogUploadController.js';
 import ThumbImageCreateController from './controller/api/ThumbImageCreateController.js';
 import ThumbImageRenderController from './controller/ThumbImageRenderController.js';
-import type { MediaW0SJp as Configure } from '../../configure/type/common.js';
 
 /* 設定ファイル読み込み */
 const config = JSON.parse((await fs.promises.readFile('configure/common.json')).toString()) as Configure;
