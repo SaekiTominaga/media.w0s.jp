@@ -65,6 +65,7 @@ export default class ThumbImageUtil {
 		/* sharp 設定 */
 		Sharp.cache(false);
 
+		// eslint-disable-next-line new-cap
 		const sharp = Sharp(origFilePath);
 		sharp.resize(thumbImage.size.width, thumbImage.size.height);
 		switch (thumbImage.type) {

@@ -31,7 +31,7 @@ export default class BlogUploadController extends Controller implements Controll
 		super();
 
 		this.#configCommon = configCommon;
-		this.#config = JSON.parse(fs.readFileSync('configure/blog-upload.json', 'utf8'));
+		this.#config = JSON.parse(fs.readFileSync('configure/blog-upload.json', 'utf8')) as Configure;
 	}
 
 	/**
@@ -53,8 +53,8 @@ export default class BlogUploadController extends Controller implements Controll
 			this.logger.error('パラメーター不正', validationResult.array());
 
 			const responseJson: ResponseJson = {
-				name: req.body.name,
-				size: req.body.size,
+				name: req.body['name'] as string,
+				size: Number(req.body['size']),
 				code: this.#config.response.request_query.code,
 				message: this.#config.response.request_query.message,
 			};
@@ -63,11 +63,11 @@ export default class BlogUploadController extends Controller implements Controll
 		}
 
 		const requestQuery: BlogUploadRequest.Query = {
-			file_name: req.body.name,
-			mime: req.body.type,
-			temp_path: req.body.temppath,
-			size: Number(req.body.size),
-			overwrite: Boolean(req.body.overwrite),
+			file_name: req.body['name'] as string,
+			mime: req.body['type'] as string,
+			temp_path: req.body['temppath'] as string,
+			size: Number(req.body['size']),
+			overwrite: Boolean(req.body['overwrite']),
 		};
 
 		let responseJson: ResponseJson;
