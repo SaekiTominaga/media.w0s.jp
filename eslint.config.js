@@ -6,6 +6,12 @@ import w0sConfig from '@w0s/eslint-config';
 export default [
 	...w0sConfig,
 	{
+		files: ['node/__tests__/**/*.test.js'],
+		rules: {
+			'import/no-unresolved': 'off', // Github Actions 環境では /dist/ ファイルが存在しないためテスト不可
+		},
+	},
+	{
 		files: ['node/src/controller/**/*.ts'],
 		rules: {
 			'@typescript-eslint/dot-notation': 'off',
