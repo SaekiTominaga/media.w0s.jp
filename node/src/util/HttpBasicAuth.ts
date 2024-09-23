@@ -3,7 +3,7 @@ import basicAuth from 'basic-auth';
 import htpasswd from 'htpasswd-js';
 import type { Request } from 'express';
 
-export interface Credentials {
+interface Credentials {
 	username: string;
 	password: string;
 }
