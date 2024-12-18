@@ -10,7 +10,7 @@
 		"test": "node --test --experimental-test-coverage",
 		"css-lint": "stylelint public/*.css",
 		"format": "prettier -w .",
-		"github-actions-lint": "yamllint .github/workflows/*.yml"
+		"yaml-lint": "yamllint .github/workflows/*.yml"
 	},
 	"dependencies": {
 		"@log4js-node/smtp": "^2.0.8",
