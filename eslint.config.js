@@ -28,10 +28,4 @@ export default [
 			'@typescript-eslint/no-misused-promises': 'off',
 		},
 	},
-	{
-		files: ['node/src/*Interface.ts'],
-		rules: {
-			semi: 'off',
-		},
-	},
 ];
