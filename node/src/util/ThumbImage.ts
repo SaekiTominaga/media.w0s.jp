@@ -1,5 +1,5 @@
 import path from 'node:path';
-import type { NoName2 as ImageInfo } from '../../../configure/type/thumb-image.js';
+import config, { type Info as ImageInfo } from '../config/thumb-image.js';
 
 /**
  * サムネイル画像
@@ -24,21 +24,25 @@ export default class ThumbImage {
 	#quality: number | undefined;
 
 	/**
-	 * @param imageInfo - ファイルタイプ毎の MIME タイプや拡張子の定義
-	 * @param dir - サムネイル画像を保存するルートディレクトリ
-	 * @param fileBasePath - ベースとなるファイルパス
-	 * @param type - 画像タイプ
-	 * @param size - 画像サイズ
-	 * @param quality - 画像品質
+	 * @param option -
+	 * @param option.fileBasePath - ベースとなるファイルパス
+	 * @param option.type - 画像タイプ
+	 * @param option.size - 画像サイズ
+	 * @param option.quality - 画像品質
 	 */
-	constructor(imageInfo: ImageInfo, dir: string, fileBasePath: string, type: string, size: ImageSize, quality?: number) {
-		this.#imageInfo = imageInfo;
+	constructor(option: { fileBasePath: string; type: string; size: ImageSize; quality?: number }) {
+		const dir = process.env['THUMBIMAGE_DIR'];
+		if (dir === undefined) {
+			throw new Error('thumbimage directory not defined');
+		}
 		this.#dir = dir;
-		this.#fileBasePath = fileBasePath;
 
-		this.#type = type;
-		this.#size = size;
-		this.#quality = quality;
+		this.#imageInfo = config.type;
+		this.#fileBasePath = option.fileBasePath;
+
+		this.#type = option.type;
+		this.#size = option.size;
+		this.#quality = option.quality;
 	}
 
 	/**
@@ -79,7 +83,7 @@ export default class ThumbImage {
 	}
 
 	get altType(): string | undefined {
-		return this.#getImageInfo().alt_type;
+		return this.#getImageInfo().altType;
 	}
 
 	get type(): string {

@@ -3,32 +3,10 @@ import { test } from 'node:test';
 import path from 'node:path';
 import ThumbImage from '../dist/util/ThumbImage.js';
 
-const TYPE = {
-	avif: {
-		mime: 'image/avif',
-		extension: 'avif',
-		quality: true,
-		alt_type: 'webp',
-	},
-	webp: {
-		mime: 'image/webp',
-		extension: 'webp',
-		quality: true,
-	},
-	jpeg: {
-		mime: 'image/jpeg',
-		extension: 'jpeg',
-		quality: true,
-	},
-	png: {
-		mime: 'image/png',
-		extension: 'png',
-		quality: false,
-	},
-};
+process.env.THUMBIMAGE_DIR = 'dir';
 
 test('getter', async (t) => {
-	const thumbImage = new ThumbImage(TYPE, 'dir', 'path/to.jpg', 'avif', { width: 100, height: 200 }, 80);
+	const thumbImage = new ThumbImage({ fileBasePath: 'path/to.jpg', type: 'avif', size: { width: 100, height: 200 }, quality: 80 });
 
 	await t.test('fileBasePath', () => {
 		assert.equal(thumbImage.fileBasePath, 'path/to.jpg');
@@ -68,7 +46,7 @@ test('getter', async (t) => {
 });
 
 test('setter', async (t) => {
-	const thumbImage = new ThumbImage(TYPE, 'dir', 'path/to.jpg', 'avif', { width: 100, height: 200 }, 80);
+	const thumbImage = new ThumbImage({ fileBasePath: 'path/to.jpg', type: 'avif', size: { width: 100, height: 200 }, quality: 80 });
 
 	t.beforeEach(() => {
 		thumbImage.type = 'webp';
@@ -114,7 +92,7 @@ test('setter', async (t) => {
 });
 
 test('filePath', async (t) => {
-	const thumbImage = new ThumbImage(TYPE, 'dir', 'path/to.jpg', 'avif', { width: 100, height: 200 }, 80);
+	const thumbImage = new ThumbImage({ fileBasePath: 'path/to.jpg', type: 'avif', size: { width: 100, height: 200 }, quality: 80 });
 
 	t.beforeEach(() => {
 		thumbImage.type = 'avif';

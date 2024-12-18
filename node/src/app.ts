@@ -1,19 +1,25 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import compression from 'compression';
+import * as dotenv from 'dotenv';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import Log4js from 'log4js';
 import qs from 'qs';
-import type { MediaW0SJp as Configure } from '../../configure/type/common.js';
+import config from './config/express.js';
 import BlogUploadController from './controller/api/BlogUploadController.js';
 import ThumbImageCreateController from './controller/api/ThumbImageCreateController.js';
 import ThumbImageRenderController from './controller/ThumbImageRenderController.js';
 
-/* 設定ファイル読み込み */
-const config = JSON.parse((await fs.promises.readFile('configure/common.json')).toString()) as Configure;
+dotenv.config({
+	path: process.env['NODE_ENV'] === 'production' ? '.env.production' : '.env.development',
+});
 
-/* Logger 設定 */
-Log4js.configure(config.logger.path);
+/* Logger */
+const loggerFilePath = process.env['LOGGER'];
+if (loggerFilePath === undefined) {
+	throw new Error('Logger file path not defined');
+}
+Log4js.configure(loggerFilePath);
 const logger = Log4js.getLogger();
 
 const app = express();
@@ -33,7 +39,7 @@ app.use(
 		/* Report */
 		res.setHeader(
 			'Reporting-Endpoints',
-			Object.entries(config.response.header.reporting_endpoints)
+			Object.entries(config.response.header.reportingEndpoints)
 				.map((endpoint) => `${endpoint.at(0) ?? ''}="${endpoint.at(1) ?? ''}"`)
 				.join(','),
 		);
@@ -55,15 +61,13 @@ app.use(
 		let requestFilePath: string | undefined; // 実ファイルパス
 		if (requestPath.endsWith('/')) {
 			/* ディレクトリトップ（e.g. /foo/ ） */
-			const fileName = config.static.indexes?.find((name) => fs.existsSync(`${config.static.root}${requestPath}${name}`));
-			if (fileName !== undefined) {
-				requestFilePath = `${requestPath}${fileName}`;
+			if (fs.existsSync(`${config.static.root}${requestPath}${config.static.index}`)) {
+				requestFilePath = `${requestPath}${config.static.index}`;
 			}
 		} else if (path.extname(requestPath) === '') {
 			/* 拡張子のない URL（e.g. /foo ） */
-			const extension = config.static.extensions?.find((ext) => fs.existsSync(`${config.static.root}${requestPath}${ext}`));
-			if (extension !== undefined) {
-				requestFilePath = `${requestPath}${extension}`;
+			if (fs.existsSync(`${config.static.root}${requestPath}${config.static.extension}`)) {
+				requestFilePath = `${requestPath}${config.static.extension}`;
 			}
 		} else if (fs.existsSync(`${config.static.root}${requestPath}`)) {
 			/* 拡張子のある URL（e.g. /foo.txt ） */
@@ -82,12 +86,16 @@ app.use(
 		next();
 	},
 	express.static(config.static.root, {
-		extensions: config.static.extensions?.map((ext) => /* 拡張子の . は不要 */ ext.substring(1)),
-		index: config.static.indexes,
+		extensions: [config.static.extension.substring(1)],
+		index: [config.static.index],
 		setHeaders: (res, localPath) => {
 			const requestUrl = res.req.url; // リクエストパス e.g. ('/foo.html.br')
-			const requestUrlOrigin = requestUrl.endsWith(config.extension.brotli) ? requestUrl.substring(0, requestUrl.length - config.extension.brotli.length) : requestUrl; // 元ファイル（圧縮ファイルではない）のリクエストパス (e.g. '/foo.html')
-			const localPathOrigin = localPath.endsWith(config.extension.brotli) ? localPath.substring(0, localPath.length - config.extension.brotli.length) : localPath; // 元ファイルの絶対パス (e.g. '/var/www/public/foo.html')
+			const requestUrlOrigin = requestUrl.endsWith(config.extension.brotli)
+				? requestUrl.substring(0, requestUrl.length - config.extension.brotli.length)
+				: requestUrl; // 元ファイル（圧縮ファイルではない）のリクエストパス (e.g. '/foo.html')
+			const localPathOrigin = localPath.endsWith(config.extension.brotli)
+				? localPath.substring(0, localPath.length - config.extension.brotli.length)
+				: localPath; // 元ファイルの絶対パス (e.g. '/var/www/public/foo.html')
 			const extensionOrigin = path.extname(localPathOrigin); // 元ファイルの拡張子 (e.g. '.html')
 
 			/* Content-Type */
@@ -104,18 +112,15 @@ app.use(
 			res.setHeader('Content-Type', mimeType ?? 'application/octet-stream');
 
 			/* Cache-Control */
-			if (config.static.headers.cache_control !== undefined) {
-				const cacheControl =
-					config.static.headers.cache_control.path.find((ccPath) => ccPath.paths.includes(requestUrlOrigin))?.value ??
-					config.static.headers.cache_control.extension.find((ccExt) => ccExt.extensions.includes(extensionOrigin))?.value ??
-					config.static.headers.cache_control.default;
-
-				res.setHeader('Cache-Control', cacheControl);
-			}
+			const cacheControl =
+				config.static.headers.cacheControl.path.find((ccPath) => ccPath.paths.includes(requestUrlOrigin))?.value ??
+				config.static.headers.cacheControl.extension.find((ccExt) => ccExt.extensions.includes(extensionOrigin))?.value ??
+				config.static.headers.cacheControl.default;
+			res.setHeader('Cache-Control', cacheControl);
 
 			/* CSP */
 			if (['.html', '.xhtml'].includes(extensionOrigin)) {
-				res.setHeader('Content-Security-Policy', config.response.header.csp_html);
+				res.setHeader('Content-Security-Policy', config.response.header.cspHtml);
 			}
 		},
 	}),
@@ -126,7 +131,7 @@ app.use(
  */
 app.get('/thumbimage/:path([^?]+)', async (req, res, next) => {
 	try {
-		await new ThumbImageRenderController(config).execute(req, res);
+		await new ThumbImageRenderController().execute(req, res);
 	} catch (e) {
 		next(e);
 	}
@@ -137,7 +142,7 @@ app.get('/thumbimage/:path([^?]+)', async (req, res, next) => {
  */
 app.post('/thumbimage/create', async (req, res, next) => {
 	try {
-		await new ThumbImageCreateController(config).execute(req, res);
+		await new ThumbImageCreateController().execute(req, res);
 	} catch (e) {
 		next(e);
 	}
@@ -148,7 +153,7 @@ app.post('/thumbimage/create', async (req, res, next) => {
  */
 app.post('/blog/upload', async (req, res, next) => {
 	try {
-		await new BlogUploadController(config).execute(req, res);
+		await new BlogUploadController().execute(req, res);
 	} catch (e) {
 		next(e);
 	}
@@ -160,7 +165,12 @@ app.post('/blog/upload', async (req, res, next) => {
 app.use((req, res): void => {
 	logger.warn(`404 Not Found: ${req.method} ${req.url}`);
 
-	res.status(404).sendFile(path.resolve(config.errorpage.path_404));
+	const pagePath = process.env['ERRORPAGE_404'];
+	if (pagePath === undefined) {
+		throw new Error("404 page's file path not defined");
+	}
+
+	res.status(404).sendFile(path.resolve(pagePath));
 });
 app.use((err: Error, req: Request, res: Response, _next: NextFunction /* eslint-disable-line @typescript-eslint/no-unused-vars */): void => {
 	logger.fatal(`${req.method} ${req.url}`, err.stack);
@@ -172,9 +182,12 @@ app.use((err: Error, req: Request, res: Response, _next: NextFunction /* eslint-
 <h1>500 Internal Server Error</h1>`);
 });
 
-/**
- * HTTP サーバー起動
- */
-app.listen(config.port, () => {
-	logger.info(`Example app listening at http://localhost:${String(config.port)}`);
+/* HTTP Server */
+const port = process.env['PORT'];
+if (port === undefined) {
+	throw new Error('Port not defined');
+}
+
+app.listen(Number(port), () => {
+	logger.info(`Server is running on http://localhost:${port}`);
 });

@@ -3,6 +3,9 @@ import path from 'node:path';
 import FileSizeFormat from '@w0s/file-size-format';
 import type { Request, Response } from 'express';
 import { imageSize } from 'image-size';
+import configExpress from '../config/express.js';
+import configSqlite from '../config/sqlite.js';
+import configThumbimage from '../config/thumb-image.js';
 import Controller from '../Controller.js';
 import type ControllerInterface from '../ControllerInterface.js';
 import HttpResponse from '../util/HttpResponse.js';
@@ -10,35 +13,19 @@ import ThumbImage from '../util/ThumbImage.js';
 import ThumbImageRenderDao from '../dao/ThumbImageRenderDao.js';
 import ThumbImageValidator from '../validator/ThumbImageValidator.js';
 import ThumbImageUtil from '../util/ThumbImageUtil.js';
-import type { MediaW0SJp as ConfigureCommon } from '../../../configure/type/common.js';
-import type { NoName as Configure } from '../../../configure/type/thumb-image.js';
 
 /**
  * サムネイル画像表示
  */
 export default class ThumbImageRenderController extends Controller implements ControllerInterface {
-	#configCommon: ConfigureCommon;
-
-	#config: Configure;
-
-	/**
-	 * @param configCommon - 共通設定
-	 */
-	constructor(configCommon: ConfigureCommon) {
-		super();
-
-		this.#configCommon = configCommon;
-		this.#config = JSON.parse(fs.readFileSync('configure/thumb-image.json', 'utf8')) as Configure;
-	}
-
 	/**
 	 * @param req - Request
 	 * @param res - Response
 	 */
 	async execute(req: Request, res: Response): Promise<void> {
-		const httpResponse = new HttpResponse(res, this.#configCommon);
+		const httpResponse = new HttpResponse(res);
 
-		const validationResult = await new ThumbImageValidator(req, this.#config).render();
+		const validationResult = await new ThumbImageValidator(req).render();
 		if (!validationResult.isEmpty()) {
 			this.logger.warn('パラメーター不正', validationResult.array());
 			httpResponse.send403();
@@ -50,10 +37,10 @@ export default class ThumbImageRenderController extends Controller implements Co
 			type: this.#decideType(req),
 			width: req.query['w'] !== undefined ? Number(req.query['w']) : null,
 			height: req.query['h'] !== undefined ? Number(req.query['h']) : null,
-			quality: req.query['quality'] !== undefined ? Number(req.query['quality']) : this.#config.quality_default,
+			quality: req.query['quality'] !== undefined ? Number(req.query['quality']) : configThumbimage.qualityDefault,
 		};
 
-		const origFileFullPath = path.resolve(`${this.#configCommon.static.root}/${this.#configCommon.static.directory.image}/${requestQuery.path}`);
+		const origFileFullPath = path.resolve(`${configExpress.static.root}/${configExpress.static.directory.image}/${requestQuery.path}`);
 		if (!fs.existsSync(origFileFullPath)) {
 			this.logger.warn(`存在しないファイルパスが指定: ${req.url}`);
 			httpResponse.send404();
@@ -73,7 +60,12 @@ export default class ThumbImageRenderController extends Controller implements Co
 
 		const origFileMtime = (await fs.promises.stat(origFileFullPath)).mtime;
 
-		const thumbImage = new ThumbImage(this.#config.type, this.#config.thumb_dir, requestQuery.path, requestQuery.type, thumbSize, requestQuery.quality);
+		const thumbImage = new ThumbImage({
+			fileBasePath: requestQuery.path,
+			type: requestQuery.type,
+			size: thumbSize,
+			quality: requestQuery.quality,
+		});
 
 		let thumbFileData: Buffer | undefined;
 		try {
@@ -99,7 +91,12 @@ export default class ThumbImageRenderController extends Controller implements Co
 		const thumbTypeAlt = thumbImage.altType;
 		if (thumbTypeAlt !== undefined) {
 			/* 代替タイプが設定されている場合はリアルタイム生成を行わず、ファイル生成情報を DB に登録する（別途、バッチ処理でファイル生成を行うため） */
-			const dao = new ThumbImageRenderDao(this.#configCommon.sqlite.db.thumbimage);
+			const dbFilePath = process.env['SQLITE_THUMBIMAGE'];
+			if (dbFilePath === undefined) {
+				throw new Error('thumbimage DB file path not defined');
+			}
+
+			const dao = new ThumbImageRenderDao(dbFilePath);
 			try {
 				const insertedCount = await dao.insert(thumbImage.fileBasePath, thumbImage.type, thumbImage.size, thumbImage.quality);
 				if (insertedCount > 0) {
@@ -112,11 +109,11 @@ export default class ThumbImageRenderController extends Controller implements Co
 
 				// @ts-expect-error: ts(2339)
 				switch (e.errno) {
-					case this.#configCommon.sqlite.errno['locked']: {
+					case configSqlite.errno.locked: {
 						this.logger.warn('DB ロック', thumbImage.fileBasePath, thumbImage.type, thumbImage.size, thumbImage.quality);
 						break;
 					}
-					case this.#configCommon.sqlite.errno['unique_constraint']: {
+					case configSqlite.errno.uniqueConstraint: {
 						this.logger.info('ファイル生成情報は DB 登録済み', thumbImage.fileBasePath, thumbImage.type, thumbImage.size, thumbImage.quality);
 						break;
 					}
@@ -186,7 +183,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 		const origin = req.get('Origin');
 		if (origin !== undefined) {
 			/* クロスオリジンからの <img crossorigin> による呼び出し */
-			if (!this.#config.allow_origins.includes(origin)) {
+			if (!process.env['THUMBIMAGE_ALLOW_ORIGIN']?.split(' ').includes(origin)) {
 				this.logger.warn(`許可されていないオリジンからのアクセス: ${origin}`);
 
 				httpResponse.send403();
@@ -287,7 +284,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 		}
 
 		res.setHeader('Content-Type', mimeType);
-		res.setHeader('Cache-Control', this.#config.cache_control);
+		res.setHeader('Cache-Control', configThumbimage.cacheControl);
 
 		res.send(fileData);
 	}
@@ -303,7 +300,7 @@ export default class ThumbImageRenderController extends Controller implements Co
 	async #responseOriginal(req: Request, res: Response, httpResponse: HttpResponse, fullPath: string): Promise<void> {
 		const fileData = await fs.promises.readFile(fullPath);
 		const extension = path.extname(fullPath);
-		const mimeType = Object.entries(this.#configCommon.static.headers.mime_type.extension)
+		const mimeType = Object.entries(configExpress.static.headers.mime_type.extension)
 			.find(([fileExtension]) => fileExtension === extension)
 			?.at(1);
 		if (mimeType === undefined) {
