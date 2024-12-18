@@ -6,6 +6,9 @@ import w0sConfig from '@w0s/eslint-config';
 export default [
 	...w0sConfig,
 	{
+		ignores: ['node/dist/**/*.js'],
+	},
+	{
 		files: ['node/__tests__/**/*.test.js'],
 		rules: {
 			'import/no-unresolved': 'off', // Github Actions 環境では /dist/ ファイルが存在しないためテスト不可
