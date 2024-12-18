@@ -11,7 +11,7 @@
 		"config": "run-p _config-convert _config-validate:*",
 		"css-lint": "stylelint public/*.css",
 		"format": "prettier -w .",
-		"github-actions-lint": "yamllint .github/workflows/*.yml",
+		"yaml-lint": "yamllint .github/workflows/*.yml",
 		"_config-convert": "json2ts -i configure/schema -o configure/type",
 		"_config-validate:common": "ajv --spec=draft7 -s configure/schema/common.json -d configure/common.json",
 		"_config-validate:blog-upload": "ajv --spec=draft7 -s configure/schema/blog-upload.json -d configure/blog-upload.json",
