@@ -44,11 +44,11 @@ export default class ThumbImageCreateController extends Controller implements Co
 		}
 
 		const requestQuery: ThumbImageCreateRequest.Query = {
-			file_path: req.body['file_path'] as string,
-			type: req.body['type'] as string,
-			width: Number(req.body['width']),
-			height: Number(req.body['height']),
-			quality: Number(req.body['quality']),
+			file_path: req.body.file_path as string,
+			type: req.body.type as string,
+			width: Number(req.body.width),
+			height: Number(req.body.height),
+			quality: Number(req.body.quality),
 		};
 
 		const origFileFullPath = path.resolve(`${configExpress.static.root}/${configExpress.static.directory.image}/${requestQuery.file_path}`);

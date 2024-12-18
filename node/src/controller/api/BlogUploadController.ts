@@ -44,8 +44,8 @@ export default class BlogUploadController extends Controller implements Controll
 			this.logger.error('パラメーター不正', validationResult.array());
 
 			const responseJson: ResponseJson = {
-				name: req.body['name'] as string,
-				size: Number(req.body['size']),
+				name: req.body.name as string,
+				size: Number(req.body.size),
 				code: configBlogUpload.response.requestQuery.code,
 				message: configBlogUpload.response.requestQuery.message,
 			};
@@ -54,11 +54,11 @@ export default class BlogUploadController extends Controller implements Controll
 		}
 
 		const requestQuery: BlogUploadRequest.Query = {
-			file_name: req.body['name'] as string,
-			mime: req.body['type'] as string,
-			temp_path: req.body['temppath'] as string,
-			size: Number(req.body['size']),
-			overwrite: Boolean(req.body['overwrite']),
+			file_name: req.body.name as string,
+			mime: req.body.type as string,
+			temp_path: req.body.temppath as string,
+			size: Number(req.body.size),
+			overwrite: Boolean(req.body.overwrite),
 		};
 
 		let responseJson: ResponseJson;

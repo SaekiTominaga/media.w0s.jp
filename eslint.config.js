@@ -17,7 +17,7 @@ export default [
 	{
 		files: ['node/src/controller/**/*.ts'],
 		rules: {
-			'@typescript-eslint/dot-notation': 'off',
+			'class-methods-use-this': 'off',
 			'@typescript-eslint/no-non-null-assertion': 'off',
 			'@typescript-eslint/no-unsafe-member-access': 'off',
 		},
