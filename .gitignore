@@ -1,3 +1,6 @@
+.env
+.env.*
+
 /.thumbimage/
 
 /configure/*.json
@@ -6,7 +9,7 @@
 /log/
 
 /node/dist/
-/node/log4js*.json
+/node/log4js.*.json
 
 /node_modules/
 

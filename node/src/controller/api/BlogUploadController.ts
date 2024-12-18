@@ -1,13 +1,13 @@
 import fs from 'node:fs';
 import type { Request, Response } from 'express';
 import MIMEType from 'whatwg-mimetype';
+import configAuth from '../../config/auth.js';
+import configBlogUpload from '../../config/blog-upload.js';
 import BlogValidator from '../../validator/BlogValiator.js';
 import Controller from '../../Controller.js';
 import type ControllerInterface from '../../ControllerInterface.js';
 import HttpBasicAuth from '../../util/HttpBasicAuth.js';
 import HttpResponse from '../../util/HttpResponse.js';
-import type { MediaW0SJp as ConfigureCommon } from '../../../../configure/type/common.js';
-import type { NoName as Configure } from '../../../../configure/type/blog-upload.js';
 
 interface ResponseJson {
 	name: string | null;
@@ -20,31 +20,22 @@ interface ResponseJson {
  * ブログ用ファイルアップロード
  */
 export default class BlogUploadController extends Controller implements ControllerInterface {
-	#configCommon: ConfigureCommon;
-
-	#config: Configure;
-
-	/**
-	 * @param configCommon - 共通設定
-	 */
-	constructor(configCommon: ConfigureCommon) {
-		super();
-
-		this.#configCommon = configCommon;
-		this.#config = JSON.parse(fs.readFileSync('configure/blog-upload.json', 'utf8')) as Configure;
-	}
-
 	/**
 	 * @param req - Request
 	 * @param res - Response
 	 */
 	async execute(req: Request, res: Response): Promise<void> {
-		const httpResponse = new HttpResponse(res, this.#configCommon);
+		const httpResponse = new HttpResponse(res);
 
 		/* Basic 認証 */
+		const htpasswdFilePath = process.env['AUTH_HTPASSWD'];
+		if (htpasswdFilePath === undefined) {
+			throw new Error('htpasswd file path not defined');
+		}
+
 		const httpBasicAuth = new HttpBasicAuth(req);
-		if (!(await httpBasicAuth.htpasswd(this.#configCommon.auth.htpasswd_file))) {
-			httpResponse.send401Json('Basic', this.#configCommon.auth.realm);
+		if (!(await httpBasicAuth.htpasswd(htpasswdFilePath))) {
+			httpResponse.send401Json('Basic', configAuth.realm);
 			return;
 		}
 
@@ -55,8 +46,8 @@ export default class BlogUploadController extends Controller implements Controll
 			const responseJson: ResponseJson = {
 				name: req.body['name'] as string,
 				size: Number(req.body['size']),
-				code: this.#config.response.request_query.code,
-				message: this.#config.response.request_query.message,
+				code: configBlogUpload.response.requestQuery.code,
+				message: configBlogUpload.response.requestQuery.message,
 			};
 			httpResponse.send403Json(responseJson);
 			return;
@@ -73,25 +64,21 @@ export default class BlogUploadController extends Controller implements Controll
 		let responseJson: ResponseJson;
 		switch (new MIMEType(requestQuery.mime).type) {
 			case 'image': {
-				responseJson = await this.upload(
-					requestQuery.file_name,
-					requestQuery.temp_path,
-					requestQuery.size,
-					this.#config.image.dir,
-					requestQuery.overwrite,
-					this.#config.image.limit,
-				);
+				responseJson = await this.#upload({
+					fileName: requestQuery.file_name,
+					temp: requestQuery.temp_path,
+					size: requestQuery.size,
+					overwrite: requestQuery.overwrite,
+				});
 				break;
 			}
 			case 'video': {
-				responseJson = await this.upload(
-					requestQuery.file_name,
-					requestQuery.temp_path,
-					requestQuery.size,
-					this.#config.video.dir,
-					requestQuery.overwrite,
-					this.#config.video.limit,
-				);
+				responseJson = await this.#upload({
+					fileName: requestQuery.file_name,
+					temp: requestQuery.temp_path,
+					size: requestQuery.size,
+					overwrite: requestQuery.overwrite,
+				});
 				break;
 			}
 			default: {
@@ -100,8 +87,8 @@ export default class BlogUploadController extends Controller implements Controll
 				responseJson = {
 					name: requestQuery.file_name,
 					size: requestQuery.size,
-					code: this.#config.response.type.code,
-					message: this.#config.response.type.message,
+					code: configBlogUpload.response.type.code,
+					message: configBlogUpload.response.type.message,
 				};
 			}
 		}
@@ -112,48 +99,47 @@ export default class BlogUploadController extends Controller implements Controll
 	/**
 	 * ファイルアップロードを実行する（実際はアップロードされたファイルを media.w0s.jp の適切な場所に移動する）
 	 *
-	 * @param fileName - ファイル名
-	 * @param tempPath - 仮で保存されたファイルパス
-	 * @param size - ファイルサイズ
-	 * @param fileDir - ファイルを保存するディレクトリ
-	 * @param overwrite - 上書きを許可するか
-	 * @param limitSize - 許可された最大サイズ
+	 * @param option -
+	 * @param option.fileName - ファイル名
+	 * @param option.temp - 仮で保存されたファイルパス
+	 * @param option.size - ファイルサイズ
+	 * @param option.overwrite - 上書きを許可するか
 	 *
 	 * @returns 返答内容
 	 */
-	private async upload(fileName: string, tempPath: string, size: number, fileDir: string, overwrite: boolean, limitSize: number): Promise<ResponseJson> {
-		const filePath = `${fileDir}/${fileName}`;
+	async #upload(option: { fileName: string; temp: string; size: number; overwrite: boolean }): Promise<ResponseJson> {
+		const filePath = `${configBlogUpload.image.dir}/${option.fileName}`;
 
-		if (!overwrite && fs.existsSync(filePath)) {
-			this.logger.info(`上書き禁止: ${fileName}`);
+		if (!option.overwrite && fs.existsSync(filePath)) {
+			this.logger.info(`上書き禁止: ${option.fileName}`);
 
 			return {
-				name: fileName,
-				size: size,
-				code: this.#config.response.overwrite.code,
-				message: this.#config.response.overwrite.message,
+				name: option.fileName,
+				size: option.size,
+				code: configBlogUpload.response.overwrite.code,
+				message: configBlogUpload.response.overwrite.message,
 			};
 		}
 
-		if (size > limitSize) {
-			this.logger.info(`ファイルサイズ超過: ${fileName}`);
+		if (option.size > configBlogUpload.video.limit) {
+			this.logger.info(`ファイルサイズ超過: ${option.fileName}`);
 
 			return {
-				name: fileName,
-				size: size,
-				code: this.#config.response.size.code,
-				message: this.#config.response.size.message,
+				name: option.fileName,
+				size: option.size,
+				code: configBlogUpload.response.size.code,
+				message: configBlogUpload.response.size.message,
 			};
 		}
 
-		await fs.promises.rename(tempPath, filePath);
-		this.logger.info(`ファイルアップロード成功: ${fileName}`);
+		await fs.promises.rename(option.temp, filePath);
+		this.logger.info(`ファイルアップロード成功: ${option.fileName}`);
 
 		return {
-			name: fileName,
-			size: size,
-			code: this.#config.response.success.code,
-			message: this.#config.response.success.message,
+			name: option.fileName,
+			size: option.size,
+			code: configBlogUpload.response.success.code,
+			message: configBlogUpload.response.success.message,
 		};
 	}
 }
