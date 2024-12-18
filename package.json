@@ -4,6 +4,7 @@
 	"scripts": {
 		"app": "tsx --watch --tsconfig node/tsconfig.json node/src/app.ts",
 		"build": "tsc -p node/tsconfig.json",
+		"prelint": "npm run build",
 		"lint": "eslint node/src/**/*.ts node/__tests__/*.test.js node/@types/*.d.ts",
 		"pretest": "npm run build",
 		"test": "node --test --experimental-test-coverage",
