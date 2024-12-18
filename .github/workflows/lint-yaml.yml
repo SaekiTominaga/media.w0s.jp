@@ -1,4 +1,5 @@
-name: github-actions-lint
+name: Linting YAML files
+
 on:
   pull_request:
     branches:

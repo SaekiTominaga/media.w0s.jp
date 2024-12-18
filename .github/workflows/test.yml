@@ -1,21 +1,24 @@
-name: css-lint
+name: test
+
 on:
   pull_request:
     branches:
       - main
     paths:
-      - 'public/*.css'
-      - 'stylelint.config.js'
+      - 'node/src/**/*.ts'
+      - 'node/__tests__/*.test.js'
+      - 'node/@types/*.d.ts'
   push:
     branches:
       - main
     paths:
-      - 'public/*.css'
-      - 'stylelint.config.js'
+      - 'node/src/**/*.ts'
+      - 'node/__tests__/*.test.js'
+      - 'node/@types/*.d.ts'
   workflow_dispatch:
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,4 +26,4 @@ jobs:
         with:
           node-version: '20'
       - run: npm ci
-      - run: npm run css-lint
+      - run: npm run test
