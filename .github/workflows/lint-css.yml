@@ -7,12 +7,6 @@ on:
     paths:
       - 'public/*.css'
       - 'stylelint.config.js'
-  push:
-    branches:
-      - main
-    paths:
-      - 'public/*.css'
-      - 'stylelint.config.js'
   workflow_dispatch:
 
 jobs:
