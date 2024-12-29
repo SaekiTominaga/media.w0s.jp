@@ -1,6 +1,5 @@
 import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
-import DbUtil from '../util/DbUtil.js';
 
 /**
  * サムネイル画像の画面表示
@@ -27,7 +26,7 @@ export default class ThumbImageRenderDao {
 	 *
 	 * @returns DB 接続情報
 	 */
-	async getDbh(): Promise<sqlite.Database> {
+	async #getDbh(): Promise<sqlite.Database> {
 		if (this.#dbh !== null) {
 			return this.#dbh;
 		}
@@ -45,40 +44,63 @@ export default class ThumbImageRenderDao {
 	/**
 	 * 生成する画像情報をキューに登録する
 	 *
-	 * @param filePath - ファイルパス
-	 * @param type - 画像タイプ
-	 * @param size - 画像の大きさ
-	 * @param quality - 画質
+	 * @param data - 登録データ
+	 * @param data.filePath - ファイルパス
+	 * @param data.type - 画像タイプ
+	 * @param data.size - 画像の大きさ
+	 * @param data.quality - 画質
 	 *
 	 * @returns 登録されたデータ数
 	 */
-	async insert(filePath: string, type: string, size: ImageSize, quality: number | null = null): Promise<number> {
+	async insert(data: { filePath: string; type: string; size: ImageSize; quality: number | undefined }): Promise<number> {
 		interface Select {
 			count: number;
 		}
 
-		const dbh = await this.getDbh();
+		const dbh = await this.#getDbh();
 
-		const sthSelect = await dbh.prepare(`
-			SELECT
-				COUNT(file_path) AS count
-			FROM
-				d_queue
-			WHERE
-				file_path = :file_path AND
-				file_type = :type AND
-				width = :width AND
-				height = :height AND
-				quality = :quality
-		`);
-		await sthSelect.bind({
-			':file_path': filePath,
-			':type': type,
-			':width': size.width,
-			':height': size.height,
-			':quality': quality,
-		});
-		const row: Select | undefined = await sthSelect.get();
+		let sthSelect: sqlite.Statement;
+		if (data.quality !== undefined) {
+			sthSelect = await dbh.prepare(`
+				SELECT
+					COUNT(file_path) AS count
+				FROM
+					d_queue
+				WHERE
+					file_path = :file_path AND
+					file_type = :type AND
+					width = :width AND
+					height = :height AND
+					quality = :quality
+			`);
+			await sthSelect.bind({
+				':file_path': data.filePath,
+				':type': data.type,
+				':width': data.size.width,
+				':height': data.size.height,
+				':quality': data.quality,
+			});
+		} else {
+			sthSelect = await dbh.prepare(`
+				SELECT
+					COUNT(file_path) AS count
+				FROM
+					d_queue
+				WHERE
+					file_path = :file_path AND
+					file_type = :type AND
+					width = :width AND
+					height = :height AND
+					quality IS NULL
+			`);
+			await sthSelect.bind({
+				':file_path': data.filePath,
+				':type': data.type,
+				':width': data.size.width,
+				':height': data.size.height,
+			});
+		}
+		const row = await sthSelect.get<Select>();
 		await sthSelect.finalize();
 
 		if (row === undefined || row.count > 0 /* 既にキューにある場合 */) {
@@ -90,19 +112,19 @@ export default class ThumbImageRenderDao {
 		await dbh.exec('BEGIN');
 		try {
 			const sthInsert = await dbh.prepare(`
-					INSERT INTO
-						d_queue
-						(file_path, file_type, width, height, quality, registered_at)
-					VALUES
-						(:file_path, :type, :width, :height, :quality, :registered_at)
-				`);
+				INSERT INTO
+					d_queue
+					(file_path, file_type, width, height, quality, registered_at)
+				VALUES
+					(:file_path, :type, :width, :height, :quality, :registered_at)
+			`);
 			const result = await sthInsert.run({
-				':file_path': filePath,
-				':type': type,
-				':width': size.width,
-				':height': size.height,
-				':quality': quality,
-				':registered_at': DbUtil.dateToUnix(),
+				':file_path': data.filePath,
+				':type': data.type,
+				':width': data.size.width,
+				':height': data.size.height,
+				':quality': data.quality,
+				':registered_at': Math.round(Date.now() / 1000),
 			});
 			await sthInsert.finalize();
 
