@@ -3,6 +3,7 @@
 	"type": "module",
 	"scripts": {
 		"app": "tsx --watch --tsconfig node/tsconfig.json node/src/app.ts",
+		"prebuild": "rimraf node/dist/* -g",
 		"build": "tsc -p node/tsconfig.json",
 		"prelint": "npm run build",
 		"lint": "eslint node/src/**/*.ts node/__tests__/*.test.js node/@types/*.d.ts",
@@ -41,6 +42,7 @@
 		"@w0s/tsconfig": "^1.4.1",
 		"eslint": "^8.57.0",
 		"prettier": "^3.2.5",
+		"rimraf": "^6.0.1",
 		"stylelint": "^16.7.0",
 		"tsx": "^4.12.0",
 		"typescript": "^5.4.5",
