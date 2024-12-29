@@ -1,6 +1,5 @@
 import path from 'node:path';
 import type { Request, Response } from 'express';
-import type { MediaW0SJp as Configure } from '../../../configure/type/common.js';
 
 type HttpAuthType = 'Basic' | 'Bearer' | 'Digest' | 'HOBA' | 'Mutual' | 'Negotiate' | 'OAuth' | 'SCRAM-SHA-1' | 'SCRAM-SHA-256' | 'vapid';
 
@@ -10,15 +9,11 @@ type HttpAuthType = 'Basic' | 'Bearer' | 'Digest' | 'HOBA' | 'Mutual' | 'Negotia
 export default class HttpResponse {
 	#res: Response;
 
-	#config: Configure;
-
 	/**
 	 * @param res - Request
-	 * @param config - 共通設定ファイル
 	 */
-	constructor(res: Response, config: Configure) {
+	constructor(res: Response) {
 		this.#res = res;
-		this.#config = config;
 	}
 
 	/**
@@ -65,14 +60,20 @@ export default class HttpResponse {
 	 * @param realm - A description of the protected area.
 	 */
 	send401Json(type: HttpAuthType, realm: string): void {
-		this.#res.set('WWW-Authenticate', `${type} realm="${realm}"`).status(401).json(this.#config.auth.json_401);
+		this.#res.set('WWW-Authenticate', `${type} realm="${realm}"`).status(401).json({
+			message: '401 Unauthorized',
+		});
 	}
 
 	/**
 	 * 403 Forbidden (HTML)
 	 */
 	send403(): void {
-		this.#res.status(403).sendFile(path.resolve(this.#config.errorpage.path_403));
+		const pagePath = process.env['ERRORPAGE_403'];
+		if (pagePath === undefined) {
+			throw new Error("403 page's file path not defined");
+		}
+		this.#res.status(403).sendFile(path.resolve(pagePath));
 	}
 
 	/**
@@ -88,7 +89,11 @@ export default class HttpResponse {
 	 * 404 Not Found (HTML)
 	 */
 	send404(): void {
-		this.#res.status(404).sendFile(path.resolve(this.#config.errorpage.path_404));
+		const pagePath = process.env['ERRORPAGE_404'];
+		if (pagePath === undefined) {
+			throw new Error("404 page's file path not defined");
+		}
+		this.#res.status(404).sendFile(path.resolve(pagePath));
 	}
 
 	/**
