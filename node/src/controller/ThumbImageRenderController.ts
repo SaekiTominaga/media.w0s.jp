@@ -98,7 +98,12 @@ export default class ThumbImageRenderController extends Controller implements Co
 
 			const dao = new ThumbImageRenderDao(dbFilePath);
 			try {
-				const insertedCount = await dao.insert(thumbImage.fileBasePath, thumbImage.type, thumbImage.size, thumbImage.quality);
+				const insertedCount = await dao.insert({
+					filePath: thumbImage.fileBasePath,
+					type: thumbImage.type,
+					size: thumbImage.size,
+					quality: thumbImage.quality,
+				});
 				if (insertedCount > 0) {
 					this.logger.info(`ファイル生成情報を DB に登録: ${thumbImage.fileBasePath}`);
 				}
