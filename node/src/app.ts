@@ -63,7 +63,7 @@ app.use(async (context, next) => {
 	headers.set(
 		'Reporting-Endpoints',
 		Object.entries(config.response.header.reportingEndpoints)
-			.map((endpoint) => `${endpoint[0]}="${endpoint[1]}"`)
+			.map(([key, value]) => `${key}="${value}"`)
 			.join(','),
 	);
 
