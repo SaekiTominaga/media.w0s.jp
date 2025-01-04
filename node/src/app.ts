@@ -16,6 +16,7 @@ import config from './config/hono.js';
 import blogUpload from './controller/blogUpload.js';
 import thumbImageCreate from './controller/thumbImageCreate.js';
 import thumbImageRender from './controller/thumbImageRender.js';
+import { getAuth } from './util/auth.js';
 import { isApi } from './util/request.js';
 
 dotenv.config({
@@ -119,22 +120,18 @@ app.use(
 );
 
 /* Auth */
-const authFilePath = process.env['AUTH_ADMIN'];
-if (authFilePath === undefined) {
-	throw new Error('Auth file not defined');
-}
-const authFile = JSON.parse((await fs.promises.readFile(authFilePath)).toString()) as { user: string; password: string; realm: string };
+const auth = await getAuth();
 app.use(
 	`/${config.api.dir}/*`,
 	basicAuth({
-		username: authFile.user,
-		password: authFile.password,
-		realm: authFile.realm,
+		username: auth.user,
+		password: auth.password,
+		realm: auth.realm,
 		verifyUser: (username, password) => {
 			// @ts-expect-error: ts(2551)
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 			const passwordHash = crypto.hash('sha256', password) as string;
-			return username === authFile.user && passwordHash === authFile.password;
+			return username === auth.user && passwordHash === auth.password;
 		},
 		invalidUserMessage: {
 			message: config.basicAuth.unauthorizedMessage,

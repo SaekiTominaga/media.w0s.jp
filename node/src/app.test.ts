@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { test } from 'node:test';
 import app from './app.js';
 import config from './config/hono.js';
+import { getAuth } from './util/auth.js';
 
 await test('Top page', async () => {
 	const res = await app.request('/');
@@ -80,8 +81,8 @@ await test('404', async (t) => {
 	});
 
 	await t.test('API', async () => {
-		const authFile = JSON.parse((await fs.promises.readFile(process.env['AUTH_ADMIN']!)).toString()) as { user: string; password_orig: string };
-		const authorization = `Basic ${Buffer.from(`${authFile.user}:${authFile.password_orig}`).toString('base64')}`;
+		const auth = await getAuth();
+		const authorization = `Basic ${Buffer.from(`${auth.user}:${auth.password_orig!}`).toString('base64')}`;
 
 		const res = await app.request('/api/', {
 			method: 'post',

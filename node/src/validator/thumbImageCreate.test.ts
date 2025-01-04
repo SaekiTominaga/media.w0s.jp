@@ -1,10 +1,10 @@
 import { strict as assert } from 'node:assert';
-import fs from 'node:fs';
 import { test } from 'node:test';
 import app from '../app.js';
+import { getAuth } from '../util/auth.js';
 
-const authFile = JSON.parse((await fs.promises.readFile(process.env['AUTH_ADMIN']!)).toString()) as { user: string; password_orig: string };
-const authorization = `Basic ${Buffer.from(`${authFile.user}:${authFile.password_orig}`).toString('base64')}`;
+const auth = await getAuth();
+const authorization = `Basic ${Buffer.from(`${auth.user}:${auth.password_orig!}`).toString('base64')}`;
 
 await test('file_path undefined', async () => {
 	const res = await app.request('/api/thumbimage-create', {
