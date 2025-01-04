@@ -5,11 +5,6 @@ import app from '../app.js';
 import config from '../config/hono.js';
 import ThumbImage from '../object/ThumbImage.js';
 
-const origin = process.env['THUMBIMAGE_CORS_ORIGINS']?.split(' ').at(0);
-if (origin === undefined) {
-	throw new Error('Origin for CORS is not set');
-}
-
 const imageDir = `${config.static.root}/${config.static.directory.image}`;
 
 await test('not found', async () => {

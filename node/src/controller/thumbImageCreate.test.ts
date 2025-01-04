@@ -4,12 +4,7 @@ import { test, before, after } from 'node:test';
 import app from '../app.js';
 import ThumbImage from '../object/ThumbImage.js';
 
-const authFilePath = process.env['AUTH_ADMIN'];
-if (authFilePath === undefined) {
-	throw new Error('Auth file not defined');
-}
-const authFile = JSON.parse((await fs.promises.readFile(authFilePath)).toString()) as { user: string; password_orig: string };
-
+const authFile = JSON.parse((await fs.promises.readFile(process.env['AUTH_ADMIN']!)).toString()) as { user: string; password_orig: string };
 const authorization = `Basic ${Buffer.from(`${authFile.user}:${authFile.password_orig}`).toString('base64')}`;
 
 await test('File not found', async () => {
