@@ -14,4 +14,11 @@ export default [
 			'import/prefer-default-export': 'off',
 		},
 	},
+	{
+		files: ['node/src/validator/*.test.ts'],
+		rules: {
+			'line-comment-position': 'off',
+			'@typescript-eslint/no-unsafe-member-access': 'off',
+		},
+	},
 ];

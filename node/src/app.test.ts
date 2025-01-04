@@ -63,17 +63,34 @@ await test('Compression', async (t) => {
 	});
 });
 
-await test('404', async () => {
-	const res = await app.request('/foo');
+await test('404', async (t) => {
+	await t.test('normal', async () => {
+		const res = await app.request('/foo');
 
-	assert.equal(res.status, 404);
-	assert.equal(res.headers.get('Content-Type'), 'text/html; charset=UTF-8');
-	assert.equal(
-		await res.text(),
-		`<!DOCTYPE html>
+		assert.equal(res.status, 404);
+		assert.equal(res.headers.get('Content-Type'), 'text/html; charset=UTF-8');
+		assert.equal(
+			await res.text(),
+			`<!DOCTYPE html>
 <html lang=en>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>media.w0s.jp</title>
 <h1>404 Not Found</h1>`,
-	);
+		);
+	});
+
+	await t.test('API', async () => {
+		const authFile = JSON.parse((await fs.promises.readFile(process.env['AUTH_ADMIN']!)).toString()) as { user: string; password_orig: string };
+
+		const authorization = `Basic ${Buffer.from(`${authFile.user}:${authFile.password_orig}`).toString('base64')}`;
+
+		const res = await app.request('/api/', {
+			method: 'post',
+			headers: { Authorization: authorization },
+		});
+
+		assert.equal(res.status, 404);
+		assert.equal(res.headers.get('Content-Type'), 'application/json');
+		assert.deepStrictEqual(await res.json(), { message: '404 Not Found' });
+	});
 });

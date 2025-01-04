@@ -16,7 +16,14 @@ await test('not found', async () => {
 	const res = await app.request('/thumbimage/foo?type=webp;w=1;h=1;quality=1');
 
 	assert.equal(res.status, 404);
-	assert.equal(await res.text(), 'File not found');
+	assert.equal(
+		await res.text(),
+		`<!DOCTYPE html>
+<html lang=en>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>media.w0s.jp</title>
+<h1>Client error</h1>`,
+	);
 });
 
 await test('orig image', async () => {

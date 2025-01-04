@@ -19,7 +19,7 @@ await test('name undefined', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The `name` parameter is invalid');
+	assert.equal((await res.json()).message, 'The `name` parameter is invalid');
 });
 
 await test('type undefined', async () => {
@@ -30,7 +30,7 @@ await test('type undefined', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The `type` parameter is invalid');
+	assert.equal((await res.json()).message, 'The `type` parameter is invalid');
 });
 
 await test('temppath undefined', async () => {
@@ -44,7 +44,7 @@ await test('temppath undefined', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The `temppath` parameter is invalid');
+	assert.equal((await res.json()).message, 'The `temppath` parameter is invalid');
 });
 
 await test('size undefined', async () => {
@@ -59,7 +59,7 @@ await test('size undefined', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The `size` parameter is invalid');
+	assert.equal((await res.json()).message, 'The `size` parameter is invalid');
 });
 
 await test('size string', async () => {
@@ -75,7 +75,7 @@ await test('size string', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The value of the `size` parameter must be a positive integer');
+	assert.equal((await res.json()).message, 'The value of the `size` parameter must be a positive integer');
 });
 
 await test('size min', async () => {
@@ -91,7 +91,7 @@ await test('size min', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The value of the `size` parameter must be a positive integer');
+	assert.equal((await res.json()).message, 'The value of the `size` parameter must be a positive integer');
 });
 
 await test('overwrite multi', async () => {
@@ -109,5 +109,5 @@ await test('overwrite multi', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The `overwrite` parameter is invalid');
+	assert.equal((await res.json()).message, 'The `overwrite` parameter is invalid');
 });

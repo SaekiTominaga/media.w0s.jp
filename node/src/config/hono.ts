@@ -1,7 +1,4 @@
 export default {
-	extension: {
-		brotli: '.br',
-	},
 	response: {
 		header: {
 			hsts: 'max-age=31536000',
@@ -44,8 +41,9 @@ export default {
 		},
 	},
 	basicAuth: {
-		unauthorizedMessage: {
-			message: 'Unauthorized',
-		},
+		unauthorizedMessage: 'Unauthorized',
+	},
+	api: {
+		dir: 'api', // API を示すディレクトリ
 	},
 };

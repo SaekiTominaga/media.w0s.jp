@@ -19,7 +19,7 @@ await test('file_path undefined', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The `file_path` parameter is invalid');
+	assert.equal((await res.json()).message, 'The `file_path` parameter is invalid');
 });
 
 await test('type undefined', async () => {
@@ -30,7 +30,7 @@ await test('type undefined', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The `type` parameter is invalid');
+	assert.equal((await res.json()).message, 'The `type` parameter is invalid');
 });
 
 await test('width undefined', async () => {
@@ -44,7 +44,7 @@ await test('width undefined', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The `width` parameter is invalid');
+	assert.equal((await res.json()).message, 'The `width` parameter is invalid');
 });
 
 await test('width string', async () => {
@@ -59,7 +59,7 @@ await test('width string', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The value of the `width` parameter must be a positive integer');
+	assert.equal((await res.json()).message, 'The value of the `width` parameter must be a positive integer');
 });
 
 await test('width min', async () => {
@@ -74,7 +74,7 @@ await test('width min', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The value of the `width` parameter must be between 1 and 9999');
+	assert.equal((await res.json()).message, 'The value of the `width` parameter must be between 1 and 9999');
 });
 
 await test('width max', async () => {
@@ -89,7 +89,7 @@ await test('width max', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The value of the `width` parameter must be between 1 and 9999');
+	assert.equal((await res.json()).message, 'The value of the `width` parameter must be between 1 and 9999');
 });
 
 await test('height undefined', async () => {
@@ -104,7 +104,7 @@ await test('height undefined', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The `height` parameter is invalid');
+	assert.equal((await res.json()).message, 'The `height` parameter is invalid');
 });
 
 await test('height string', async () => {
@@ -120,7 +120,7 @@ await test('height string', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The value of the `height` parameter must be a positive integer');
+	assert.equal((await res.json()).message, 'The value of the `height` parameter must be a positive integer');
 });
 
 await test('height min', async () => {
@@ -136,7 +136,7 @@ await test('height min', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The value of the `height` parameter must be between 1 and 9999');
+	assert.equal((await res.json()).message, 'The value of the `height` parameter must be between 1 and 9999');
 });
 
 await test('height max', async () => {
@@ -152,7 +152,7 @@ await test('height max', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The value of the `height` parameter must be between 1 and 9999');
+	assert.equal((await res.json()).message, 'The value of the `height` parameter must be between 1 and 9999');
 });
 
 await test('quality multi', async () => {
@@ -170,7 +170,7 @@ await test('quality multi', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The `quality` parameter is invalid');
+	assert.equal((await res.json()).message, 'The `quality` parameter is invalid');
 });
 
 await test('quality string', async () => {
@@ -187,7 +187,7 @@ await test('quality string', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The value of the `quality` parameter must be a positive integer');
+	assert.equal((await res.json()).message, 'The value of the `quality` parameter must be a positive integer');
 });
 
 await test('quality min', async () => {
@@ -204,7 +204,7 @@ await test('quality min', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The value of the `quality` parameter must be between 1 and 100');
+	assert.equal((await res.json()).message, 'The value of the `quality` parameter must be between 1 and 100');
 });
 
 await test('quality max', async () => {
@@ -221,5 +221,5 @@ await test('quality max', async () => {
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal(await res.text(), 'The value of the `quality` parameter must be between 1 and 100');
+	assert.equal((await res.json()).message, 'The value of the `quality` parameter must be between 1 and 100');
 });

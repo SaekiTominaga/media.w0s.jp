@@ -2,11 +2,12 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import * as dotenv from 'dotenv';
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import { basicAuth } from 'hono/basic-auth';
 import { compress } from 'hono/compress';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
+import type { ContentfulStatusCode } from 'hono/utils/http-status.js';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import Log4js from 'log4js';
@@ -123,7 +124,7 @@ if (authFilePath === undefined) {
 }
 const authFile = JSON.parse((await fs.promises.readFile(authFilePath)).toString()) as { user: string; password: string; realm: string };
 app.use(
-	'/api/*',
+	`/${config.api.dir}/*`,
 	basicAuth({
 		username: authFile.user,
 		password: authFile.password,
@@ -134,52 +135,67 @@ app.use(
 			const passwordHash = crypto.hash('sha256', password) as string;
 			return username === authFile.user && passwordHash === authFile.password;
 		},
-		invalidUserMessage: config.basicAuth.unauthorizedMessage,
+		invalidUserMessage: {
+			message: config.basicAuth.unauthorizedMessage,
+		},
 	}),
 );
 
 /* Routes */
 app.route('/thumbimage/', thumbImageRender);
-app.route('/api/thumbimage-create', thumbImageCreate);
-app.route('/api/blog-upload', blogUpload);
+app.route(`/${config.api.dir}/thumbimage-create`, thumbImageCreate);
+app.route(`/${config.api.dir}/blog-upload`, blogUpload);
 
 /* Error pages */
-app.notFound((context) =>
-	context.html(
-		`<!DOCTYPE html>
-<html lang=en>
-<meta name=viewport content="width=device-width,initial-scale=1">
-<title>media.w0s.jp</title>
-<h1>404 Not Found</h1>`,
-		404,
-	),
-);
-app.onError((err, context) => {
-	const MESSAGE_5XX = 'Server error has occurred';
+const isApiUrl = (context: Context) => context.req.path.startsWith(`/${config.api.dir}/`);
+app.notFound((context) => {
+	const TITLE = '404 Not Found';
 
-	if (err instanceof HTTPException) {
-		const { status, message } = err;
-
-		if (status >= 400 && status < 500) {
-			logger.info(message, context.req.header('User-Agent'));
-		} else {
-			if (message !== '') {
-				logger.error(message);
-			}
-			err.message = MESSAGE_5XX;
-		}
-
-		return err.getResponse();
+	if (isApiUrl(context)) {
+		return context.json({ message: TITLE }, 404);
 	}
 
-	logger.fatal(err.message);
 	return context.html(
 		`<!DOCTYPE html>
 <html lang=en>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>media.w0s.jp</title>
-<h1>500 Internal Server Error</h1>`,
-		500,
+<h1>${TITLE}</h1>`,
+		404,
+	);
+});
+app.onError((err, context) => {
+	const TITLE_4XX = 'Client error';
+	const TITLE_5XX = 'Server error';
+
+	let status: ContentfulStatusCode = 500;
+	let title = TITLE_5XX;
+	let message: string | undefined;
+	if (err instanceof HTTPException) {
+		status = err.status;
+		message = err.message;
+
+		if (err.status >= 400 && err.status < 500) {
+			logger.info(err.message, context.req.header('User-Agent'));
+			title = TITLE_4XX;
+		} else {
+			logger.error(err.message);
+		}
+	} else {
+		logger.fatal(err.message);
+	}
+
+	if (isApiUrl(context)) {
+		return context.json({ message: message ?? title }, status);
+	}
+
+	return context.html(
+		`<!DOCTYPE html>
+<html lang=en>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>media.w0s.jp</title>
+<h1>${title}</h1>`,
+		status,
 	);
 });
 
