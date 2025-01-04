@@ -33,7 +33,7 @@ export default {
 				],
 				extension: [
 					{
-						extensions: ['.webp', '.jpg', '.jpeg', '.png', '.svg'],
+						extensions: ['.webp', '.jpg', '.jpeg', '.png', '.svg', '.m4a', '.mp4', '.webm'],
 						value: 'max-age=3600',
 					},
 				],
