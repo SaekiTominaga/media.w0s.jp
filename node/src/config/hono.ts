@@ -43,5 +43,6 @@ export default {
 	},
 	api: {
 		dir: 'api', // API を示すディレクトリ
+		allowMethods: ['POST'],
 	},
 };

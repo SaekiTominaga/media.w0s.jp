@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import * as dotenv from 'dotenv';
-import { Hono, type Context } from 'hono';
+import { Hono } from 'hono';
 import { basicAuth } from 'hono/basic-auth';
 import { compress } from 'hono/compress';
 import { cors } from 'hono/cors';
@@ -16,6 +16,7 @@ import config from './config/hono.js';
 import blogUpload from './controller/blogUpload.js';
 import thumbImageCreate from './controller/thumbImageCreate.js';
 import thumbImageRender from './controller/thumbImageRender.js';
+import { isApi } from './util/request.js';
 
 dotenv.config({
 	path: process.env['NODE_ENV'] === 'production' ? '.env.production' : '.env.development',
@@ -147,11 +148,10 @@ app.route(`/${config.api.dir}/thumbimage-create`, thumbImageCreate);
 app.route(`/${config.api.dir}/blog-upload`, blogUpload);
 
 /* Error pages */
-const isApiUrl = (context: Context) => context.req.path.startsWith(`/${config.api.dir}/`);
 app.notFound((context) => {
 	const TITLE = '404 Not Found';
 
-	if (isApiUrl(context)) {
+	if (isApi(context)) {
 		return context.json({ message: TITLE }, 404);
 	}
 
@@ -185,7 +185,7 @@ app.onError((err, context) => {
 		logger.fatal(err.message);
 	}
 
-	if (isApiUrl(context)) {
+	if (isApi(context)) {
 		return context.json({ message: message ?? title }, status);
 	}
 

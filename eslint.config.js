@@ -9,12 +9,6 @@ export default [
 		ignores: ['node/dist/**/*.js'],
 	},
 	{
-		files: ['node/src/validator/*.ts'],
-		rules: {
-			'import/prefer-default-export': 'off',
-		},
-	},
-	{
 		files: ['node/src/validator/*.test.ts'],
 		rules: {
 			'line-comment-position': 'off',
