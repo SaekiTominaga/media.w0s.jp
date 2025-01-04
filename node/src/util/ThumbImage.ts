@@ -1,112 +1,116 @@
+import fs from 'node:fs';
 import path from 'node:path';
-import config, { type Info as ImageInfo } from '../config/thumb-image.js';
+import Sharp from 'sharp';
+import ThumbImage from '../object/ThumbImage.js';
 
 /**
- * サムネイル画像
+ * 出力するサムネイル画像ファイルの大きさを計算する
+ *
+ * @param requestSize - リクエストされた画像サイズ
+ * @param requestSize.width - 幅
+ * @param requestSize.height - 高さ
+ * @param origImage - オリジナル画像のサイズ情報
+ *
+ * @returns 出力するサムネイル画像ファイルの大きさ
  */
-export default class ThumbImage {
-	/* ファイルタイプ毎の MIME タイプや拡張子の定義 */
-	#imageInfo: ImageInfo;
+export const getSize = (
+	requestSize: Readonly<{
+		width: number | undefined;
+		height: number | undefined;
+	}>,
+	origImage: Readonly<ImageSize>,
+): ImageSize => {
+	let newImageWidth = origImage.width;
+	let newImageHeight = origImage.height;
 
-	/* サムネイル画像を保存するルートディレクトリ */
-	#dir: string;
-
-	/* ベースとなるファイルパス */
-	#fileBasePath: string;
-
-	/* 画像タイプ */
-	#type: string;
-
-	/* 画像の大きさ */
-	#size: ImageSize;
-
-	/* 画像品質 */
-	#quality: number | undefined;
-
-	/**
-	 * @param option -
-	 * @param option.fileBasePath - ベースとなるファイルパス
-	 * @param option.type - 画像タイプ
-	 * @param option.size - 画像サイズ
-	 * @param option.quality - 画像品質
-	 */
-	constructor(option: { fileBasePath: string; type: string; size: ImageSize; quality?: number }) {
-		const dir = process.env['THUMBIMAGE_DIR'];
-		if (dir === undefined) {
-			throw new Error('thumbimage directory not defined');
+	if (requestSize.height === undefined) {
+		/* 幅のみが指定された場合 */
+		if (requestSize.width !== undefined && requestSize.width < origImage.width) {
+			/* 幅を基準に縮小する */
+			newImageWidth = requestSize.width;
+			newImageHeight = Math.round((origImage.height / origImage.width) * requestSize.width);
 		}
-		this.#dir = dir;
-
-		this.#imageInfo = config.type;
-		this.#fileBasePath = option.fileBasePath;
-
-		this.#type = option.type;
-		this.#size = option.size;
-		this.#quality = option.quality;
-	}
-
-	/**
-	 * 画像定義を取得する
-	 *
-	 * @returns MIME タイプや拡張子の定義
-	 */
-	#getImageInfo() {
-		const imageInfo = this.#imageInfo[this.#type];
-		if (imageInfo === undefined) {
-			throw new Error('Specified image type information is not registered.');
+	} else if (requestSize.width === undefined) {
+		/* 高さのみが指定された場合 */
+		if (requestSize.height < origImage.height) {
+			/* 高さを基準に縮小する */
+			newImageWidth = Math.round((origImage.width / origImage.height) * requestSize.height);
+			newImageHeight = requestSize.height;
 		}
+	} else if (requestSize.width < origImage.width || requestSize.height < origImage.height) {
+		/* 幅、高さが両方指定された場合（幅か高さ、どちらかより縮小割合が大きい方を基準に縮小する） */
+		const reductionRatio = Math.min(requestSize.width / origImage.width, requestSize.height / origImage.height);
 
-		return imageInfo;
+		newImageWidth = Math.round(origImage.width * reductionRatio);
+		newImageHeight = Math.round(origImage.height * reductionRatio);
 	}
 
-	get fileBasePath(): string {
-		return this.#fileBasePath;
+	return { width: newImageWidth, height: newImageHeight };
+};
+
+/**
+ * 画像ファイルを生成する
+ *
+ * @param origFilePath - 元画像ファイルのフルパス
+ * @param thumbImage - 生成するサムネイル画像のファイル情報
+ *
+ * @returns 生成したサムネイル画像データ
+ */
+export const create = async (origFilePath: string, thumbImage: Readonly<ThumbImage>): Promise<Buffer> => {
+	/* ディレクトリのチェック */
+	const thumbDirectory = path.dirname(thumbImage.fileFullPath);
+	if (!fs.existsSync(thumbDirectory)) {
+		await fs.promises.mkdir(thumbDirectory, {
+			recursive: true,
+		});
 	}
 
-	get filePath(): string {
-		const imageInfo = this.#getImageInfo();
+	/* sharp 設定 */
+	Sharp.cache(false);
 
-		const paramSize = `s=${String(this.#size.width)}x${String(this.#size.height)}`;
-		const paramQuality = `q=${String(this.#quality)}`;
+	// eslint-disable-next-line new-cap
+	const sharp = Sharp(origFilePath);
+	sharp.resize(thumbImage.size.width, thumbImage.size.height);
+	switch (thumbImage.type) {
+		case 'avif': {
+			sharp.avif({
+				quality: thumbImage.quality,
+			});
+			break;
+		}
+		case 'webp': {
+			sharp.webp({
+				quality: thumbImage.quality,
+			});
+			break;
+		}
+		case 'jpeg': {
+			sharp.jpeg({
+				quality: thumbImage.quality,
+			});
+			break;
+		}
+		case 'png': {
+			const sharpOptions: Sharp.PngOptions = {
+				compressionLevel: 9,
+			};
 
-		const params = imageInfo.quality ? [paramSize, paramQuality] : [paramSize];
+			const metadata = await sharp.metadata();
+			// @ts-expect-error: ts(2339)
+			if (metadata.format === 'png' && metadata.paletteBitDepth === 8) {
+				/* PNG8 */
+				sharpOptions.palette = true;
+			}
 
-		return `${this.#fileBasePath}@${params.join(';')}.${imageInfo.extension}`; // e.g `path/to.jpg@s=100x200;q=80.webp`
+			sharp.png(sharpOptions);
+
+			break;
+		}
+		default:
 	}
 
-	get fileFullPath(): string {
-		return path.resolve(`${this.#dir}/${this.filePath}`);
-	}
+	const fileData = await sharp.toBuffer();
+	await fs.promises.writeFile(thumbImage.fileFullPath, fileData);
 
-	get mime(): string {
-		return this.#getImageInfo().mime;
-	}
-
-	get altType(): string | undefined {
-		return this.#getImageInfo().altType;
-	}
-
-	get type(): string {
-		return this.#type;
-	}
-
-	set type(type: string) {
-		this.#type = type;
-	}
-
-	get size(): ImageSize {
-		return this.#size;
-	}
-
-	set size(size: ImageSize) {
-		this.#size = size;
-	}
-
-	get quality(): number | undefined {
-		return this.#quality;
-	}
-
-	set quality(quality: number | undefined) {
-		this.#quality = quality;
-	}
-}
+	return fileData;
+};

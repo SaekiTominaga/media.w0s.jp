@@ -9,17 +9,9 @@ export default [
 		ignores: ['node/dist/**/*.js'],
 	},
 	{
-		files: ['node/src/controller/**/*.ts'],
+		files: ['node/src/validator/*.ts'],
 		rules: {
-			'class-methods-use-this': 'off',
-			'@typescript-eslint/no-non-null-assertion': 'off',
-			'@typescript-eslint/no-unsafe-member-access': 'off',
-		},
-	},
-	{
-		files: ['node/src/app.ts'],
-		rules: {
-			'@typescript-eslint/no-misused-promises': 'off',
+			'import/prefer-default-export': 'off',
 		},
 	},
 ];

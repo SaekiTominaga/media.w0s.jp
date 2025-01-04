@@ -13,7 +13,7 @@ export default {
 			},
 		},
 		compression: {
-			threshold: '512',
+			threshold: 512,
 		},
 	},
 	static: {
@@ -26,25 +26,6 @@ export default {
 		index: 'index.html',
 		extension: '.html', // URL 上で省略できる拡張子
 		headers: {
-			mime_type: {
-				path: {
-					'/favicon.ico': 'image/svg+xml;charset=utf-8',
-				},
-				extension: {
-					'.m4a': 'audio/aac',
-					'.jpg': 'image/jpeg',
-					'.jpeg': 'image/jpeg',
-					'.png': 'image/png',
-					'.svg': 'image/svg+xml;charset=utf-8',
-					'.webp': 'image/webp',
-					'.css': 'text/css;charset=utf-8',
-					'.html': 'text/html;charset=utf-8',
-					'.txt': 'text/plain;charset=utf-8',
-					'.vtt': 'text/vtt',
-					'.mp4': 'video/mp4',
-					'.webm': 'video/webm',
-				},
-			},
 			cacheControl: {
 				default: 'max-age=600',
 				path: [
@@ -60,6 +41,11 @@ export default {
 					},
 				],
 			},
+		},
+	},
+	basicAuth: {
+		unauthorizedMessage: {
+			message: 'Unauthorized',
 		},
 	},
 };
