@@ -20,12 +20,16 @@ await test('Omission of extension', async () => {
 	assert.equal(res.headers.get('Content-Type'), 'text/html; charset=utf-8');
 });
 
-await test('Cache-Control: extension', async () => {
-	const res = await app.request('/apple-touch-icon.png');
+await test('Custom header', async () => {
+	const res = await app.request('/');
 
-	assert.equal(res.status, 200);
-	assert.equal(res.headers.get('Content-Type'), 'image/png');
-	assert.equal(res.headers.get('Cache-Control'), 'max-age=3600');
+	assert.equal(res.headers.get('Strict-Transport-Security'), 'max-age=31536000');
+	assert.equal(
+		res.headers.get('Content-Security-Policy'),
+		"frame-ancestors 'self'; report-uri https://w0sjp.report-uri.com/r/d/csp/enforce; report-to default",
+	);
+	assert.equal(res.headers.get('Reporting-Endpoints'), 'default="https://w0sjp.report-uri.com/a/d/g"');
+	assert.equal(res.headers.get('X-Content-Type-Options'), 'nosniff');
 });
 
 await test('favicon.ico', async () => {
@@ -34,6 +38,14 @@ await test('favicon.ico', async () => {
 	assert.equal(res.status, 200);
 	assert.equal(res.headers.get('Content-Type'), 'image/svg+xml;charset=utf-8');
 	assert.equal(res.headers.get('Cache-Control'), 'max-age=604800');
+});
+
+await test('Cache-Control: extension', async () => {
+	const res = await app.request('/apple-touch-icon.png');
+
+	assert.equal(res.status, 200);
+	assert.equal(res.headers.get('Content-Type'), 'image/png');
+	assert.equal(res.headers.get('Cache-Control'), 'max-age=3600');
 });
 
 await test('Compression', async (t) => {
