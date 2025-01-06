@@ -9,8 +9,8 @@ const authorization = `Basic ${Buffer.from(`${auth.user}:${auth.password_orig!}`
 await test('name undefined', async () => {
 	const res = await app.request('/api/blog-upload', {
 		method: 'post',
-		headers: { Authorization: authorization },
-		body: new URLSearchParams(),
+		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+		body: JSON.stringify({}),
 	});
 
 	assert.equal(res.status, 400);
@@ -20,37 +20,37 @@ await test('name undefined', async () => {
 await test('type undefined', async () => {
 	const res = await app.request('/api/blog-upload', {
 		method: 'post',
-		headers: { Authorization: authorization },
-		body: new URLSearchParams([['name', '']]),
+		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+		body: JSON.stringify({ name: '' }),
 	});
 
 	assert.equal(res.status, 400);
 	assert.equal((await res.json()).message, 'The `type` parameter is invalid');
 });
 
-await test('temppath undefined', async () => {
+await test('temp undefined', async () => {
 	const res = await app.request('/api/blog-upload', {
 		method: 'post',
-		headers: { Authorization: authorization },
-		body: new URLSearchParams([
-			['name', ''],
-			['type', ''],
-		]),
+		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			name: '',
+			type: '',
+		}),
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal((await res.json()).message, 'The `temppath` parameter is invalid');
+	assert.equal((await res.json()).message, 'The `temp` parameter is invalid');
 });
 
 await test('size undefined', async () => {
 	const res = await app.request('/api/blog-upload', {
 		method: 'post',
-		headers: { Authorization: authorization },
-		body: new URLSearchParams([
-			['name', ''],
-			['type', ''],
-			['temppath', ''],
-		]),
+		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			name: '',
+			type: '',
+			temp: '',
+		}),
 	});
 
 	assert.equal(res.status, 400);
@@ -60,47 +60,62 @@ await test('size undefined', async () => {
 await test('size string', async () => {
 	const res = await app.request('/api/blog-upload', {
 		method: 'post',
-		headers: { Authorization: authorization },
-		body: new URLSearchParams([
-			['name', ''],
-			['type', ''],
-			['temppath', ''],
-			['size', 'foo'],
-		]),
+		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			name: '',
+			type: '',
+			temp: '',
+			size: 'foo',
+		}),
 	});
 
 	assert.equal(res.status, 400);
-	assert.equal((await res.json()).message, 'The value of the `size` parameter must be a positive integer');
+	assert.equal((await res.json()).message, 'The `size` parameter is invalid');
 });
 
 await test('size min', async () => {
 	const res = await app.request('/api/blog-upload', {
 		method: 'post',
-		headers: { Authorization: authorization },
-		body: new URLSearchParams([
-			['name', ''],
-			['type', ''],
-			['temppath', ''],
-			['size', '-1'],
-		]),
+		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			name: '',
+			type: '',
+			temp: '',
+			size: -1,
+		}),
 	});
 
 	assert.equal(res.status, 400);
 	assert.equal((await res.json()).message, 'The value of the `size` parameter must be a positive integer');
 });
 
-await test('overwrite multi', async () => {
+await test('size decimal', async () => {
 	const res = await app.request('/api/blog-upload', {
 		method: 'post',
-		headers: { Authorization: authorization },
-		body: new URLSearchParams([
-			['name', ''],
-			['type', ''],
-			['temppath', ''],
-			['size', '0'],
-			['overwrite', ''],
-			['overwrite', ''],
-		]),
+		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			name: '',
+			type: '',
+			temp: '',
+			size: 0.1,
+		}),
+	});
+
+	assert.equal(res.status, 400);
+	assert.equal((await res.json()).message, 'The value of the `size` parameter must be a positive integer');
+});
+
+await test('overwrite string', async () => {
+	const res = await app.request('/api/blog-upload', {
+		method: 'post',
+		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			name: '',
+			type: '',
+			temp: '',
+			size: 0,
+			overwrite: '',
+		}),
 	});
 
 	assert.equal(res.status, 400);

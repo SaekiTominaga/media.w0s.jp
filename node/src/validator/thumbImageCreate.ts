@@ -9,58 +9,54 @@ interface RequestBody {
 	quality: number | undefined;
 }
 
-export const form = validator('form', (value): RequestBody => {
-	const { file_path: filePath, type, width, height, quality } = value;
+export const json = validator('json', (value: Record<string, unknown>): RequestBody => {
+	const { path: filePath, type, width, height, quality } = value;
 
 	if (typeof filePath !== 'string') {
-		throw new HTTPException(400, { message: 'The `file_path` parameter is invalid' });
+		throw new HTTPException(400, { message: 'The `path` parameter is invalid' });
 	}
 
 	if (typeof type !== 'string') {
 		throw new HTTPException(400, { message: 'The `type` parameter is invalid' });
 	}
 
-	if (typeof width !== 'string') {
+	if (typeof width !== 'number') {
 		throw new HTTPException(400, { message: 'The `width` parameter is invalid' });
 	}
-	if (!/^[0-9]+$/.test(width)) {
-		throw new HTTPException(400, { message: 'The value of the `width` parameter must be a positive integer' });
-	}
-	const widthNumber = Number(width);
-	if (widthNumber < 1 || widthNumber > 9999) {
+	if (width < 1 || width > 9999) {
 		throw new HTTPException(400, { message: 'The value of the `width` parameter must be between 1 and 9999' });
 	}
+	if (!Number.isInteger(width)) {
+		throw new HTTPException(400, { message: 'The value of the `width` parameter must be an integer' });
+	}
 
-	if (typeof height !== 'string') {
+	if (typeof height !== 'number') {
 		throw new HTTPException(400, { message: 'The `height` parameter is invalid' });
 	}
-	if (!/^[0-9]+$/.test(height)) {
-		throw new HTTPException(400, { message: 'The value of the `height` parameter must be a positive integer' });
-	}
-	const heightNumber = Number(height);
-	if (heightNumber < 1 || heightNumber > 9999) {
+	if (height < 1 || height > 9999) {
 		throw new HTTPException(400, { message: 'The value of the `height` parameter must be between 1 and 9999' });
 	}
+	if (!Number.isInteger(height)) {
+		throw new HTTPException(400, { message: 'The value of the `height` parameter must be an integer' });
+	}
 
-	let qualityNumber: number | undefined;
 	if (quality !== undefined) {
-		if (typeof quality !== 'string') {
+		if (typeof quality !== 'number') {
 			throw new HTTPException(400, { message: 'The `quality` parameter is invalid' });
 		}
-		if (!/^[0-9]+$/.test(quality)) {
-			throw new HTTPException(400, { message: 'The value of the `quality` parameter must be a positive integer' });
-		}
-		qualityNumber = Number(quality);
-		if (qualityNumber < 1 || qualityNumber > 100) {
+		if (quality < 1 || quality > 100) {
 			throw new HTTPException(400, { message: 'The value of the `quality` parameter must be between 1 and 100' });
+		}
+		if (!Number.isInteger(quality)) {
+			throw new HTTPException(400, { message: 'The value of the `quality` parameter must be an integer' });
 		}
 	}
 
 	return {
 		filePath: filePath,
 		type: type,
-		width: widthNumber,
-		height: heightNumber,
-		quality: qualityNumber,
+		width: width,
+		height: height,
+		quality: quality,
 	};
 });

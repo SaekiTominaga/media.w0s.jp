@@ -11,14 +11,14 @@ const authorization = `Basic ${Buffer.from(`${auth.user}:${auth.password_orig!}`
 await test('File not found', async () => {
 	const res = await app.request('/api/thumbimage-create', {
 		method: 'post',
-		headers: { Authorization: authorization },
-		body: new URLSearchParams([
-			['file_path', 'foo'],
-			['type', ''],
-			['width', '1'],
-			['height', '1'],
-			['quality', '1'],
-		]),
+		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+		body: JSON.stringify({
+			path: 'foo',
+			type: '',
+			width: 1,
+			height: 1,
+			quality: 1,
+		}),
 	});
 
 	assert.equal(res.status, 204);
@@ -46,14 +46,14 @@ await test('create', async (t) => {
 	await t.test('AVIF', async () => {
 		const res = await app.request('/api/thumbimage-create', {
 			method: 'post',
-			headers: { Authorization: authorization },
-			body: new URLSearchParams([
-				['file_path', 'sample.jpg'],
-				['type', 'avif'],
-				['width', '1'],
-				['height', '1'],
-				['quality', '1'],
-			]),
+			headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				path: 'sample.jpg',
+				type: 'avif',
+				width: 1,
+				height: 1,
+				quality: 1,
+			}),
 		});
 
 		assert.equal(res.status, 204);

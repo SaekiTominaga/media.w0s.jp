@@ -28,23 +28,23 @@ await test('upload', async (t) => {
 	});
 
 	await t.test('image', async () => {
-		const filename = '_test-upload-image';
+		const fileName = '_test-upload-image';
 
 		const res = await app.request('/api/blog-upload', {
 			method: 'post',
-			headers: { Authorization: authorization },
-			body: new URLSearchParams([
-				['name', filename],
-				['type', 'image/xxx'],
-				['temppath', tempPath],
-				['size', '0'],
-			]),
+			headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				name: fileName,
+				type: 'image/xxx',
+				temp: tempPath,
+				size: 0,
+			}),
 		});
 
-		await fs.promises.unlink(`${configBlogUpload.image.dir}/${filename}`);
+		await fs.promises.unlink(`${configBlogUpload.image.dir}/${fileName}`);
 
 		assert.equal(res.status, 200);
-		assert.deepStrictEqual(await res.json(), { name: filename, size: 0, code: 1, message: 'File upload was successful.' });
+		assert.deepStrictEqual(await res.json(), { name: fileName, size: 0, code: 1, message: 'File upload was successful.' });
 	});
 
 	await t.test('video', async () => {
@@ -52,13 +52,13 @@ await test('upload', async (t) => {
 
 		const res = await app.request('/api/blog-upload', {
 			method: 'post',
-			headers: { Authorization: authorization },
-			body: new URLSearchParams([
-				['name', filename],
-				['type', 'video/xxx'],
-				['temppath', tempPath],
-				['size', '0'],
-			]),
+			headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				name: filename,
+				type: 'video/xxx',
+				temp: tempPath,
+				size: 0,
+			}),
 		});
 
 		await fs.promises.unlink(`${configBlogUpload.video.dir}/${filename}`);
@@ -72,13 +72,13 @@ await test('upload', async (t) => {
 
 		const res = await app.request('/api/blog-upload', {
 			method: 'post',
-			headers: { Authorization: authorization },
-			body: new URLSearchParams([
-				['name', filename],
-				['type', 'text/xxx'],
-				['temppath', tempPath],
-				['size', '0'],
-			]),
+			headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				name: filename,
+				type: 'text/xxx',
+				temp: tempPath,
+				size: 0,
+			}),
 		});
 
 		assert.equal(res.status, 200);
@@ -116,13 +116,13 @@ await test('overwrite', async (t) => {
 	await t.test('First file upload', async () => {
 		const res = await app.request('/api/blog-upload', {
 			method: 'post',
-			headers: { Authorization: authorization },
-			body: new URLSearchParams([
-				['name', filename],
-				['type', 'image/xxx'],
-				['temppath', tempPath],
-				['size', '0'],
-			]),
+			headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				name: filename,
+				type: 'image/xxx',
+				temp: tempPath,
+				size: 0,
+			}),
 		});
 
 		assert.equal(res.status, 200);
@@ -132,13 +132,13 @@ await test('overwrite', async (t) => {
 	await t.test('Block file overwriting', async () => {
 		const res = await app.request('/api/blog-upload', {
 			method: 'post',
-			headers: { Authorization: authorization },
-			body: new URLSearchParams([
-				['name', filename],
-				['type', 'image/xxx'],
-				['temppath', tempPath],
-				['size', '0'],
-			]),
+			headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				name: filename,
+				type: 'image/xxx',
+				temp: tempPath,
+				size: 0,
+			}),
 		});
 
 		assert.equal(res.status, 200);
@@ -148,14 +148,14 @@ await test('overwrite', async (t) => {
 	await t.test('File overwritten', async () => {
 		const res = await app.request('/api/blog-upload', {
 			method: 'post',
-			headers: { Authorization: authorization },
-			body: new URLSearchParams([
-				['name', filename],
-				['type', 'image/xxx'],
-				['temppath', tempPath],
-				['size', '0'],
-				['overwrite', '1'],
-			]),
+			headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				name: filename,
+				type: 'image/xxx',
+				temp: tempPath,
+				size: 0,
+				overwrite: true,
+			}),
 		});
 
 		assert.equal(res.status, 200);

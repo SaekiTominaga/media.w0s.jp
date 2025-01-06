@@ -3,7 +3,7 @@ import { Hono } from 'hono';
 import Log4js from 'log4js';
 import MIMEType from 'whatwg-mimetype';
 import configBlogUpload from '../config/blog-upload.js';
-import { form as validatorForm } from '../validator/blogUpload.js';
+import { json as validatorJson } from '../validator/blogUpload.js';
 
 interface ResponseJson {
 	name: string;
@@ -25,7 +25,7 @@ const logger = Log4js.getLogger('blog-upload');
  * @param option.limit - 取り扱うファイルサイズのリミット
  * @param requset - リクエストで指定された情報
  * @param requset.fileName - ファイル名
- * @param requset.temp - 仮で保存されたファイルパス
+ * @param requset.tempPath - 仮で保存されたファイルパス
  * @param requset.size - ファイルサイズ
  * @param requset.overwrite - 上書きを許可するか
  *
@@ -33,7 +33,7 @@ const logger = Log4js.getLogger('blog-upload');
  */
 const upload = async (
 	option: { dir: string; limit: number },
-	requset: { fileName: string; temp: string; size: number; overwrite: boolean },
+	requset: { fileName: string; tempPath: string; size: number; overwrite: boolean },
 ): Promise<ResponseJson> => {
 	const filePath = `${option.dir}/${requset.fileName}`;
 
@@ -59,8 +59,8 @@ const upload = async (
 		};
 	}
 
-	logger.debug(`ファイルアップロード実施: ${requset.temp} → ${filePath}`);
-	await fs.promises.rename(requset.temp, filePath);
+	logger.debug(`ファイルアップロード実施: ${requset.tempPath} → ${filePath}`);
+	await fs.promises.rename(requset.tempPath, filePath);
 	logger.info(`ファイルアップロード成功: ${filePath}`);
 
 	return {
@@ -71,10 +71,10 @@ const upload = async (
 	};
 };
 
-const app = new Hono().post('/', validatorForm, async (context) => {
+const app = new Hono().post('/', validatorJson, async (context) => {
 	const { req } = context;
 
-	const requestBody = req.valid('form');
+	const requestBody = req.valid('json');
 
 	let response: ResponseJson;
 	switch (new MIMEType(requestBody.type).type) {
@@ -85,8 +85,8 @@ const app = new Hono().post('/', validatorForm, async (context) => {
 					limit: configBlogUpload.image.limit,
 				},
 				{
-					fileName: requestBody.name,
-					temp: requestBody.temppath,
+					fileName: requestBody.fileName,
+					tempPath: requestBody.tempPath,
 					size: requestBody.size,
 					overwrite: requestBody.overwrite,
 				},
@@ -100,8 +100,8 @@ const app = new Hono().post('/', validatorForm, async (context) => {
 					limit: configBlogUpload.video.limit,
 				},
 				{
-					fileName: requestBody.name,
-					temp: requestBody.temppath,
+					fileName: requestBody.fileName,
+					tempPath: requestBody.tempPath,
 					size: requestBody.size,
 					overwrite: requestBody.overwrite,
 				},
@@ -112,7 +112,7 @@ const app = new Hono().post('/', validatorForm, async (context) => {
 			logger.info('未対応のファイルタイプ', requestBody.type);
 
 			response = {
-				name: requestBody.name,
+				name: requestBody.fileName,
 				size: requestBody.size,
 				code: configBlogUpload.response.type.code,
 				message: configBlogUpload.response.type.message,

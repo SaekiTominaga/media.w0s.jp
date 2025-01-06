@@ -6,7 +6,7 @@ import Log4js from 'log4js';
 import configExpress from '../config/hono.js';
 import ThumbImage from '../object/ThumbImage.js';
 import { create as createThumbImage } from '../util/thumbImage.js';
-import { form as validatorForm } from '../validator/thumbImageCreate.js';
+import { json as validatorJson } from '../validator/thumbImageCreate.js';
 
 /**
  * サムネイル画像生成
@@ -36,10 +36,10 @@ const create = async (origFileFullPath: string, thumbImage: ThumbImage): Promise
 	return createdData;
 };
 
-const app = new Hono().post('/', validatorForm, async (context) => {
+const app = new Hono().post('/', validatorJson, async (context) => {
 	const { req } = context;
 
-	const requestBody = req.valid('form');
+	const requestBody = req.valid('json');
 
 	const origFileFullPath = path.resolve(`${configExpress.static.root}/${configExpress.static.directory.image}/${requestBody.filePath}`);
 	if (!fs.existsSync(origFileFullPath)) {
