@@ -52,60 +52,8 @@ export default class ThumbImageRenderDao {
 	 *
 	 * @returns 登録されたデータ数
 	 */
-	async insert(data: { filePath: string; type: string; size: ImageSize; quality: number | undefined }): Promise<number> {
-		interface Select {
-			count: number;
-		}
-
+	async insert(data: Readonly<{ filePath: string; type: string; size: ImageSize; quality: number | undefined }>): Promise<number> {
 		const dbh = await this.#getDbh();
-
-		let sthSelect: sqlite.Statement;
-		if (data.quality !== undefined) {
-			sthSelect = await dbh.prepare(`
-				SELECT
-					COUNT(file_path) AS count
-				FROM
-					d_queue
-				WHERE
-					file_path = :file_path AND
-					file_type = :type AND
-					width = :width AND
-					height = :height AND
-					quality = :quality
-			`);
-			await sthSelect.bind({
-				':file_path': data.filePath,
-				':type': data.type,
-				':width': data.size.width,
-				':height': data.size.height,
-				':quality': data.quality,
-			});
-		} else {
-			sthSelect = await dbh.prepare(`
-				SELECT
-					COUNT(file_path) AS count
-				FROM
-					d_queue
-				WHERE
-					file_path = :file_path AND
-					file_type = :type AND
-					width = :width AND
-					height = :height AND
-					quality IS NULL
-			`);
-			await sthSelect.bind({
-				':file_path': data.filePath,
-				':type': data.type,
-				':width': data.size.width,
-				':height': data.size.height,
-			});
-		}
-		const row = await sthSelect.get<Select>();
-		await sthSelect.finalize();
-
-		if (row === undefined || row.count > 0 /* 既にキューにある場合 */) {
-			return 0;
-		}
 
 		let insertedCount = 0; // 登録されたデータ数
 

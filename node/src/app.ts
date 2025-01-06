@@ -1,14 +1,23 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import compression from 'compression';
 import * as dotenv from 'dotenv';
-import express, { type NextFunction, type Request, type Response } from 'express';
+import { Hono } from 'hono';
+import { basicAuth } from 'hono/basic-auth';
+import { compress } from 'hono/compress';
+import { cors } from 'hono/cors';
+import { HTTPException } from 'hono/http-exception';
+import type { ContentfulStatusCode } from 'hono/utils/http-status.js';
+import { serve } from '@hono/node-server';
+import { serveStatic } from '@hono/node-server/serve-static';
 import Log4js from 'log4js';
 import qs from 'qs';
-import config from './config/express.js';
-import BlogUploadController from './controller/api/BlogUploadController.js';
-import ThumbImageCreateController from './controller/api/ThumbImageCreateController.js';
-import ThumbImageRenderController from './controller/ThumbImageRenderController.js';
+import config from './config/hono.js';
+import blogUpload from './controller/blogUpload.js';
+import thumbImageCreate from './controller/thumbImageCreate.js';
+import thumbImageRender from './controller/thumbImageRender.js';
+import { getAuth } from './util/auth.js';
+import { isApi } from './util/request.js';
 
 dotenv.config({
 	path: process.env['NODE_ENV'] === 'production' ? '.env.production' : '.env.development',
@@ -22,172 +31,183 @@ if (loggerFilePath === undefined) {
 Log4js.configure(loggerFilePath);
 const logger = Log4js.getLogger();
 
-const app = express();
-
-app.set('query parser', (query: string) => qs.parse(query, { delimiter: /[&;]/ }));
-app.set('trust proxy', true);
-app.set('x-powered-by', false);
+/* Hono */
+const app = new Hono();
 
 app.use(
-	(_req, res, next) => {
-		/* HSTS */
-		res.setHeader('Strict-Transport-Security', config.response.header.hsts);
-
-		/* CSP */
-		res.setHeader('Content-Security-Policy', config.response.header.csp);
-
-		/* Report */
-		res.setHeader(
-			'Reporting-Endpoints',
-			Object.entries(config.response.header.reportingEndpoints)
-				.map((endpoint) => `${endpoint.at(0) ?? ''}="${endpoint.at(1) ?? ''}"`)
-				.join(','),
-		);
-
-		/* MIME スニッフィング抑止 */
-		res.setHeader('X-Content-Type-Options', 'nosniff');
-
-		next();
-	},
-	compression({
+	compress({
 		threshold: config.response.compression.threshold,
 	}),
-	express.urlencoded({
-		extended: true,
-	}),
-	(req, res, next) => {
-		const requestPath = req.path;
+);
 
-		let requestFilePath: string | undefined; // 実ファイルパス
-		if (requestPath.endsWith('/')) {
-			/* ディレクトリトップ（e.g. /foo/ ） */
-			if (fs.existsSync(`${config.static.root}${requestPath}${config.static.index}`)) {
-				requestFilePath = `${requestPath}${config.static.index}`;
-			}
-		} else if (path.extname(requestPath) === '') {
-			/* 拡張子のない URL（e.g. /foo ） */
-			if (fs.existsSync(`${config.static.root}${requestPath}${config.static.extension}`)) {
-				requestFilePath = `${requestPath}${config.static.extension}`;
-			}
-		} else if (fs.existsSync(`${config.static.root}${requestPath}`)) {
-			/* 拡張子のある URL（e.g. /foo.txt ） */
-			requestFilePath = requestPath;
-		}
+app.use(async (context, next) => {
+	const { req } = context;
 
-		/* Brotli */
-		if (requestFilePath !== undefined && req.method === 'GET' && req.acceptsEncodings('br') === 'br') {
-			const brotliFilePath = `${requestFilePath}${config.extension.brotli}`;
-			if (fs.existsSync(`${config.static.root}${brotliFilePath}`)) {
-				req.url = brotliFilePath;
-				res.setHeader('Content-Encoding', 'br');
-			}
-		}
+	const { search } = new URL(req.url);
+	if (search !== '') {
+		/* query paeser カスタマイズ https://github.com/honojs/hono/issues/3667#issuecomment-2503499238 */
+		req.queries = () => qs.parse(search.substring(1), { delimiter: /[&;]/ }) as never;
+	}
 
-		next();
-	},
-	express.static(config.static.root, {
-		extensions: [config.static.extension.substring(1)],
-		index: [config.static.index],
-		setHeaders: (res, localPath) => {
-			const requestUrl = res.req.url; // リクエストパス e.g. ('/foo.html.br')
-			const requestUrlOrigin = requestUrl.endsWith(config.extension.brotli)
-				? requestUrl.substring(0, requestUrl.length - config.extension.brotli.length)
-				: requestUrl; // 元ファイル（圧縮ファイルではない）のリクエストパス (e.g. '/foo.html')
-			const localPathOrigin = localPath.endsWith(config.extension.brotli)
-				? localPath.substring(0, localPath.length - config.extension.brotli.length)
-				: localPath; // 元ファイルの絶対パス (e.g. '/var/www/public/foo.html')
-			const extensionOrigin = path.extname(localPathOrigin); // 元ファイルの拡張子 (e.g. '.html')
+	await next();
+});
 
-			/* Content-Type */
-			const mimeType =
-				Object.entries(config.static.headers.mime_type.path)
-					.find(([filePath]) => filePath === requestUrlOrigin)
-					?.at(1) ??
-				Object.entries(config.static.headers.mime_type.extension)
-					.find(([fileExtension]) => fileExtension === extensionOrigin)
-					?.at(1);
-			if (mimeType === undefined) {
-				logger.error(`MIME type is undefined: ${requestUrlOrigin}`);
+app.use(async (context, next) => {
+	/* HSTS */
+	context.header('Strict-Transport-Security', config.response.header.hsts);
+
+	/* CSP */
+	context.header('Content-Security-Policy', config.response.header.csp);
+
+	/* Report */
+	context.header(
+		'Reporting-Endpoints',
+		Object.entries(config.response.header.reportingEndpoints)
+			.map(([key, value]) => `${key}="${value}"`)
+			.join(','),
+	);
+
+	/* MIME スニッフィング抑止 */
+	context.header('X-Content-Type-Options', 'nosniff');
+
+	await next();
+});
+
+app.get('/favicon.ico', async (context, next) => {
+	const { res } = context;
+
+	const file = await fs.promises.readFile(`${config.static.root}/favicon.ico`);
+
+	res.headers.set('Content-Type', 'image/svg+xml;charset=utf-8'); // `context.header` だと実際には問題ないが、test で落ちる
+	context.body(file);
+
+	await next();
+});
+
+app.use(
+	serveStatic({
+		root: config.static.root,
+		index: config.static.index,
+		precompressed: true,
+		rewriteRequestPath: (urlPath) => {
+			if (urlPath.endsWith('/') || urlPath.includes('.')) {
+				return urlPath;
 			}
-			res.setHeader('Content-Type', mimeType ?? 'application/octet-stream');
+
+			return `${urlPath}${config.static.extension}`;
+		},
+		onFound: (localPath, context) => {
+			const urlPath = path.normalize(localPath).substring(path.normalize(config.static.root).length).replaceAll(path.sep, '/'); // URL のパス部分 e.g. ('/foo.html')
+			const urlExtension = path.extname(urlPath); // URL の拡張子部分 (e.g. '.html')
 
 			/* Cache-Control */
 			const cacheControl =
-				config.static.headers.cacheControl.path.find((ccPath) => ccPath.paths.includes(requestUrlOrigin))?.value ??
-				config.static.headers.cacheControl.extension.find((ccExt) => ccExt.extensions.includes(extensionOrigin))?.value ??
+				config.static.headers.cacheControl.path.find((ccPath) => ccPath.paths.includes(urlPath))?.value ??
+				config.static.headers.cacheControl.extension.find((ccExt) => ccExt.extensions.includes(urlExtension))?.value ??
 				config.static.headers.cacheControl.default;
-			res.setHeader('Cache-Control', cacheControl);
-
-			/* CSP */
-			if (['.html', '.xhtml'].includes(extensionOrigin)) {
-				res.setHeader('Content-Security-Policy', config.response.header.cspHtml);
-			}
+			context.header('Cache-Control', cacheControl);
 		},
 	}),
 );
 
-/**
- * サムネイル画像表示
- */
-app.get('/thumbimage/:path([^?]+)', async (req, res, next) => {
-	try {
-		await new ThumbImageRenderController().execute(req, res);
-	} catch (e) {
-		next(e);
-	}
-});
+/* CORS */
+app.use(
+	'/thumbimage/*',
+	cors({
+		origin: process.env['THUMBIMAGE_CORS_ORIGINS']?.split(' ') ?? '*',
+		allowMethods: ['GET'],
+	}),
+);
 
-/**
- * サムネイル画像生成
- */
-app.post('/thumbimage/create', async (req, res, next) => {
-	try {
-		await new ThumbImageCreateController().execute(req, res);
-	} catch (e) {
-		next(e);
-	}
-});
+/* Auth */
+const auth = await getAuth();
+app.use(
+	`/${config.api.dir}/*`,
+	basicAuth({
+		username: auth.user,
+		password: auth.password,
+		realm: auth.realm,
+		verifyUser: (username, password) => {
+			// @ts-expect-error: ts(2551)
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+			const passwordHash = crypto.hash('sha256', password) as string;
+			return username === auth.user && passwordHash === auth.password;
+		},
+		invalidUserMessage: {
+			message: config.basicAuth.unauthorizedMessage,
+		},
+	}),
+);
 
-/**
- * ブログ用ファイルアップロード
- */
-app.post('/blog/upload', async (req, res, next) => {
-	try {
-		await new BlogUploadController().execute(req, res);
-	} catch (e) {
-		next(e);
-	}
-});
+/* Routes */
+app.route('/thumbimage/', thumbImageRender);
+app.route(`/${config.api.dir}/thumbimage/create`, thumbImageCreate);
+app.route(`/${config.api.dir}/blog/upload`, blogUpload);
 
-/**
- * エラー処理
- */
-app.use((req, res): void => {
-	logger.warn(`404 Not Found: ${req.method} ${req.url}`);
+/* Error pages */
+app.notFound((context) => {
+	const TITLE = '404 Not Found';
 
-	const pagePath = process.env['ERRORPAGE_404'];
-	if (pagePath === undefined) {
-		throw new Error("404 page's file path not defined");
+	if (isApi(context)) {
+		return context.json({ message: TITLE }, 404);
 	}
 
-	res.status(404).sendFile(path.resolve(pagePath));
-});
-app.use((err: Error, req: Request, res: Response, _next: NextFunction /* eslint-disable-line @typescript-eslint/no-unused-vars */): void => {
-	logger.fatal(`${req.method} ${req.url}`, err.stack);
-
-	res.status(500).send(`<!DOCTYPE html>
+	return context.html(
+		`<!DOCTYPE html>
 <html lang=en>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>media.w0s.jp</title>
-<h1>500 Internal Server Error</h1>`);
+<h1>${TITLE}</h1>`,
+		404,
+	);
+});
+app.onError((err, context) => {
+	const TITLE_4XX = 'Client error';
+	const TITLE_5XX = 'Server error';
+
+	let status: ContentfulStatusCode = 500;
+	let title = TITLE_5XX;
+	let message: string | undefined;
+	if (err instanceof HTTPException) {
+		status = err.status;
+		message = err.message;
+
+		if (err.status >= 400 && err.status < 500) {
+			logger.info(err.status, err.message, context.req.header('User-Agent'));
+			title = TITLE_4XX;
+		} else {
+			logger.error(err.message);
+		}
+	} else {
+		logger.fatal(err.message);
+	}
+
+	if (isApi(context)) {
+		return context.json({ message: message ?? title }, status);
+	}
+
+	return context.html(
+		`<!DOCTYPE html>
+<html lang=en>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>media.w0s.jp</title>
+<h1>${title}</h1>`,
+		status,
+	);
 });
 
 /* HTTP Server */
-const port = process.env['PORT'];
-if (port === undefined) {
-	throw new Error('Port not defined');
+if (process.env['TEST'] !== 'test') {
+	const port = process.env['PORT'];
+	if (port === undefined) {
+		throw new Error('Port not defined');
+	}
+	logger.info(`Server is running on http://localhost:${port}`);
+
+	serve({
+		fetch: app.fetch,
+		port: Number(port),
+	});
 }
 
-app.listen(Number(port), () => {
-	logger.info(`Server is running on http://localhost:${port}`);
-});
+export default app;

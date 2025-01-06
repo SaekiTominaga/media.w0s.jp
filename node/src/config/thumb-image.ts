@@ -36,4 +36,12 @@ export default {
 	type: info,
 	qualityDefault: 80,
 	cacheControl: 'max-age=600',
+	origMimeType: {
+		'.avif': 'image/avif',
+		'.jpeg': 'image/jpeg',
+		'.jpg': 'image/jpeg',
+		'.png': 'image/png',
+		'.svg': 'image/svg+xml;charset=utf-8',
+		'.webp': 'image/webp',
+	},
 };

@@ -1,12 +1,10 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import path from 'node:path';
-import ThumbImage from '../dist/util/ThumbImage.js';
+import ThumbImage from './ThumbImage.js';
 
-process.env.THUMBIMAGE_DIR = 'dir';
-
-test('getter', async (t) => {
-	const thumbImage = new ThumbImage({ fileBasePath: 'path/to.jpg', type: 'avif', size: { width: 100, height: 200 }, quality: 80 });
+await test('getter', async (t) => {
+	const thumbImage = new ThumbImage('dir', { fileBasePath: 'path/to.jpg', type: 'avif', size: { width: 100, height: 200 }, quality: 80 });
 
 	await t.test('fileBasePath', () => {
 		assert.equal(thumbImage.fileBasePath, 'path/to.jpg');
@@ -45,8 +43,8 @@ test('getter', async (t) => {
 	});
 });
 
-test('setter', async (t) => {
-	const thumbImage = new ThumbImage({ fileBasePath: 'path/to.jpg', type: 'avif', size: { width: 100, height: 200 }, quality: 80 });
+await test('setter', async (t) => {
+	const thumbImage = new ThumbImage('dir', { fileBasePath: 'path/to.jpg', type: 'avif', size: { width: 100, height: 200 }, quality: 80 });
 
 	t.beforeEach(() => {
 		thumbImage.type = 'webp';
@@ -91,8 +89,8 @@ test('setter', async (t) => {
 	});
 });
 
-test('filePath', async (t) => {
-	const thumbImage = new ThumbImage({ fileBasePath: 'path/to.jpg', type: 'avif', size: { width: 100, height: 200 }, quality: 80 });
+await test('filePath', async (t) => {
+	const thumbImage = new ThumbImage('dir', { fileBasePath: 'path/to.jpg', type: 'avif', size: { width: 100, height: 200 }, quality: 80 });
 
 	t.beforeEach(() => {
 		thumbImage.type = 'avif';
@@ -103,6 +101,7 @@ test('filePath', async (t) => {
 
 		assert.throws(
 			() => {
+				// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 				thumbImage.mime;
 			},
 			{ name: 'Error', message: 'Specified image type information is not registered.' },
@@ -117,4 +116,13 @@ test('filePath', async (t) => {
 		thumbImage.type = 'png';
 		assert.equal(thumbImage.filePath, 'path/to.jpg@s=100x200.png');
 	});
+});
+
+await test('filePath', () => {
+	assert.throws(
+		() => {
+			new ThumbImage(undefined, { fileBasePath: 'path/to.jpg', type: 'avif', size: { width: 100, height: 200 }, quality: undefined });
+		},
+		{ name: 'Error', message: 'thumbimage directory not defined' },
+	);
 });

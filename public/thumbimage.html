@@ -13,7 +13,10 @@
 		<main>
 			<ul class="list">
 				<li>Generates and displays a thumbnail image of the size specified by the URL parameter.</li>
-				<li>The <code>Origin</code> header is checked in the program. This prevents the image generation process from running if the URL is entered directly or embedded from another site without permission.</li>
+				<li>
+					The <code>Origin</code> header is checked in the program. This prevents the image generation process from running if the URL is entered directly or
+					embedded from another site without permission.
+				</li>
 				<li>
 					If a thumbnail image has already been generated (in the case of the second or later requests), the generated image will be displayed instead of
 					processing the generation.
@@ -195,33 +198,19 @@
 				<section>
 					<h3>Generated thumbnail image</h3>
 
-					<section>
-						<h4>Optimal image type selection by using the <code>picture</code> element</h4>
-
-						<pre><code>&lt;picture&gt;
+					<pre><code>&lt;picture&gt;
 	&lt;source type="image/avif" srcset="/thumbimage/sample.jpg?type=avif;w=360;quality=30" /&gt;
 	&lt;source type="image/webp" srcset="/thumbimage/sample.jpg?type=webp;w=360;quality=30" /&gt;
 	&lt;img src="/thumbimage/sample.jpg?type=jpeg;w=360;quality=30" alt="Sample Image" crossorigin="" /&gt;
 &lt;/picture&gt;</code></pre>
 
-						<p>
-							<picture>
-								<source type="image/avif" srcset="/thumbimage/sample.jpg?type=avif;w=360;quality=30" />
-								<source type="image/webp" srcset="/thumbimage/sample.jpg?type=webp;w=360;quality=30" />
-								<img src="/thumbimage/sample.jpg?type=jpeg;w=360;quality=30" alt="Sample Image" crossorigin="" />
-							</picture>
-						</p>
-					</section>
-
-					<section>
-						<h4>Optimal image type selection by using the <code>accept</code> request header</h4>
-
-						<pre><code>&lt;img src="/thumbimage/sample.jpg?type[]=avif;type[]=webp;type[]=jpeg;w=360;quality=30" alt="Sample Image" crossorigin="" /&gt;</code></pre>
-
-						<p>
-							<img src="/thumbimage/sample.jpg?type[]=avif;type[]=webp;type[]=jpeg;w=360;quality=30" alt="Sample Image" crossorigin="" />
-						</p>
-					</section>
+					<p>
+						<picture>
+							<source type="image/avif" srcset="/thumbimage/sample.jpg?type=avif;w=360;quality=30" />
+							<source type="image/webp" srcset="/thumbimage/sample.jpg?type=webp;w=360;quality=30" />
+							<img src="/thumbimage/sample.jpg?type=jpeg;w=360;quality=30" alt="Sample Image" crossorigin="" />
+						</picture>
+					</p>
 				</section>
 			</section>
 		</main>

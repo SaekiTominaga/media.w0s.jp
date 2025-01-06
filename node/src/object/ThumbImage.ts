@@ -1,12 +1,12 @@
 import path from 'node:path';
-import config, { type Info as ImageInfo } from '../config/thumb-image.js';
+import config, { type Info } from '../config/thumb-image.js';
 
 /**
  * サムネイル画像
  */
 export default class ThumbImage {
 	/* ファイルタイプ毎の MIME タイプや拡張子の定義 */
-	#imageInfo: ImageInfo;
+	#imageInfo: Info;
 
 	/* サムネイル画像を保存するルートディレクトリ */
 	#dir: string;
@@ -24,25 +24,25 @@ export default class ThumbImage {
 	#quality: number | undefined;
 
 	/**
-	 * @param option -
-	 * @param option.fileBasePath - ベースとなるファイルパス
-	 * @param option.type - 画像タイプ
-	 * @param option.size - 画像サイズ
-	 * @param option.quality - 画像品質
+	 * @param dir - サムネイル画像を保存するルートディレクトリ
+	 * @param file - ファイル情報
+	 * @param file.fileBasePath - ベースとなるファイルパス
+	 * @param file.type - 画像タイプ
+	 * @param file.size - 画像サイズ
+	 * @param file.quality - 画像品質
 	 */
-	constructor(option: { fileBasePath: string; type: string; size: ImageSize; quality?: number }) {
-		const dir = process.env['THUMBIMAGE_DIR'];
+	constructor(dir: string | undefined, file: Readonly<{ fileBasePath: string; type: string; size: ImageSize; quality: number | undefined }>) {
 		if (dir === undefined) {
 			throw new Error('thumbimage directory not defined');
 		}
 		this.#dir = dir;
 
 		this.#imageInfo = config.type;
-		this.#fileBasePath = option.fileBasePath;
+		this.#fileBasePath = file.fileBasePath;
 
-		this.#type = option.type;
-		this.#size = option.size;
-		this.#quality = option.quality;
+		this.#type = file.type;
+		this.#size = file.size;
+		this.#quality = file.quality;
 	}
 
 	/**
