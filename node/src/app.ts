@@ -173,7 +173,7 @@ app.onError((err, context) => {
 		message = err.message;
 
 		if (err.status >= 400 && err.status < 500) {
-			logger.info(err.message, context.req.header('User-Agent'));
+			logger.info(err.status, err.message, context.req.header('User-Agent'));
 			title = TITLE_4XX;
 		} else {
 			logger.error(err.message);
