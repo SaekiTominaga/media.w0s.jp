@@ -30,7 +30,7 @@ await test('upload', async (t) => {
 	await t.test('image', async () => {
 		const fileName = '_test-upload-image';
 
-		const res = await app.request('/api/blog-upload', {
+		const res = await app.request('/api/blog/upload', {
 			method: 'post',
 			headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -50,7 +50,7 @@ await test('upload', async (t) => {
 	await t.test('video', async () => {
 		const filename = '_test-upload-video';
 
-		const res = await app.request('/api/blog-upload', {
+		const res = await app.request('/api/blog/upload', {
 			method: 'post',
 			headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -70,7 +70,7 @@ await test('upload', async (t) => {
 	await t.test('text', async () => {
 		const filename = '_test-upload-text';
 
-		const res = await app.request('/api/blog-upload', {
+		const res = await app.request('/api/blog/upload', {
 			method: 'post',
 			headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -114,7 +114,7 @@ await test('overwrite', async (t) => {
 	});
 
 	await t.test('First file upload', async () => {
-		const res = await app.request('/api/blog-upload', {
+		const res = await app.request('/api/blog/upload', {
 			method: 'post',
 			headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -130,7 +130,7 @@ await test('overwrite', async (t) => {
 	});
 
 	await t.test('Block file overwriting', async () => {
-		const res = await app.request('/api/blog-upload', {
+		const res = await app.request('/api/blog/upload', {
 			method: 'post',
 			headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -146,7 +146,7 @@ await test('overwrite', async (t) => {
 	});
 
 	await t.test('File overwritten', async () => {
-		const res = await app.request('/api/blog-upload', {
+		const res = await app.request('/api/blog/upload', {
 			method: 'post',
 			headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 			body: JSON.stringify({

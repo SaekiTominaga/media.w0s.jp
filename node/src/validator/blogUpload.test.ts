@@ -7,7 +7,7 @@ const auth = await getAuth();
 const authorization = `Basic ${Buffer.from(`${auth.user}:${auth.password_orig!}`).toString('base64')}`;
 
 await test('name undefined', async () => {
-	const res = await app.request('/api/blog-upload', {
+	const res = await app.request('/api/blog/upload', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({}),
@@ -18,7 +18,7 @@ await test('name undefined', async () => {
 });
 
 await test('type undefined', async () => {
-	const res = await app.request('/api/blog-upload', {
+	const res = await app.request('/api/blog/upload', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({ name: '' }),
@@ -29,7 +29,7 @@ await test('type undefined', async () => {
 });
 
 await test('temp undefined', async () => {
-	const res = await app.request('/api/blog-upload', {
+	const res = await app.request('/api/blog/upload', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -43,7 +43,7 @@ await test('temp undefined', async () => {
 });
 
 await test('size undefined', async () => {
-	const res = await app.request('/api/blog-upload', {
+	const res = await app.request('/api/blog/upload', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -58,7 +58,7 @@ await test('size undefined', async () => {
 });
 
 await test('size string', async () => {
-	const res = await app.request('/api/blog-upload', {
+	const res = await app.request('/api/blog/upload', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -74,7 +74,7 @@ await test('size string', async () => {
 });
 
 await test('size min', async () => {
-	const res = await app.request('/api/blog-upload', {
+	const res = await app.request('/api/blog/upload', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -90,7 +90,7 @@ await test('size min', async () => {
 });
 
 await test('size decimal', async () => {
-	const res = await app.request('/api/blog-upload', {
+	const res = await app.request('/api/blog/upload', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -106,7 +106,7 @@ await test('size decimal', async () => {
 });
 
 await test('overwrite string', async () => {
-	const res = await app.request('/api/blog-upload', {
+	const res = await app.request('/api/blog/upload', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({

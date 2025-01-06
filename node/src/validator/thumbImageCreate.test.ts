@@ -7,7 +7,7 @@ const auth = await getAuth();
 const authorization = `Basic ${Buffer.from(`${auth.user}:${auth.password_orig!}`).toString('base64')}`;
 
 await test('path undefined', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({}),
@@ -18,7 +18,7 @@ await test('path undefined', async () => {
 });
 
 await test('type undefined', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({ path: '' }),
@@ -29,7 +29,7 @@ await test('type undefined', async () => {
 });
 
 await test('width undefined', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -43,7 +43,7 @@ await test('width undefined', async () => {
 });
 
 await test('width string', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -58,7 +58,7 @@ await test('width string', async () => {
 });
 
 await test('width min', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -73,7 +73,7 @@ await test('width min', async () => {
 });
 
 await test('width max', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -88,7 +88,7 @@ await test('width max', async () => {
 });
 
 await test('width decimal', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -103,7 +103,7 @@ await test('width decimal', async () => {
 });
 
 await test('height undefined', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -118,7 +118,7 @@ await test('height undefined', async () => {
 });
 
 await test('height string', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -134,7 +134,7 @@ await test('height string', async () => {
 });
 
 await test('height min', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -150,7 +150,7 @@ await test('height min', async () => {
 });
 
 await test('height max', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -166,7 +166,7 @@ await test('height max', async () => {
 });
 
 await test('height decimal', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -182,7 +182,7 @@ await test('height decimal', async () => {
 });
 
 await test('quality string', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -199,7 +199,7 @@ await test('quality string', async () => {
 });
 
 await test('quality min', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -216,7 +216,7 @@ await test('quality min', async () => {
 });
 
 await test('quality max', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -233,7 +233,7 @@ await test('quality max', async () => {
 });
 
 await test('quality decimal', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({

@@ -141,8 +141,8 @@ app.use(
 
 /* Routes */
 app.route('/thumbimage/', thumbImageRender);
-app.route(`/${config.api.dir}/thumbimage-create`, thumbImageCreate);
-app.route(`/${config.api.dir}/blog-upload`, blogUpload);
+app.route(`/${config.api.dir}/thumbimage/create`, thumbImageCreate);
+app.route(`/${config.api.dir}/blog/upload`, blogUpload);
 
 /* Error pages */
 app.notFound((context) => {

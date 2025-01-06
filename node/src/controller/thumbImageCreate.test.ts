@@ -9,7 +9,7 @@ const auth = await getAuth();
 const authorization = `Basic ${Buffer.from(`${auth.user}:${auth.password_orig!}`).toString('base64')}`;
 
 await test('File not found', async () => {
-	const res = await app.request('/api/thumbimage-create', {
+	const res = await app.request('/api/thumbimage/create', {
 		method: 'post',
 		headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 		body: JSON.stringify({
@@ -44,7 +44,7 @@ await test('create', async (t) => {
 	});
 
 	await t.test('AVIF', async () => {
-		const res = await app.request('/api/thumbimage-create', {
+		const res = await app.request('/api/thumbimage/create', {
 			method: 'post',
 			headers: { Authorization: authorization, 'Content-Type': 'application/json' },
 			body: JSON.stringify({
