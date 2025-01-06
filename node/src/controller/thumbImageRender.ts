@@ -127,7 +127,7 @@ const create = async (origFileFullPath: string, thumbImage: ThumbImage): Promise
 	return createdData;
 };
 
-const app = new Hono().get('/:path', validatorQuery, async (context) => {
+const app = new Hono().get('/:path{.+}', validatorQuery, async (context) => {
 	const { req, res } = context;
 
 	const requestParam = req.param();
