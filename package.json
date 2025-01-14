@@ -5,7 +5,6 @@
 		"dev": "tsx --watch --tsconfig node/tsconfig.json node/src/app.ts",
 		"prebuild": "rimraf node/dist/* -g",
 		"build": "tsc -p node/tsconfig.json",
-		"prelint": "npm run build",
 		"lint": "eslint node/src/**/*.ts node/@types/*.d.ts",
 		"pretest": "npm run build",
 		"test": "node --env-file=.env.test --experimental-test-coverage --test **/*.test.js",
