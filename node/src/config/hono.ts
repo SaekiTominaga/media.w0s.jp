@@ -2,7 +2,11 @@ export default {
 	response: {
 		header: {
 			hsts: 'max-age=31536000',
-			csp: "frame-ancestors 'self'; report-uri https://w0sjp.report-uri.com/r/d/csp/enforce; report-to default",
+			csp: {
+				'frame-ancestors': ["'self'"],
+				'report-uri': ['https://w0sjp.report-uri.com/r/d/csp/enforce'],
+				'report-to': ['default'],
+			},
 			reportingEndpoints: {
 				default: 'https://w0sjp.report-uri.com/a/d/g',
 			},
