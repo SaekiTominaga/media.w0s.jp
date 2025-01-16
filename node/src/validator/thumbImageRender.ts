@@ -9,16 +9,8 @@ interface RequestBody {
 	quality: number | undefined;
 }
 
-export const query = validator('query', (value, context): RequestBody => {
-	const { req, res } = context;
+export const query = validator('query', (value): RequestBody => {
 	const { type, w, h, quality } = value;
-
-	if (req.header('Origin') !== undefined) {
-		/* クロスオリジンからの `<img crossorigin>` による呼び出し */
-		if (res.headers.get('Access-Control-Allow-Origin') === null) {
-			throw new HTTPException(403, { message: '`Access-Control-Allow-Origin` header does not exist' });
-		}
-	}
 
 	if (type === undefined) {
 		throw new HTTPException(400, { message: 'The `type` parameter is required' });

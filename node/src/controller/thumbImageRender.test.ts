@@ -7,6 +7,15 @@ import ThumbImage from '../object/ThumbImage.js';
 
 const imageDir = `${config.static.root}/${config.static.directory.image}`;
 
+await test('cors', async () => {
+	const res = await app.request('/thumbimage/foo', {
+		headers: new Headers({ Origin: 'http://example.com' }),
+	});
+
+	assert.equal(res.status, 403);
+	// `Access-Control-Allow-Origin` header does not exist
+});
+
 await test('not found', async () => {
 	const res = await app.request('/thumbimage/foo?type=webp;w=1;h=1;quality=1');
 

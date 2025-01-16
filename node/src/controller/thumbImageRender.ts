@@ -9,6 +9,7 @@ import configHono from '../config/hono.js';
 import configSqlite from '../config/sqlite.js';
 import configThumbimage from '../config/thumb-image.js';
 import ThumbImageRenderDao from '../dao/ThumbImageRenderDao.js';
+import { cors as corsMiddleware } from '../middleware/cors.js';
 import ThumbImage from '../object/ThumbImage.js';
 import { getSize as getThumbImageSize, create as createThumbImage } from '../util/thumbImage.js';
 import { query as validatorQuery } from '../validator/thumbImageRender.js';
@@ -127,7 +128,7 @@ const create = async (origFileFullPath: string, thumbImage: ThumbImage): Promise
 	return createdData;
 };
 
-const app = new Hono().get('/:path{.+}', validatorQuery, async (context) => {
+const app = new Hono().get('/:path{.+}', corsMiddleware, validatorQuery, async (context) => {
 	const { req, res } = context;
 
 	const requestParam = req.param();

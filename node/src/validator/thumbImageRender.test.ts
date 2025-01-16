@@ -2,15 +2,6 @@ import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import app from '../app.js';
 
-await test('cors', async () => {
-	const res = await app.request('/thumbimage/foo', {
-		headers: new Headers({ Origin: 'http://example.com' }),
-	});
-
-	assert.equal(res.status, 403);
-	// `Access-Control-Allow-Origin` header does not exist
-});
-
 await test('type undefined', async () => {
 	const res = await app.request('/thumbimage/foo?');
 
