@@ -1,7 +1,7 @@
 import { createMiddleware } from 'hono/factory';
 import { HTTPException } from 'hono/http-exception';
 
-export const cors = createMiddleware(async (context, next) => {
+export const corsAllowNoOrigin = createMiddleware(async (context, next) => {
 	const { req, res } = context;
 
 	if (req.header('Origin') !== undefined) {
