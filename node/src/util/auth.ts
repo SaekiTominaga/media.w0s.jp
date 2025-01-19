@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { env } from './env.js';
 
 interface Auth {
 	user: string;
@@ -13,10 +14,7 @@ interface Auth {
  * @returns 認証ファイルの内容
  */
 export const getAuth = async (): Promise<Auth> => {
-	const filePath = process.env['AUTH_ADMIN'];
-	if (filePath === undefined) {
-		throw new Error('Auth file not defined');
-	}
+	const filePath = env('AUTH_ADMIN');
 
 	return JSON.parse((await fs.promises.readFile(filePath)).toString()) as Auth;
 };

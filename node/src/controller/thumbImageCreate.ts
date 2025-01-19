@@ -5,6 +5,7 @@ import { Hono } from 'hono';
 import Log4js from 'log4js';
 import configExpress from '../config/hono.js';
 import ThumbImage from '../object/ThumbImage.js';
+import { env } from '../util/env.js';
 import { create as createThumbImage } from '../util/thumbImage.js';
 import { json as validatorJson } from '../validator/thumbImageCreate.js';
 
@@ -48,7 +49,7 @@ const app = new Hono().post('/', validatorJson, async (context) => {
 		return new Response(null, { status: 204 }); // TODO: 正常時と区別が付かないので、本来は 200 にしてボディ内に情報を含めるべき
 	}
 
-	const thumbImage = new ThumbImage(process.env['THUMBIMAGE_DIR'], {
+	const thumbImage = new ThumbImage(env('THUMBIMAGE_DIR'), {
 		fileBasePath: requestBody.filePath,
 		type: requestBody.type,
 		size: {

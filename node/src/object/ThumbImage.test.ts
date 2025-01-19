@@ -117,12 +117,3 @@ await test('filePath', async (t) => {
 		assert.equal(thumbImage.filePath, 'path/to.jpg@s=100x200.png');
 	});
 });
-
-await test('filePath', () => {
-	assert.throws(
-		() => {
-			new ThumbImage(undefined, { fileBasePath: 'path/to.jpg', type: 'avif', size: { width: 100, height: 200 }, quality: undefined });
-		},
-		{ name: 'Error', message: 'thumbimage directory not defined' },
-	);
-});

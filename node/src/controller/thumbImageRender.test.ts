@@ -4,6 +4,7 @@ import { test, before, after } from 'node:test';
 import app from '../app.js';
 import config from '../config/hono.js';
 import ThumbImage from '../object/ThumbImage.js';
+import { env } from '../util/env.js';
 
 const imageDir = `${config.static.root}/${config.static.directory.image}`;
 
@@ -39,7 +40,7 @@ await test('orig image', async () => {
 });
 
 await test('thumb image', async (t) => {
-	const thumbImage = new ThumbImage(process.env['THUMBIMAGE_DIR'], {
+	const thumbImage = new ThumbImage(env('THUMBIMAGE_DIR'), {
 		fileBasePath: 'sample.jpg',
 		type: 'webp',
 		size: { width: 1, height: 1 },
@@ -77,7 +78,7 @@ await test('thumb image', async (t) => {
 });
 
 await test('thumb image - alt type', async (t) => {
-	const thumbImage = new ThumbImage(process.env['THUMBIMAGE_DIR'], {
+	const thumbImage = new ThumbImage(env('THUMBIMAGE_DIR'), {
 		fileBasePath: 'sample.jpg',
 		type: 'avif',
 		size: { width: 1, height: 1 },

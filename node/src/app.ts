@@ -16,6 +16,7 @@ import config from './config/hono.js';
 import blogUpload from './controller/blogUpload.js';
 import thumbImageCreate from './controller/thumbImageCreate.js';
 import thumbImageRender from './controller/thumbImageRender.js';
+import { env } from './util/env.js';
 import { getAuth } from './util/auth.js';
 import { isApi } from './util/request.js';
 
@@ -24,11 +25,7 @@ dotenv.config({
 });
 
 /* Logger */
-const loggerFilePath = process.env['LOGGER'];
-if (loggerFilePath === undefined) {
-	throw new Error('Logger file path not defined');
-}
-Log4js.configure(loggerFilePath);
+Log4js.configure(env('LOGGER'));
 const logger = Log4js.getLogger();
 
 /* Hono */
@@ -119,7 +116,7 @@ app.use(
 app.use(
 	'/thumbimage/*',
 	cors({
-		origin: process.env['THUMBIMAGE_CORS_ORIGINS']?.split(' ') ?? '*',
+		origin: env('THUMBIMAGE_CORS_ORIGINS').split(' '),
 		allowMethods: ['GET'],
 	}),
 );
@@ -203,10 +200,7 @@ app.onError((err, context) => {
 
 /* HTTP Server */
 if (process.env['TEST'] !== 'test') {
-	const port = process.env['PORT'];
-	if (port === undefined) {
-		throw new Error('Port not defined');
-	}
+	const port = env('PORT');
 	logger.info(`Server is running on http://localhost:${port}`);
 
 	serve({
