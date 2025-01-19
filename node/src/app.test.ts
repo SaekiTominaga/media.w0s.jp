@@ -9,8 +9,8 @@ await test('headers', async () => {
 	const res = await app.request('/');
 
 	assert.equal(res.headers.get('Strict-Transport-Security'), 'max-age=31536000');
-	assert.equal(res.headers.get('Content-Security-Policy'), "frame-ancestors 'self';report-uri https://w0sjp.report-uri.com/r/d/csp/enforce;report-to default");
-	assert.equal(res.headers.get('Reporting-Endpoints'), 'default="https://w0sjp.report-uri.com/a/d/g"');
+	assert.equal(res.headers.get('Content-Security-Policy'), "frame-ancestors 'self';report-uri https://report.w0s.jp/report/csp;report-to csp");
+	assert.equal(res.headers.get('Reporting-Endpoints'), 'csp="https://report.w0s.jp/report/csp"');
 	assert.equal(res.headers.get('X-Content-Type-Options'), 'nosniff');
 });
 
