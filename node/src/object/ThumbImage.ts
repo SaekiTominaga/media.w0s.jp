@@ -31,10 +31,7 @@ export default class ThumbImage {
 	 * @param file.size - 画像サイズ
 	 * @param file.quality - 画像品質
 	 */
-	constructor(dir: string | undefined, file: Readonly<{ fileBasePath: string; type: string; size: ImageSize; quality: number | undefined }>) {
-		if (dir === undefined) {
-			throw new Error('thumbimage directory not defined');
-		}
+	constructor(dir: string, file: Readonly<{ fileBasePath: string; type: string; size: ImageSize; quality: number | undefined }>) {
 		this.#dir = dir;
 
 		this.#imageInfo = config.type;

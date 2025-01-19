@@ -11,6 +11,7 @@ import configThumbimage from '../config/thumb-image.js';
 import ThumbImageRenderDao from '../dao/ThumbImageRenderDao.js';
 import { corsAllowNoOrigin as corsMiddleware } from '../middleware/cors.js';
 import ThumbImage from '../object/ThumbImage.js';
+import { env } from '../util/env.js';
 import { getSize as getThumbImageSize, create as createThumbImage } from '../util/thumbImage.js';
 import { query as validatorQuery } from '../validator/thumbImageRender.js';
 
@@ -163,7 +164,7 @@ const app = new Hono().get('/:path{.+}', corsMiddleware, validatorQuery, async (
 
 	const origFileMtime = (await fs.promises.stat(origFileFullPath)).mtime;
 
-	const thumbImage = new ThumbImage(process.env['THUMBIMAGE_DIR'], {
+	const thumbImage = new ThumbImage(env('THUMBIMAGE_DIR'), {
 		fileBasePath: requestParam.path,
 		type: requestQuery.type,
 		size: thumbSize,
@@ -193,12 +194,7 @@ const app = new Hono().get('/:path{.+}', corsMiddleware, validatorQuery, async (
 	const thumbTypeAlt = thumbImage.altType;
 	if (thumbTypeAlt !== undefined) {
 		/* 代替タイプが設定されている場合はリアルタイム生成を行わず、ファイル生成情報を DB に登録する（別途、バッチ処理でファイル生成を行うため） */
-		const dbFilePath = process.env['SQLITE_THUMBIMAGE'];
-		if (dbFilePath === undefined) {
-			throw new Error('thumbimage DB file path not defined');
-		}
-
-		const dao = new ThumbImageRenderDao(dbFilePath);
+		const dao = new ThumbImageRenderDao(env('SQLITE_THUMBIMAGE'));
 		try {
 			const insertedCount = await dao.insert({
 				filePath: thumbImage.fileBasePath,

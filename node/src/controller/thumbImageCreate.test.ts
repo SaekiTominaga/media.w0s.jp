@@ -4,6 +4,7 @@ import { test, before, after } from 'node:test';
 import app from '../app.js';
 import ThumbImage from '../object/ThumbImage.js';
 import { getAuth } from '../util/auth.js';
+import { env } from '../util/env.js';
 
 const auth = await getAuth();
 const authorization = `Basic ${Buffer.from(`${auth.user}:${auth.password_orig!}`).toString('base64')}`;
@@ -26,7 +27,7 @@ await test('File not found', async () => {
 });
 
 await test('create', async (t) => {
-	const thumbImage = new ThumbImage(process.env['THUMBIMAGE_DIR'], {
+	const thumbImage = new ThumbImage(env('THUMBIMAGE_DIR'), {
 		fileBasePath: 'sample.jpg',
 		type: 'avif',
 		size: { width: 1, height: 1 },
