@@ -15,4 +15,18 @@ export default [
 			'@typescript-eslint/no-unsafe-member-access': 'off',
 		},
 	},
+	{
+		files: ['node/src/util/**/*.ts'],
+		rules: {
+			'func-style': [
+				'error',
+				'expression',
+				{
+					overrides: {
+						namedExports: 'ignore',
+					},
+				},
+			],
+		},
+	},
 ];

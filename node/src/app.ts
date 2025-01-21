@@ -116,7 +116,7 @@ app.use(
 app.use(
 	'/thumbimage/*',
 	cors({
-		origin: env('THUMBIMAGE_CORS_ORIGINS').split(' '),
+		origin: env('THUMBIMAGE_CORS_ORIGINS', 'string[]'),
 		allowMethods: ['GET'],
 	}),
 );
@@ -200,12 +200,12 @@ app.onError((err, context) => {
 
 /* HTTP Server */
 if (process.env['TEST'] !== 'test') {
-	const port = env('PORT');
-	logger.info(`Server is running on http://localhost:${port}`);
+	const port = env('PORT', 'number');
+	logger.info(`Server is running on http://localhost:${String(port)}`);
 
 	serve({
 		fetch: app.fetch,
-		port: Number(port),
+		port: port,
 	});
 }
 
