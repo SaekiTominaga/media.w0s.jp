@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import FileSizeFormat from '@w0s/file-size-format';
+import { iec } from '@w0s/file-size-format';
 import { Hono, type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { imageSize } from 'image-size';
@@ -121,8 +121,8 @@ const create = async (origFileFullPath: string, thumbImage: ThumbImage): Promise
 	const processingTime = Date.now() - startTime;
 
 	/* 生成後の処理 */
-	const origSize = FileSizeFormat.iec((await fs.promises.stat(origFileFullPath)).size, { digits: 1 });
-	const createdSize = FileSizeFormat.iec(createdData.byteLength, { digits: 1 });
+	const origSize = iec((await fs.promises.stat(origFileFullPath)).size, { digits: 1 });
+	const createdSize = iec(createdData.byteLength, { digits: 1 });
 
 	logger.info(`画像生成完了（${String(Math.round(processingTime / 1000))}秒）: ${thumbImage.filePath} （${origSize} → ${createdSize}）`);
 
