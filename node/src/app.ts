@@ -130,9 +130,7 @@ app.use(
 		password: auth.password,
 		realm: auth.realm,
 		verifyUser: (username, password) => {
-			// @ts-expect-error: ts(2551)
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-			const passwordHash = crypto.hash('sha256', password) as string;
+			const passwordHash = crypto.hash('sha256', password);
 			return username === auth.user && passwordHash === auth.password;
 		},
 		invalidUserMessage: {
