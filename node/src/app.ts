@@ -13,9 +13,9 @@ import { serveStatic } from '@hono/node-server/serve-static';
 import Log4js from 'log4js';
 import qs from 'qs';
 import config from './config/hono.js';
-import blogUpload from './controller/blogUpload.js';
-import thumbImageCreate from './controller/thumbImageCreate.js';
-import thumbImageRender from './controller/thumbImageRender.js';
+import { blogUploadApp } from './controller/blogUpload.js';
+import { thumbImageCreateApp } from './controller/thumbImageCreate.js';
+import { thumbImageRenderApp } from './controller/thumbImageRender.js';
 import { getAuth } from './util/auth.js';
 import { env } from './util/env.js';
 import { csp as cspHeader, reportingEndpoints as reportingEndpointsHeader } from './util/httpHeader.js';
@@ -131,9 +131,9 @@ app.use(
 );
 
 /* Routes */
-app.route('/thumbimage/', thumbImageRender);
-app.route(`/${config.api.dir}/thumbimage/create`, thumbImageCreate);
-app.route(`/${config.api.dir}/blog/upload`, blogUpload);
+app.route('/thumbimage/', thumbImageRenderApp);
+app.route(`/${config.api.dir}/thumbimage/create`, thumbImageCreateApp);
+app.route(`/${config.api.dir}/blog/upload`, blogUploadApp);
 
 /* Error pages */
 app.notFound((context) => {

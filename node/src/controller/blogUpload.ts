@@ -71,7 +71,7 @@ const upload = async (
 	};
 };
 
-const app = new Hono().post('/', validatorJson, async (context) => {
+export const blogUploadApp = new Hono().post(validatorJson, async (context) => {
 	const { req } = context;
 
 	const requestBody = req.valid('json');
@@ -122,5 +122,3 @@ const app = new Hono().post('/', validatorJson, async (context) => {
 
 	return context.json(response);
 });
-
-export default app;
