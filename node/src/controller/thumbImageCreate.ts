@@ -37,7 +37,7 @@ const create = async (origFileFullPath: string, thumbImage: ThumbImage): Promise
 	return createdData;
 };
 
-const app = new Hono().post('/', validatorJson, async (context) => {
+export const thumbImageCreateApp = new Hono().post(validatorJson, async (context) => {
 	const { req } = context;
 
 	const requestBody = req.valid('json');
@@ -65,4 +65,4 @@ const app = new Hono().post('/', validatorJson, async (context) => {
 	return new Response(null, { status: 204 });
 });
 
-export default app;
+export default thumbImageCreateApp;

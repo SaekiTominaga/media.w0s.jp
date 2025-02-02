@@ -129,7 +129,7 @@ const create = async (origFileFullPath: string, thumbImage: ThumbImage): Promise
 	return createdData;
 };
 
-const app = new Hono().get('/:path{.+}', corsMiddleware, validatorQuery, async (context) => {
+export const thumbImageRenderApp = new Hono().get('/:path{.+}', corsMiddleware, validatorQuery, async (context) => {
 	const { req, res } = context;
 
 	const requestParam = req.param();
@@ -248,4 +248,4 @@ const app = new Hono().get('/:path{.+}', corsMiddleware, validatorQuery, async (
 	return render(context, { data: createdData, mimeType: thumbImage.mime });
 });
 
-export default app;
+export default thumbImageRenderApp;
