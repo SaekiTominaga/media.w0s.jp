@@ -117,13 +117,11 @@ const auth = await getAuth();
 app.use(
 	`/${config.api.dir}/*`,
 	basicAuth({
-		username: auth.user,
-		password: auth.password,
-		realm: auth.realm,
 		verifyUser: (username, password) => {
 			const passwordHash = crypto.hash('sha256', password);
 			return username === auth.user && passwordHash === auth.password;
 		},
+		realm: auth.realm,
 		invalidUserMessage: {
 			message: config.basicAuth.unauthorizedMessage,
 		},
