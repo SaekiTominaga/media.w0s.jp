@@ -117,13 +117,11 @@ const auth = await getAuth();
 app.use(
 	`/${config.api.dir}/*`,
 	basicAuth({
-		username: auth.user,
-		password: auth.password,
-		realm: auth.realm,
 		verifyUser: (username, password) => {
 			const passwordHash = crypto.hash('sha256', password);
 			return username === auth.user && passwordHash === auth.password;
 		},
+		realm: auth.realm,
 		invalidUserMessage: {
 			message: config.basicAuth.unauthorizedMessage,
 		},
@@ -157,6 +155,7 @@ app.onError((err, context) => {
 	const TITLE_5XX = 'Server error';
 
 	let status: ContentfulStatusCode = 500;
+	const headers = new Headers();
 	let title = TITLE_5XX;
 	let message: string | undefined;
 	if (err instanceof HTTPException) {
@@ -164,7 +163,16 @@ app.onError((err, context) => {
 		message = err.message;
 
 		if (err.status >= 400 && err.status < 500) {
-			logger.info(err.status, err.message, context.req.header('User-Agent'));
+			if (err.status === 401) {
+				/* 手動で `WWW-Authenticate` ヘッダーを設定 https://github.com/honojs/hono/issues/952 */
+				const wwwAuthenticate = err.res?.headers.get('WWW-Authenticate');
+				if (wwwAuthenticate !== null && wwwAuthenticate !== undefined) {
+					headers.set('WWW-Authenticate', wwwAuthenticate);
+				}
+			} else {
+				logger.info(err.status, err.message, context.req.header('User-Agent'));
+			}
+
 			title = TITLE_4XX;
 		} else {
 			logger.error(err.message);
@@ -184,6 +192,7 @@ app.onError((err, context) => {
 <title>media.w0s.jp</title>
 <h1>${title}</h1>`,
 		status,
+		Object.fromEntries(headers.entries()),
 	);
 });
 

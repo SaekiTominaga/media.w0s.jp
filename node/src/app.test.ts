@@ -88,6 +88,35 @@ await test('Compression', async (t) => {
 	});
 });
 
+await test('401', async (t) => {
+	await t.test('normal', async () => {
+		const res = await app.request('/api/');
+
+		assert.equal(res.status, 401);
+		assert.equal(res.headers.get('Content-Type'), 'text/html; charset=UTF-8');
+		assert.equal(/^Basic realm=".+"$/.test(res.headers.get('WWW-Authenticate')!), true);
+		assert.deepStrictEqual(
+			await res.text(),
+			`<!DOCTYPE html>
+<html lang=en>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>media.w0s.jp</title>
+<h1>Client error</h1>`,
+		);
+	});
+
+	await t.test('API', async () => {
+		const res = await app.request('/api/', {
+			method: 'post',
+		});
+
+		assert.equal(res.status, 401);
+		assert.equal(res.headers.get('Content-Type'), 'application/json');
+		assert.equal(res.headers.get('WWW-Authenticate'), null);
+		/* assert.deepStrictEqual(await res.json(), { message: config.basicAuth.unauthorizedMessage }); */ // TODO: https://github.com/SaekiTominaga/media.w0s.jp/issues/85
+	});
+});
+
 await test('404', async (t) => {
 	await t.test('normal', async () => {
 		const res = await app.request('/foo');
