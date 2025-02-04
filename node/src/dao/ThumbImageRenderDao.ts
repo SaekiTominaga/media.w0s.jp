@@ -52,29 +52,29 @@ export default class ThumbImageRenderDao {
 	 *
 	 * @returns 登録されたデータ数
 	 */
-	async insert(data: Readonly<{ filePath: string; type: string; size: ImageSize; quality: number | undefined }>): Promise<number> {
+	async insert(data: Readonly<Omit<ThumbImageDB.Queue, 'registeredAt'>>): Promise<number> {
 		const dbh = await this.#getDbh();
 
-		let insertedCount = 0; // 登録されたデータ数
+		let insertedCount: number; // 登録されたデータ数
 
 		await dbh.exec('BEGIN');
 		try {
-			const sthInsert = await dbh.prepare(`
+			const sth = await dbh.prepare(`
 				INSERT INTO
 					d_queue
-					(file_path, file_type, width, height, quality, registered_at)
+					(file_path,  file_type, width,  height,  quality,  registered_at)
 				VALUES
-					(:file_path, :type, :width, :height, :quality, :registered_at)
+					(:file_path, :type,    :width, :height, :quality, :registered_at)
 			`);
-			const result = await sthInsert.run({
+			const result = await sth.run({
 				':file_path': data.filePath,
 				':type': data.type,
-				':width': data.size.width,
-				':height': data.size.height,
+				':width': data.width,
+				':height': data.height,
 				':quality': data.quality,
 				':registered_at': Math.round(Date.now() / 1000),
 			});
-			await sthInsert.finalize();
+			await sth.finalize();
 
 			insertedCount = result.changes ?? 0;
 

@@ -199,7 +199,8 @@ export const thumbImageRenderApp = new Hono().get('/:path{.+}', corsMiddleware, 
 			const insertedCount = await dao.insert({
 				filePath: thumbImage.fileBasePath,
 				type: thumbImage.type,
-				size: thumbImage.size,
+				width: thumbImage.size.width,
+				height: thumbImage.size.height,
 				quality: thumbImage.quality,
 			});
 			if (insertedCount > 0) {
