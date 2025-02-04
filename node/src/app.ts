@@ -115,7 +115,7 @@ app.use(
 /* Auth */
 const auth = await getAuth();
 app.use(
-	`/${config.api.dir}/*`,
+	`/${config.api.dir}/thumbimage/create`,
 	basicAuth({
 		verifyUser: (username, password) => {
 			const passwordHash = crypto.hash('sha256', password);

@@ -90,7 +90,7 @@ await test('Compression', async (t) => {
 
 await test('401', async (t) => {
 	await t.test('normal', async () => {
-		const res = await app.request('/api/');
+		const res = await app.request('/api/thumbimage/create');
 
 		assert.equal(res.status, 401);
 		assert.equal(res.headers.get('Content-Type'), 'text/html; charset=UTF-8');
@@ -106,7 +106,7 @@ await test('401', async (t) => {
 	});
 
 	await t.test('API', async () => {
-		const res = await app.request('/api/', {
+		const res = await app.request('/api/thumbimage/create', {
 			method: 'post',
 		});
 
