@@ -1,5 +1,6 @@
 import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
+import { prepareInsert } from '../util/sql.js';
 
 /**
  * サムネイル画像の画面表示
@@ -45,10 +46,6 @@ export default class ThumbImageRenderDao {
 	 * 生成する画像情報をキューに登録する
 	 *
 	 * @param data - 登録データ
-	 * @param data.filePath - ファイルパス
-	 * @param data.type - 画像タイプ
-	 * @param data.size - 画像の大きさ
-	 * @param data.quality - 画質
 	 *
 	 * @returns 登録されたデータ数
 	 */
@@ -59,21 +56,23 @@ export default class ThumbImageRenderDao {
 
 		await dbh.exec('BEGIN');
 		try {
+			const { sqlInto, sqlValues, bindParams } = prepareInsert({
+				file_path: data.filePath,
+				file_type: data.type,
+				width: data.width,
+				height: data.height,
+				quality: data.quality,
+				registered_at: new Date(),
+			});
+
 			const sth = await dbh.prepare(`
 				INSERT INTO
 					d_queue
-					(file_path,  file_type, width,  height,  quality,  registered_at)
+					${sqlInto}
 				VALUES
-					(:file_path, :type,    :width, :height, :quality, :registered_at)
+					${sqlValues}
 			`);
-			const result = await sth.run({
-				':file_path': data.filePath,
-				':type': data.type,
-				':width': data.width,
-				':height': data.height,
-				':quality': data.quality,
-				':registered_at': Math.round(Date.now() / 1000),
-			});
+			const result = await sth.run(bindParams);
 			await sth.finalize();
 
 			insertedCount = result.changes ?? 0;
