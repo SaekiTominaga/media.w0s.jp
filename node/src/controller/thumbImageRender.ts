@@ -21,41 +21,6 @@ import { query as validatorQuery } from '../validator/thumbImageRender.js';
 const logger = Log4js.getLogger('thumbimage');
 
 /**
- * 出力するファイルの大きさを計算する
- *
- * @param requestSize - リクエストされた画像サイズ
- * @param requestSize.width - 幅
- * @param requestSize.height - 高さ
- * @param origFileFullPath - 元画像ファイルのフルパス
- *
- * @returns 出力するサムネイル画像ファイルの大きさ
- */
-const getSize = (
-	requestSize: Readonly<{
-		width: number | undefined;
-		height: number | undefined;
-	}>,
-	origFileFullPath: string,
-): ImageSize | null => {
-	let origImageWidth: number | undefined;
-	let origImageHeight: number | undefined;
-	try {
-		const dimensions = imageSize(origFileFullPath);
-		origImageWidth = dimensions.width;
-		origImageHeight = dimensions.height;
-	} catch (e) {
-		logger.warn(e);
-		return null;
-	}
-
-	if (origImageWidth === undefined || origImageHeight === undefined) {
-		return null;
-	}
-
-	return getThumbImageSize(requestSize, { width: origImageWidth, height: origImageHeight });
-};
-
-/**
  * Fetch Mode のチェック
  *
  * @param context - Context
@@ -91,9 +56,7 @@ const render = (context: Context, file: Readonly<{ data: Buffer; mimeType: strin
 		/* キャッシュ確認 */
 		const ifModifiedSince = req.header('If-Modified-Since');
 		if (ifModifiedSince !== undefined && file.mtime <= new Date(ifModifiedSince)) {
-			return new Response(null, {
-				status: 304,
-			});
+			return new Response(null, { status: 304 });
 		}
 
 		res.headers.set('Last-Modified', file.mtime.toUTCString());
@@ -140,15 +103,10 @@ export const thumbImageRenderApp = new Hono().get('/:path{.+}', corsMiddleware, 
 		throw new HTTPException(404, { message: 'File not found' });
 	}
 
-	const thumbSize = getSize({ width: requestQuery.w, height: requestQuery.h }, origFileFullPath);
-	if (thumbSize === null) {
-		throw new HTTPException(403, { message: 'サイズが取得できない画像が指定' });
-	}
+	const origFileData = await fs.promises.readFile(origFileFullPath);
 
 	if (!checkFetchMode(context)) {
 		/* `<a href>`, `<img>` 等による呼び出し時はオリジナル画像ファイルを出力する */
-		const fileData = await fs.promises.readFile(origFileFullPath);
-
 		const extension = path.extname(origFileFullPath);
 		const mimeType = Object.entries(configThumbimage.origMimeType)
 			.find(([definedExtension]) => definedExtension === extension)
@@ -157,17 +115,19 @@ export const thumbImageRenderApp = new Hono().get('/:path{.+}', corsMiddleware, 
 			throw new HTTPException(403, { message: `Unknown extension image (${extension})` });
 		}
 
-		res.headers.set('Content-Length', String(fileData.byteLength));
+		res.headers.set('Content-Length', String(origFileData.byteLength));
 		res.headers.set('Content-Type', mimeType);
-		return context.body(fileData);
+		return context.body(origFileData);
 	}
 
 	const origFileMtime = (await fs.promises.stat(origFileFullPath)).mtime;
 
+	const dimensions = imageSize(origFileData);
+
 	const thumbImage = new ThumbImage(env('THUMBIMAGE_DIR'), {
 		fileBasePath: requestParam.path,
 		type: requestQuery.type,
-		size: thumbSize,
+		size: getThumbImageSize({ width: requestQuery.w, height: requestQuery.h }, { width: dimensions.width, height: dimensions.height }),
 		quality: requestQuery.quality,
 	});
 
