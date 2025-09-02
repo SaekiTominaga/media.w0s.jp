@@ -1,4 +1,4 @@
-name: Linting CSS files
+name: CSS files
 
 on:
   pull_request:

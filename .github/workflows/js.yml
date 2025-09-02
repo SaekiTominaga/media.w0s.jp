@@ -1,12 +1,12 @@
-name: Linting JavaScript files
+name: JavaScript files
 
 on:
   pull_request:
     branches:
       - main
     paths:
-      - 'node/src/**/*.ts'
       - 'node/@types/*.d.ts'
+      - 'node/src/**/*.ts'
       - 'eslint.config.js'
   workflow_dispatch:
 
