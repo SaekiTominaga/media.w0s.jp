@@ -7,7 +7,7 @@
 		"build": "tsc -p node/tsconfig.json",
 		"lint": "eslint node/src/**/*.ts node/@types/*.d.ts",
 		"pretest": "npm run build",
-		"test": "node --env-file=.env.test --experimental-test-coverage --test **/*.test.js",
+		"test": "node --env-file=.env.test --experimental-test-coverage --test node/src/**/*.test.ts",
 		"css-lint": "stylelint public/*.css",
 		"format": "prettier -w .",
 		"yaml-lint": "yamllint .github/workflows/*.yml"
