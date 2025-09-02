@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import config from '../config/hono.js';
+import config from '../config/hono.ts';
 
 /**
  * API 機能へのリクエストかどうか

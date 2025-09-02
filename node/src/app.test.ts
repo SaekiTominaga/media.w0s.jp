@@ -1,9 +1,9 @@
 import { strict as assert } from 'node:assert';
 import fs from 'node:fs';
 import { test } from 'node:test';
-import app from './app.js';
-import config from './config/hono.js';
-import { getAuth } from './util/auth.js';
+import app from './app.ts';
+import config from './config/hono.ts';
+import { getAuth } from './util/auth.ts';
 
 await test('headers', async () => {
 	const res = await app.request('/');

@@ -7,19 +7,19 @@ import { basicAuth } from 'hono/basic-auth';
 import { compress } from 'hono/compress';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
-import type { ContentfulStatusCode } from 'hono/utils/http-status.js';
+import type { ContentfulStatusCode } from 'hono/utils/http-status.ts';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import Log4js from 'log4js';
 import qs from 'qs';
-import config from './config/hono.js';
-import { blogUploadApp } from './controller/blogUpload.js';
-import { thumbImageCreateApp } from './controller/thumbImageCreate.js';
-import { thumbImageRenderApp } from './controller/thumbImageRender.js';
-import { getAuth } from './util/auth.js';
-import { env } from './util/env.js';
-import { csp as cspHeader, reportingEndpoints as reportingEndpointsHeader } from './util/httpHeader.js';
-import { isApi } from './util/request.js';
+import config from './config/hono.ts';
+import { blogUploadApp } from './controller/blogUpload.ts';
+import { thumbImageCreateApp } from './controller/thumbImageCreate.ts';
+import { thumbImageRenderApp } from './controller/thumbImageRender.ts';
+import { getAuth } from './util/auth.ts';
+import { env } from './util/env.ts';
+import { csp as cspHeader, reportingEndpoints as reportingEndpointsHeader } from './util/httpHeader.ts';
+import { isApi } from './util/request.ts';
 
 loadEnvFile(process.env['NODE_ENV'] === 'production' ? '.env.production' : '.env.development');
 

@@ -1,6 +1,6 @@
 import { HTTPException } from 'hono/http-exception';
 import { validator } from 'hono/validator';
-import config from '../config/thumb-image.js';
+import config from '../config/thumb-image.ts';
 
 interface RequestBody {
 	type: string;

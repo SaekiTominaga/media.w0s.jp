@@ -3,11 +3,11 @@ import path from 'node:path';
 import { iec } from '@w0s/file-size-format';
 import { Hono } from 'hono';
 import Log4js from 'log4js';
-import configExpress from '../config/hono.js';
-import ThumbImage from '../object/ThumbImage.js';
-import { env } from '../util/env.js';
-import { create as createThumbImage } from '../util/thumbImage.js';
-import { json as validatorJson } from '../validator/thumbImageCreate.js';
+import configExpress from '../config/hono.ts';
+import ThumbImage from '../object/ThumbImage.ts';
+import { env } from '../util/env.ts';
+import { create as createThumbImage } from '../util/thumbImage.ts';
+import { json as validatorJson } from '../validator/thumbImageCreate.ts';
 
 /**
  * サムネイル画像生成

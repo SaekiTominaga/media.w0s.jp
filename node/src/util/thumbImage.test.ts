@@ -1,9 +1,9 @@
 import { strict as assert } from 'node:assert';
 import fs from 'node:fs';
 import { test, before, after } from 'node:test';
-import config from '../config/hono.js';
-import ThumbImage from '../object/ThumbImage.js';
-import { getSize, create } from './thumbImage.js';
+import config from '../config/hono.ts';
+import ThumbImage from '../object/ThumbImage.ts';
+import { getSize, create } from './thumbImage.ts';
 
 await test('getSize()', async (t) => {
 	await t.test('幅、高さとも未指定', () => {

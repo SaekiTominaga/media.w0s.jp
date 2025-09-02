@@ -2,8 +2,8 @@ import fs from 'node:fs';
 import { Hono } from 'hono';
 import Log4js from 'log4js';
 import MIMEType from 'whatwg-mimetype';
-import configBlogUpload from '../config/blog-upload.js';
-import { json as validatorJson } from '../validator/blogUpload.js';
+import configBlogUpload from '../config/blog-upload.ts';
+import { json as validatorJson } from '../validator/blogUpload.ts';
 
 interface ResponseJson {
 	name: string;

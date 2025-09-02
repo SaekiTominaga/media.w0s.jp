@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import app from '../app.js';
-import { getAuth } from '../util/auth.js';
+import app from '../app.ts';
+import { getAuth } from '../util/auth.ts';
 
 const auth = await getAuth();
 const authorization = `Basic ${Buffer.from(`${auth.user}:${auth.password_orig!}`).toString('base64')}`;
