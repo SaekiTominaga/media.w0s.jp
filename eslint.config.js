@@ -9,6 +9,14 @@ export default [
 		ignores: ['node/dist/**/*.js'],
 	},
 	{
+		files: ['**/*.ts'],
+		languageOptions: {
+			parserOptions: {
+				tsconfigRootDir: import.meta.dirname,
+			},
+		},
+	},
+	{
 		files: ['node/src/**/*.test.ts'],
 		rules: {
 			'line-comment-position': 'off',

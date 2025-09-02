@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import { csp, reportingEndpoints } from './httpHeader.js';
+import { csp, reportingEndpoints } from './httpHeader.ts';
 
 await test('csp', async (t) => {
 	await t.test('no type', () => {

@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 import path from 'node:path';
-import ThumbImage from './ThumbImage.js';
+import ThumbImage from './ThumbImage.ts';
 
 await test('getter', async (t) => {
 	const thumbImage = new ThumbImage('dir', { fileBasePath: 'path/to.jpg', type: 'avif', size: { width: 100, height: 200 }, quality: 80 });
