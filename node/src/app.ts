@@ -195,7 +195,7 @@ app.onError((err, context) => {
 });
 
 /* HTTP Server */
-if (process.env['TEST'] !== 'test') {
+if (process.env['TEST'] !== 'true') {
 	const port = env('PORT', 'number');
 	logger.info(`Server is running on http://localhost:${String(port)}`);
 

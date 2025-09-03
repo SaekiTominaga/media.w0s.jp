@@ -1,7 +1,6 @@
 import { strict as assert } from 'node:assert';
 import fs from 'node:fs';
 import { test, before, after } from 'node:test';
-import config from '../config/hono.ts';
 import ThumbImage from '../object/ThumbImage.ts';
 import { getSize, create } from './thumbImage.ts';
 
@@ -48,62 +47,75 @@ await test('getSize()', async (t) => {
 });
 
 await test('create()', async (t) => {
-	const dir = '.test';
+	const INPUT_DIR = 'test';
+	const OUTPUT_DIR = '.temp';
 
 	before(() => {
-		if (fs.existsSync(dir)) {
+		if (fs.existsSync(OUTPUT_DIR)) {
 			throw new Error('Test directory already exists');
 		}
 	});
 
 	after(async () => {
-		await fs.promises.rm(dir, { recursive: true });
+		await fs.promises.rm(OUTPUT_DIR, { recursive: true });
 	});
 
-	await t.test('AVIF', async () => {
-		const thumbImage = new ThumbImage(dir, { fileBasePath: 'test.jpg', type: 'avif', size: { width: 100, height: 200 }, quality: 10 });
+	await t.test('JPEG→AVIF', async () => {
+		const FILENAME = 'sample-jpeg.jpg';
 
-		await create(`${config.static.root}/${config.static.directory.image}/sample.jpg`, thumbImage);
+		const thumbImage = new ThumbImage(OUTPUT_DIR, { fileBasePath: FILENAME, type: 'avif', size: { width: 100, height: 200 }, quality: 10 });
+
+		await create(`${INPUT_DIR}/${FILENAME}`, thumbImage);
 
 		assert.equal(fs.existsSync(thumbImage.fileFullPath), true);
 	});
 
-	await t.test('WebP', async () => {
-		const thumbImage = new ThumbImage(dir, { fileBasePath: 'test.jpg', type: 'webp', size: { width: 100, height: 200 }, quality: 10 });
+	await t.test('JPEG→WebP', async () => {
+		const FILENAME = 'sample-jpeg.jpg';
 
-		await create(`${config.static.root}/${config.static.directory.image}/sample.jpg`, thumbImage);
+		const thumbImage = new ThumbImage(OUTPUT_DIR, { fileBasePath: FILENAME, type: 'webp', size: { width: 100, height: 200 }, quality: 10 });
+
+		await create(`${INPUT_DIR}/${FILENAME}`, thumbImage);
 
 		assert.equal(fs.existsSync(thumbImage.fileFullPath), true);
 	});
 
-	await t.test('JPEG', async () => {
-		const thumbImage = new ThumbImage(dir, { fileBasePath: 'test.jpg', type: 'jpeg', size: { width: 100, height: 200 }, quality: 10 });
+	await t.test('JPEG→JPEG', async () => {
+		const FILENAME = 'sample-jpeg.jpg';
 
-		await create(`${config.static.root}/${config.static.directory.image}/sample.jpg`, thumbImage);
+		const thumbImage = new ThumbImage(OUTPUT_DIR, { fileBasePath: FILENAME, type: 'jpeg', size: { width: 100, height: 200 }, quality: 10 });
+
+		await create(`${INPUT_DIR}/${FILENAME}`, thumbImage);
 
 		assert.equal(fs.existsSync(thumbImage.fileFullPath), true);
 	});
 
 	await t.test('JPEG→PNG', async () => {
-		const thumbImage = new ThumbImage(dir, { fileBasePath: 'test-jpeg.jpg', type: 'png', size: { width: 100, height: 200 }, quality: undefined });
+		const FILENAME = 'sample-jpeg.jpg';
 
-		await create(`${config.static.root}/${config.static.directory.image}/sample.jpg`, thumbImage);
+		const thumbImage = new ThumbImage(OUTPUT_DIR, { fileBasePath: FILENAME, type: 'png', size: { width: 100, height: 200 }, quality: undefined });
+
+		await create(`${INPUT_DIR}/${FILENAME}`, thumbImage);
 
 		assert.equal(fs.existsSync(thumbImage.fileFullPath), true);
 	});
 
 	await t.test('PNG8→PNG', async () => {
-		const thumbImage = new ThumbImage(dir, { fileBasePath: 'test-png8.png', type: 'png', size: { width: 101, height: 201 }, quality: undefined });
+		const FILENAME = 'sample-png8.png';
 
-		await create(`${config.static.root}/${config.static.directory.image}/sample-png8.png`, thumbImage);
+		const thumbImage = new ThumbImage(OUTPUT_DIR, { fileBasePath: FILENAME, type: 'png', size: { width: 100, height: 200 }, quality: undefined });
+
+		await create(`${INPUT_DIR}/${FILENAME}`, thumbImage);
 
 		assert.equal(fs.existsSync(thumbImage.fileFullPath), true);
 	});
 
 	await t.test('PNG32→PNG', async () => {
-		const thumbImage = new ThumbImage(dir, { fileBasePath: 'test-png32.png', type: 'png', size: { width: 102, height: 202 }, quality: undefined });
+		const FILENAME = 'sample-png32.png';
 
-		await create(`${config.static.root}/${config.static.directory.image}/sample-png32.png`, thumbImage);
+		const thumbImage = new ThumbImage(OUTPUT_DIR, { fileBasePath: FILENAME, type: 'png', size: { width: 100, height: 200 }, quality: undefined });
+
+		await create(`${INPUT_DIR}/${FILENAME}`, thumbImage);
 
 		assert.equal(fs.existsSync(thumbImage.fileFullPath), true);
 	});
