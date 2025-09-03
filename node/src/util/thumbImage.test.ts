@@ -84,10 +84,26 @@ await test('create()', async (t) => {
 		assert.equal(fs.existsSync(thumbImage.fileFullPath), true);
 	});
 
-	await t.test('PNG', async () => {
-		const thumbImage = new ThumbImage(dir, { fileBasePath: 'test.jpg', type: 'png', size: { width: 100, height: 200 }, quality: undefined });
+	await t.test('JPEG→PNG', async () => {
+		const thumbImage = new ThumbImage(dir, { fileBasePath: 'test-jpeg.jpg', type: 'png', size: { width: 100, height: 200 }, quality: undefined });
 
 		await create(`${config.static.root}/${config.static.directory.image}/sample.jpg`, thumbImage);
+
+		assert.equal(fs.existsSync(thumbImage.fileFullPath), true);
+	});
+
+	await t.test('PNG8→PNG', async () => {
+		const thumbImage = new ThumbImage(dir, { fileBasePath: 'test-png8.png', type: 'png', size: { width: 101, height: 201 }, quality: undefined });
+
+		await create(`${config.static.root}/${config.static.directory.image}/sample-png8.png`, thumbImage);
+
+		assert.equal(fs.existsSync(thumbImage.fileFullPath), true);
+	});
+
+	await t.test('PNG32→PNG', async () => {
+		const thumbImage = new ThumbImage(dir, { fileBasePath: 'test-png32.png', type: 'png', size: { width: 102, height: 202 }, quality: undefined });
+
+		await create(`${config.static.root}/${config.static.directory.image}/sample-png32.png`, thumbImage);
 
 		assert.equal(fs.existsSync(thumbImage.fileFullPath), true);
 	});
