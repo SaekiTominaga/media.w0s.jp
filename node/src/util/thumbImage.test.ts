@@ -1,7 +1,6 @@
 import { strict as assert } from 'node:assert';
 import fs from 'node:fs';
 import { test, before, after } from 'node:test';
-import config from '../config/hono.ts';
 import ThumbImage from '../object/ThumbImage.ts';
 import { getSize, create } from './thumbImage.ts';
 
