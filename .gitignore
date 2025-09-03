@@ -1,6 +1,7 @@
 .env
 .env.*
 
+/.temp/
 /.thumbimage/
 
 /log/
