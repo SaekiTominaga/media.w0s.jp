@@ -8,8 +8,7 @@
 		"lint": "eslint node/src/**/*.ts node/@types/*.d.ts",
 		"test": "node --experimental-test-coverage --env-file-if-exists=.env.test --test node/src/**/*.test.ts",
 		"css-lint": "stylelint public/*.css",
-		"format": "prettier -w .",
-		"yaml-lint": "yamllint .github/workflows/*.yml"
+		"format": "prettier -w ."
 	},
 	"dependencies": {
 		"@hono/node-server": "^1.19.1",
@@ -37,8 +36,7 @@
 		"rimraf": "^6.0.1",
 		"stylelint": "^16.23.1",
 		"tsx": "^4.20.5",
-		"typescript": "^5.9.2",
-		"yaml-lint": "^1.7.0"
+		"typescript": "^5.9.2"
 	},
 	"private": true
 }
