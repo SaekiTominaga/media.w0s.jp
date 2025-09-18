@@ -7,7 +7,7 @@ import { basicAuth } from 'hono/basic-auth';
 import { compress } from 'hono/compress';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
-import type { ContentfulStatusCode } from 'hono/utils/http-status.ts';
+import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import Log4js from 'log4js';
@@ -42,7 +42,7 @@ app.use(async (context, next) => {
 	const { search } = new URL(req.url);
 	if (search !== '') {
 		/* query paeser カスタマイズ https://github.com/honojs/hono/issues/3667#issuecomment-2503499238 */
-		req.queries = () => qs.parse(search.substring(1), { delimiter: /[&;]/ }) as never;
+		req.queries = () => qs.parse(search.substring(1), { delimiter: /[&;]/v }) as never;
 	}
 
 	await next();

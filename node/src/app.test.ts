@@ -94,7 +94,7 @@ await test('401', async (t) => {
 
 		assert.equal(res.status, 401);
 		assert.equal(res.headers.get('Content-Type'), 'text/html; charset=UTF-8');
-		assert.equal(/^Basic realm=".+"$/.test(res.headers.get('WWW-Authenticate')!), true);
+		assert.equal(/^Basic realm=".+"$/v.test(res.headers.get('WWW-Authenticate')!), true);
 		assert.deepStrictEqual(
 			await res.text(),
 			`<!DOCTYPE html>
