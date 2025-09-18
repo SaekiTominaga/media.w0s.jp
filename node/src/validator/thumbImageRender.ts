@@ -28,7 +28,7 @@ export const query = validator('query', (value): RequestBody => {
 			throw new HTTPException(400, { message: 'The `w` parameter can only be singular' });
 		}
 
-		if (!/^[0-9]+$/.test(w)) {
+		if (!/^[0-9]+$/v.test(w)) {
 			throw new HTTPException(400, { message: 'The value of the `w` parameter must be a positive integer' });
 		}
 
@@ -44,7 +44,7 @@ export const query = validator('query', (value): RequestBody => {
 			throw new HTTPException(400, { message: 'The `h` parameter can only be singular' });
 		}
 
-		if (!/^[0-9]+$/.test(h)) {
+		if (!/^[0-9]+$/v.test(h)) {
 			throw new HTTPException(400, { message: 'The value of the `h` parameter must be a positive integer' });
 		}
 
@@ -60,7 +60,7 @@ export const query = validator('query', (value): RequestBody => {
 			throw new HTTPException(400, { message: 'The `quality` parameter can only be singular' });
 		}
 
-		if (!/^[0-9]+$/.test(quality)) {
+		if (!/^[0-9]+$/v.test(quality)) {
 			throw new HTTPException(400, { message: 'The value of the `quality` parameter must be a positive integer' });
 		}
 

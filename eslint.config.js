@@ -24,6 +24,12 @@ export default [
 		},
 	},
 	{
+		files: ['node/src/controller/*.ts', 'node/src/app.test.ts'],
+		rules: {
+			'@typescript-eslint/await-thenable': 'off',
+		},
+	},
+	{
 		files: ['node/src/util/**/*.ts'],
 		rules: {
 			'func-style': [
