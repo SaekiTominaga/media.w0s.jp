@@ -1,6 +1,6 @@
 import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
-import { prepareInsert } from '../util/sql.ts';
+import { prepareInsert } from '@w0s/sqlite-utility';
 
 /**
  * サムネイル画像の画面表示
