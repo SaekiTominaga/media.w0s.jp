@@ -12,12 +12,12 @@ import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import Log4js from 'log4js';
 import qs from 'qs';
+import { env } from '@w0s/env-value-type';
 import config from './config/hono.ts';
 import { blogUploadApp } from './controller/blogUpload.ts';
 import { thumbImageCreateApp } from './controller/thumbImageCreate.ts';
 import { thumbImageRenderApp } from './controller/thumbImageRender.ts';
 import { getAuth } from './util/auth.ts';
-import { env } from './util/env.ts';
 import { csp as cspHeader, reportingEndpoints as reportingEndpointsHeader } from './util/httpHeader.ts';
 import { isApi } from './util/request.ts';
 

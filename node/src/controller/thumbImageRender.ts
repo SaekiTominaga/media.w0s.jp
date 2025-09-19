@@ -5,13 +5,13 @@ import { Hono, type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { imageSize } from 'image-size';
 import Log4js from 'log4js';
+import { env } from '@w0s/env-value-type';
 import configHono from '../config/hono.ts';
 import configSqlite from '../config/sqlite.ts';
 import configThumbimage from '../config/thumb-image.ts';
 import ThumbImageRenderDao from '../dao/ThumbImageRenderDao.ts';
 import { corsAllowNoOrigin as corsMiddleware } from '../middleware/cors.ts';
 import ThumbImage from '../object/ThumbImage.ts';
-import { env } from '../util/env.ts';
 import { getSize as getThumbImageSize, create as createThumbImage } from '../util/thumbImage.ts';
 import { query as validatorQuery } from '../validator/thumbImageRender.ts';
 
