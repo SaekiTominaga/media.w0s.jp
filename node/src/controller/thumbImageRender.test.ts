@@ -1,10 +1,10 @@
 import { strict as assert } from 'node:assert';
 import fs from 'node:fs';
 import { test, before, after } from 'node:test';
+import { env } from '@w0s/env-value-type';
 import app from '../app.ts';
 import config from '../config/hono.ts';
 import ThumbImage from '../object/ThumbImage.ts';
-import { env } from '../util/env.ts';
 
 const imageDir = `${config.static.root}/${config.static.directory.image}`;
 

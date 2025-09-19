@@ -1,10 +1,10 @@
 import { strict as assert } from 'node:assert';
 import fs from 'node:fs';
 import { test, before, after } from 'node:test';
+import { env } from '@w0s/env-value-type';
 import app from '../app.ts';
 import ThumbImage from '../object/ThumbImage.ts';
 import { getAuth } from '../util/auth.ts';
-import { env } from '../util/env.ts';
 
 const auth = await getAuth();
 const authorization = `Basic ${Buffer.from(`${auth.user}:${auth.password_orig!}`).toString('base64')}`;
