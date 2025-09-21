@@ -15,8 +15,8 @@
 body {
 	box-sizing: border-box;
 	margin-inline: auto;
-	padding-inline: 2vi;
-	inline-size: min(100vi, 1280px);
+	padding-inline: 2dvi;
+	inline-size: min(100dvi, 1280px);
 
 	& > footer {
 		margin-block-start: 3em;
