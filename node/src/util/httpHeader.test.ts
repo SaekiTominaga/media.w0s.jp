@@ -1,6 +1,32 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import { csp, reportingEndpoints } from './httpHeader.ts';
+import { supportCompressionEncoding, csp, reportingEndpoints } from './httpHeader.ts';
+
+await test('supportCompressionEncoding', async (t) => {
+	await t.test('undefined', () => {
+		assert.equal(supportCompressionEncoding(undefined, 'br'), false);
+	});
+
+	await t.test('empty', () => {
+		assert.equal(supportCompressionEncoding('', 'br'), false);
+	});
+
+	await t.test('not exist', () => {
+		assert.equal(supportCompressionEncoding('compress, gzip', 'br'), false);
+	});
+
+	await t.test('exist', () => {
+		assert.equal(supportCompressionEncoding('compress, br, gzip', 'br'), true);
+	});
+
+	await t.test('quality value', () => {
+		assert.equal(supportCompressionEncoding('compress;q=0.5, br ; q=0.7, gzip; q=1.0', 'br'), true);
+	});
+
+	await t.test('wildcard', () => {
+		assert.equal(supportCompressionEncoding('gzip;q=1.0, identity; q=0.5, *;q=0', 'br'), false);
+	});
+});
 
 await test('csp', async (t) => {
 	await t.test('no type', () => {
