@@ -28,21 +28,38 @@ await test('Omission of extension', async () => {
 	assert.equal(res.headers.get('Content-Type'), 'text/html; charset=utf-8');
 });
 
-await test('favicon.ico', async () => {
-	const res = await app.request('/favicon.ico');
+await test('favicon.ico', async (t) => {
+	await t.test('no compression', async () => {
+		const [file, res] = await Promise.all([fs.promises.readFile(`${config.static.root}/favicon.svg`), app.request('/favicon.ico')]);
 
-	assert.equal(res.status, 200);
-	assert.equal(res.headers.get('Content-Type'), 'image/svg+xml;charset=utf-8');
+		assert.equal(res.status, 200);
+		assert.equal(res.headers.get('Content-Type'), 'image/svg+xml;charset=utf-8');
+		assert.equal(res.headers.get('Cache-Control'), 'max-age=604800');
+		assert.equal(res.headers.get('Content-Length'), String(file.byteLength));
+	});
+
+	await t.test('gzip', async () => {
+		const res = await app.request('/favicon.ico', {
+			headers: { 'Accept-Encoding': 'gzip, deflate' },
+		});
+
+		assert.equal(res.headers.get('Content-Encoding'), 'gzip');
+	});
+
+	await t.test('brotli', async () => {
+		const [file, res] = await Promise.all([
+			fs.promises.readFile(`${config.static.root}/favicon.svg.br`),
+			app.request('/favicon.ico', {
+				headers: { 'accept-encoding': 'gzip, deflate, br;q=1.0, zstd, *;q=0.5' },
+			}),
+		]);
+
+		assert.equal(res.headers.get('Content-Encoding'), 'br');
+		assert.equal(res.headers.get('Content-Length'), String(file.byteLength));
+	});
 });
 
 await test('serveStatic', async (t) => {
-	await t.test('Cache-Control: path', async () => {
-		const res = await app.request('/favicon.ico');
-
-		assert.equal(res.status, 200);
-		assert.equal(res.headers.get('Cache-Control'), 'max-age=604800');
-	});
-
 	await t.test('Cache-Control: extension', async () => {
 		const res = await app.request('/apple-touch-icon.png');
 
@@ -63,8 +80,8 @@ await test('serveStatic', async (t) => {
 await test('Compression', async (t) => {
 	await t.test('gzip', async () => {
 		const [file, res] = await Promise.all([
-			fs.promises.readFile(`${config.static.root}/favicon.ico`),
-			app.request('/favicon.ico', { headers: { 'Accept-Encoding': 'gzip,deflate' } }),
+			fs.promises.readFile(`${config.static.root}/index.html`),
+			app.request('/index.html', { headers: { 'Accept-Encoding': 'gzip,deflate' } }),
 		]);
 
 		const fileLength = file.byteLength;
@@ -77,15 +94,17 @@ await test('Compression', async (t) => {
 		}
 	});
 
+	/*
 	await t.test('brotli', async () => {
 		const [file, res] = await Promise.all([
-			fs.promises.readFile(`${config.static.root}/favicon.ico.br`),
-			app.request('/favicon.ico', { headers: { 'Accept-Encoding': 'br' } }),
+			fs.promises.readFile(`${config.static.root}/foo.xxx.br`),
+			app.request('/foo.xxx', { headers: { 'Accept-Encoding': 'br' } }),
 		]);
 
 		assert.equal(res.headers.get('Content-Encoding'), 'br');
 		assert.equal(res.headers.get('Content-Length'), String(file.byteLength));
 	});
+	*/
 });
 
 await test('401', async (t) => {
