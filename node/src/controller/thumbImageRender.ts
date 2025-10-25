@@ -66,7 +66,7 @@ const render = (context: Context, file: Readonly<{ data: Buffer; mimeType: strin
 	res.headers.set('Content-Length', String(file.data.byteLength));
 	res.headers.set('Content-Type', file.mimeType);
 
-	return context.body(file.data);
+	return context.body(Buffer.from(file.data));
 };
 
 /**
@@ -117,7 +117,7 @@ export const thumbImageRenderApp = new Hono().get('/:path{.+}', corsMiddleware, 
 
 		res.headers.set('Content-Length', String(origFileData.byteLength));
 		res.headers.set('Content-Type', mimeType);
-		return context.body(origFileData);
+		return context.body(Buffer.from(origFileData));
 	}
 
 	const origFileMtime = (await fs.promises.stat(origFileFullPath)).mtime;
