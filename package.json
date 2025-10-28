@@ -31,7 +31,7 @@
 		"@types/qs": "^6.14.0",
 		"@types/whatwg-mimetype": "^3.0.2",
 		"@w0s/eslint-config": "^9.2.0",
-		"@w0s/stylelint-config": "^4.13.1",
+		"@w0s/stylelint-config": "^4.14.0",
 		"@w0s/tsconfig": "^1.7.0",
 		"eslint": "^9.38.0",
 		"prettier": "^3.6.2",
