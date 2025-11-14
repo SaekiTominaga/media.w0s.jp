@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { SqliteError } from 'better-sqlite3';
 import { iec } from '@w0s/file-size-format';
 import { Hono, type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
@@ -7,9 +8,8 @@ import { imageSize } from 'image-size';
 import Log4js from 'log4js';
 import { env } from '@w0s/env-value-type';
 import configHono from '../config/hono.ts';
-import configSqlite from '../config/sqlite.ts';
 import configThumbimage from '../config/thumb-image.ts';
-import ThumbImageRenderDao from '../dao/ThumbImageRenderDao.ts';
+import ThumbImageRenderDao from '../db/ThumbImageRender.ts';
 import { corsAllowNoOrigin as corsMiddleware } from '../middleware/cors.ts';
 import ThumbImage from '../object/ThumbImage.ts';
 import { getSize as getThumbImageSize, create as createThumbImage } from '../util/thumbImage.ts';
@@ -157,8 +157,8 @@ export const thumbImageRenderApp = new Hono().get('/:path{.+}', corsMiddleware, 
 		const dao = new ThumbImageRenderDao(env('SQLITE_THUMBIMAGE'));
 		try {
 			const insertedCount = await dao.insert({
-				filePath: thumbImage.fileBasePath,
-				type: thumbImage.type,
+				file_path: thumbImage.fileBasePath,
+				file_type: thumbImage.type,
 				width: thumbImage.size.width,
 				height: thumbImage.size.height,
 				quality: thumbImage.quality,
@@ -167,17 +167,12 @@ export const thumbImageRenderApp = new Hono().get('/:path{.+}', corsMiddleware, 
 				logger.info(`ファイル生成情報を DB に登録: ${thumbImage.fileBasePath}`);
 			}
 		} catch (e) {
-			if (!(e instanceof Error)) {
+			if (!(e instanceof SqliteError)) {
 				throw e;
 			}
 
-			// @ts-expect-error: ts(2339)
-			switch (e.errno) {
-				case configSqlite.errno.locked: {
-					logger.warn('DB ロック', thumbImage.fileBasePath, thumbImage.type, thumbImage.size, thumbImage.quality);
-					break;
-				}
-				case configSqlite.errno.uniqueConstraint: {
+			switch (e.code /* https://sqlite.org/rescode.html */) {
+				case 'SQLITE_CONSTRAINT_UNIQUE': {
 					logger.info('ファイル生成情報は DB 登録済み', thumbImage.fileBasePath, thumbImage.type, thumbImage.size, thumbImage.quality);
 					break;
 				}
