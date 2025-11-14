@@ -102,6 +102,8 @@ app.use(
 			return `${urlPath}${config.static.extension}`;
 		},
 		onFound: (localPath, context) => {
+			const { res } = context;
+
 			const urlPath = path.normalize(localPath).substring(path.normalize(config.static.root).length).replaceAll(path.sep, '/'); // URL のパス部分 e.g. ('/foo.html')
 			const urlExtension = path.extname(urlPath); // URL の拡張子部分 (e.g. '.html')
 
@@ -109,7 +111,7 @@ app.use(
 			const cacheControl =
 				config.static.headers.cacheControl.extension.find((ccExt) => ccExt.extensions.includes(urlExtension))?.value ??
 				config.static.headers.cacheControl.default;
-			context.header('Cache-Control', cacheControl);
+			res.headers.set('Cache-Control', cacheControl);
 		},
 	}),
 );
