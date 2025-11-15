@@ -56,7 +56,7 @@ export const getSize = (
  *
  * @returns 生成したサムネイル画像データ
  */
-export const create = async (origFilePath: string, thumbImage: Readonly<ThumbImage>): Promise<Buffer> => {
+export const create = async (origFilePath: string, thumbImage: ThumbImage): Promise<Buffer> => {
 	/* ディレクトリのチェック */
 	const thumbDirectory = path.dirname(thumbImage.fileFullPath);
 	if (!fs.existsSync(thumbDirectory)) {

@@ -6,13 +6,13 @@ import config, { type Info } from '../config/thumb-image.ts';
  */
 export default class ThumbImage {
 	/* ファイルタイプ毎の MIME タイプや拡張子の定義 */
-	#imageInfo: Info;
+	readonly #imageInfo: Info;
 
 	/* サムネイル画像を保存するルートディレクトリ */
-	#dir: string;
+	readonly #dir: string;
 
 	/* ベースとなるファイルパス */
-	#fileBasePath: string;
+	readonly #fileBasePath: string;
 
 	/* 画像タイプ */
 	#type: string;
@@ -31,7 +31,7 @@ export default class ThumbImage {
 	 * @param file.size - 画像サイズ
 	 * @param file.quality - 画像品質
 	 */
-	constructor(dir: string, file: Readonly<{ fileBasePath: string; type: string; size: ImageSize; quality: number | undefined }>) {
+	constructor(dir: string, file: Readonly<{ fileBasePath: string; type: string; size: Readonly<ImageSize>; quality: number | undefined }>) {
 		this.#dir = dir;
 
 		this.#imageInfo = config.type;
@@ -95,7 +95,7 @@ export default class ThumbImage {
 		return this.#size;
 	}
 
-	set size(size: ImageSize) {
+	set size(size: Readonly<ImageSize>) {
 		this.#size = size;
 	}
 

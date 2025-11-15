@@ -32,8 +32,8 @@ const logger = Log4js.getLogger('blog-upload');
  * @returns 返答内容
  */
 const upload = async (
-	option: { dir: string; limit: number },
-	requset: { fileName: string; tempPath: string; size: number; overwrite: boolean },
+	option: Readonly<{ dir: string; limit: number }>,
+	requset: Readonly<{ fileName: string; tempPath: string; size: number; overwrite: boolean }>,
 ): Promise<ResponseJson> => {
 	const filePath = `${option.dir}/${requset.fileName}`;
 
