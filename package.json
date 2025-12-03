@@ -37,7 +37,7 @@
 		"eslint": "^9.39.1",
 		"prettier": "^3.6.2",
 		"rimraf": "^6.1.2",
-		"stylelint": "^16.25.0",
+		"stylelint": "^16.26.0",
 		"tsx": "^4.20.6",
 		"typescript": "^5.9.3"
 	},
