@@ -16,7 +16,7 @@
 		"@w0s/env-value-type": "^1.0.0",
 		"@w0s/file-size-format": "^3.0.1",
 		"@w0s/sqlite-utility": "^1.1.0",
-		"better-sqlite3": "^12.4.6",
+		"better-sqlite3": "^12.5.0",
 		"ejs": "^3.1.10",
 		"hono": "^4.10.6",
 		"image-size": "^2.0.2",
