@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import Sharp from 'sharp';
 import ThumbImage from '../object/ThumbImage.ts';
-import type { Size } from '../types/util.ts';
+import type { Size } from '../../@types/util.d.ts';
 
 /**
  * 出力するサムネイル画像ファイルの大きさを計算する

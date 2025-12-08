@@ -1,6 +1,6 @@
 import SQLite from 'better-sqlite3';
 import { Kysely, SqliteDialect } from 'kysely';
-import type { DB } from '../../../@types/db_thumbimage.ts';
+import type { DB } from '../../../@types/db_thumbimage.d.ts';
 
 /**
  * レポートデーターベース

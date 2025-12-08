@@ -1,6 +1,6 @@
 import path from 'node:path';
 import config, { type Info } from '../config/thumb-image.ts';
-import type { Size } from '../types/util.ts';
+import type { Size } from '../../@types/util.d.ts';
 
 /**
  * サムネイル画像
