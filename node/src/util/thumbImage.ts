@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import Sharp from 'sharp';
 import ThumbImage from '../object/ThumbImage.ts';
+import type { Size } from '../types/util.ts';
 
 /**
  * 出力するサムネイル画像ファイルの大きさを計算する
@@ -18,8 +19,8 @@ export const getSize = (
 		width: number | undefined;
 		height: number | undefined;
 	}>,
-	origImage: Readonly<ImageSize>,
-): ImageSize => {
+	origImage: Size,
+): Size => {
 	let newImageWidth = origImage.width;
 	let newImageHeight = origImage.height;
 

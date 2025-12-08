@@ -1,5 +1,6 @@
 import path from 'node:path';
 import config, { type Info } from '../config/thumb-image.ts';
+import type { Size } from '../types/util.ts';
 
 /**
  * サムネイル画像
@@ -18,7 +19,7 @@ export default class ThumbImage {
 	#type: string;
 
 	/* 画像の大きさ */
-	#size: ImageSize;
+	#size: Size;
 
 	/* 画像品質 */
 	#quality: number | undefined;
@@ -31,7 +32,7 @@ export default class ThumbImage {
 	 * @param file.size - 画像サイズ
 	 * @param file.quality - 画像品質
 	 */
-	constructor(dir: string, file: Readonly<{ fileBasePath: string; type: string; size: Readonly<ImageSize>; quality: number | undefined }>) {
+	constructor(dir: string, file: Readonly<{ fileBasePath: string; type: string; size: Size; quality: number | undefined }>) {
 		this.#dir = dir;
 
 		this.#imageInfo = config.type;
@@ -91,11 +92,11 @@ export default class ThumbImage {
 		this.#type = type;
 	}
 
-	get size(): ImageSize {
+	get size(): Size {
 		return this.#size;
 	}
 
-	set size(size: Readonly<ImageSize>) {
+	set size(size: Size) {
 		this.#size = size;
 	}
 
