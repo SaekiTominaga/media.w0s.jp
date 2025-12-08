@@ -5,7 +5,7 @@
 		"dev": "tsx --watch --tsconfig node/tsconfig.json node/src/app.ts",
 		"prebuild": "rimraf node/dist/* -g",
 		"build": "tsc -p node/tsconfig.json",
-		"lint": "eslint node/src/**/*.ts node/@types/*.d.ts",
+		"lint": "eslint node/src/**/*.ts",
 		"test": "node --experimental-test-coverage --env-file-if-exists=.env.test --test node/src/**/*.test.ts",
 		"css-lint": "stylelint public/*.css",
 		"format": "prettier -w ."

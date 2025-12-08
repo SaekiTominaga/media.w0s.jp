@@ -1,6 +1,6 @@
 import type { Insertable } from 'kysely';
 import { jsToSQLiteAssignment } from '@w0s/sqlite-utility';
-import type { DQueue } from '../../../@types/db.d.ts';
+import type { DQueue } from '../../../@types/db_thumbimage.ts';
 import Database from './Database.ts';
 
 /**
