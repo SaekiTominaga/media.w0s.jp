@@ -1,16 +1,11 @@
+**/node_modules
 .env
 .env.*
 
-/.temp/
-/.thumbimage/
-
-/log/
-
-/node/dist/
+/.thumbimage
+/log
+/node/dist
 /node/log4js.*.json
-
-/node_modules/
-
-/public/audio/
-/public/image/
-/public/video/
+/public/audio
+/public/image
+/public/video
