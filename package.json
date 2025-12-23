@@ -18,7 +18,7 @@
 		"@w0s/sqlite-utility": "^2.0.0",
 		"better-sqlite3": "^12.5.0",
 		"ejs": "^3.1.10",
-		"hono": "^4.10.7",
+		"hono": "^4.11.0",
 		"image-size": "^2.0.2",
 		"kysely": "^0.28.8",
 		"log4js": "^6.9.1",
