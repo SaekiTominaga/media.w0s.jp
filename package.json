@@ -1,5 +1,6 @@
 {
 	"name": "media.w0s.jp",
+	"private": true,
 	"type": "module",
 	"scripts": {
 		"dev": "tsx --watch --tsconfig node/tsconfig.json node/src/app.ts",
@@ -37,6 +38,5 @@
 		"rimraf": "^6.1.2",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3"
-	},
-	"private": true
+	}
 }
