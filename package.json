@@ -6,7 +6,7 @@
 		"dev": "tsx --watch --tsconfig node/tsconfig.json node/src/app.ts",
 		"prebuild": "rimraf node/dist/* -g",
 		"build": "tsc -p node/tsconfig.json",
-		"lint": "npm run lint:js && npm run lint:css",
+		"lint": "pnpm run /^lint:.*/",
 		"lint:js": "eslint node/@types/*.d.ts node/src/**/*.ts",
 		"lint:css": "stylelint public/*.css",
 		"test": "node --experimental-test-coverage --env-file-if-exists=.env.test --test node/src/**/*.test.ts"
