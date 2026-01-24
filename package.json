@@ -34,7 +34,7 @@
 		"@w0s/eslint-config": "9.4.1",
 		"@w0s/stylelint-config": "4.17.0",
 		"@w0s/tsconfig": "1.7.0",
-		"prettier": "3.7.4",
+		"prettier": "3.8.0",
 		"rimraf": "6.1.2",
 		"tsx": "4.21.0",
 		"typescript": "5.9.3"
