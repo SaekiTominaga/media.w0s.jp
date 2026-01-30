@@ -34,7 +34,7 @@ await test('w string', async () => {
 	const res = await app.request('/thumbimage/foo?type=jpeg;w=foo');
 
 	assert.equal(res.status, 400);
-	// The value of the `w` parameter must be a positive integer
+	// The value of the `w` parameter must be an integer
 });
 
 await test('w min', async () => {
@@ -62,7 +62,7 @@ await test('h string', async () => {
 	const res = await app.request('/thumbimage/foo?type=jpeg;w=1;h=foo');
 
 	assert.equal(res.status, 400);
-	// The value of the `h` parameter must be a positive integer
+	// The value of the `h` parameter must be an integer
 });
 
 await test('h min', async () => {
@@ -90,7 +90,7 @@ await test('quality string', async () => {
 	const res = await app.request('/thumbimage/foo?type=jpeg;w=1;h=1;quality=foo');
 
 	assert.equal(res.status, 400);
-	// The value of the `quality` parameter must be a positive integer
+	// The value of the `quality` parameter must be an integer
 });
 
 await test('quality min', async () => {

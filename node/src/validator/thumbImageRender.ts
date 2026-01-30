@@ -28,13 +28,13 @@ export const query = validator('query', (value): RequestBody => {
 			throw new HTTPException(400, { message: 'The `w` parameter can only be singular' });
 		}
 
-		if (!/^[0-9]+$/v.test(w)) {
-			throw new HTTPException(400, { message: 'The value of the `w` parameter must be a positive integer' });
-		}
-
 		wNumber = Number(w);
+
 		if (wNumber < 1 || wNumber > 9999) {
 			throw new HTTPException(400, { message: 'The value of the `w` parameter must be between 1 and 9999' });
+		}
+		if (!Number.isInteger(wNumber)) {
+			throw new HTTPException(400, { message: 'The value of the `w` parameter must be an integer' });
 		}
 	}
 
@@ -44,13 +44,13 @@ export const query = validator('query', (value): RequestBody => {
 			throw new HTTPException(400, { message: 'The `h` parameter can only be singular' });
 		}
 
-		if (!/^[0-9]+$/v.test(h)) {
-			throw new HTTPException(400, { message: 'The value of the `h` parameter must be a positive integer' });
-		}
-
 		hNumber = Number(h);
+
 		if (hNumber < 1 || hNumber > 9999) {
 			throw new HTTPException(400, { message: 'The value of the `h` parameter must be between 1 and 9999' });
+		}
+		if (!Number.isInteger(hNumber)) {
+			throw new HTTPException(400, { message: 'The value of the `h` parameter must be an integer' });
 		}
 	}
 
@@ -60,13 +60,13 @@ export const query = validator('query', (value): RequestBody => {
 			throw new HTTPException(400, { message: 'The `quality` parameter can only be singular' });
 		}
 
-		if (!/^[0-9]+$/v.test(quality)) {
-			throw new HTTPException(400, { message: 'The value of the `quality` parameter must be a positive integer' });
-		}
-
 		qualityNumber = Number(quality);
+
 		if (qualityNumber < 1 || qualityNumber > 100) {
 			throw new HTTPException(400, { message: 'The value of the `quality` parameter must be between 1 and 100' });
+		}
+		if (!Number.isInteger(qualityNumber)) {
+			throw new HTTPException(400, { message: 'The value of the `quality` parameter must be an integer' });
 		}
 	}
 
