@@ -6,7 +6,7 @@ import w0sConfig from '@w0s/eslint-config';
 export default [
 	...w0sConfig,
 	{
-		ignores: ['@types', 'node/dist'],
+		ignores: ['@types', 'hono/dist'],
 	},
 	{
 		files: ['**/*.ts'],
@@ -17,20 +17,20 @@ export default [
 		},
 	},
 	{
-		files: ['node/src/**/*.test.ts'],
+		files: ['hono/src/**/*.test.ts'],
 		rules: {
 			'line-comment-position': 'off',
 			'@typescript-eslint/no-unsafe-member-access': 'off',
 		},
 	},
 	{
-		files: ['node/src/controller/*.ts', 'node/src/app.test.ts'],
+		files: ['hono/src/controller/*.ts', 'hono/src/app.test.ts'],
 		rules: {
 			'@typescript-eslint/await-thenable': 'off',
 		},
 	},
 	{
-		files: ['node/src/util/**/*.ts'],
+		files: ['hono/src/util/**/*.ts'],
 		rules: {
 			'func-style': [
 				'error',

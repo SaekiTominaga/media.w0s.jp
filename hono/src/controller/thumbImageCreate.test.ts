@@ -27,7 +27,7 @@ await test('File not found', async () => {
 });
 
 await test('create', async (t) => {
-	const thumbImage = new ThumbImage(env('THUMBIMAGE_DIR'), {
+	const thumbImage = new ThumbImage(`${env('ROOT')}/${env('THUMBIMAGE_DIR')}`, {
 		fileBasePath: 'sample.jpg',
 		type: 'avif',
 		size: { width: 1, height: 1 },

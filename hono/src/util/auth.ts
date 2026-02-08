@@ -14,7 +14,7 @@ interface Auth {
  * @returns 認証ファイルの内容
  */
 export const getAuth = async (): Promise<Auth> => {
-	const filePath = env('AUTH_ADMIN');
+	const filePath = `${env('ROOT')}/${env('AUTH_DIR')}/${env('AUTH_ADMIN')}`;
 
 	return JSON.parse((await fs.promises.readFile(filePath)).toString()) as Auth;
 };

@@ -4,8 +4,8 @@
 
 /.thumbimage
 /log
-/node/dist
-/node/log4js.*.json
+/hono/dist
+/hono/log4js.*.json
 /public/audio
 /public/image
 /public/video

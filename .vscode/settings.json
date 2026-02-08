@@ -6,7 +6,7 @@
 	"editor.renderWhitespace": "boundary",
 	"eslint.validate": ["typescript"],
 	"search.exclude": {
-		"/node/dist": true,
+		"/hono/dist": true,
 		"**/pnpm-lock.yaml": true
 	},
 	"stylelint.validate": ["css"]

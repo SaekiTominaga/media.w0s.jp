@@ -1,4 +1,3 @@
-import path from 'node:path';
 import config, { type Info } from '../config/thumb-image.ts';
 import type { Size } from '../../@types/util.d.ts';
 
@@ -73,7 +72,7 @@ export default class ThumbImage {
 	}
 
 	get fileFullPath(): string {
-		return path.resolve(`${this.#dir}/${this.filePath}`);
+		return `${this.#dir}/${this.filePath}`;
 	}
 
 	get mime(): string {

@@ -40,7 +40,7 @@ await test('orig image', async () => {
 });
 
 await test('thumb image', async (t) => {
-	const thumbImage = new ThumbImage(env('THUMBIMAGE_DIR'), {
+	const thumbImage = new ThumbImage(`${env('ROOT')}/${env('THUMBIMAGE_DIR')}`, {
 		fileBasePath: 'sample.jpg',
 		type: 'webp',
 		size: { width: 1, height: 1 },
@@ -78,7 +78,7 @@ await test('thumb image', async (t) => {
 });
 
 await test('thumb image - alt type', async (t) => {
-	const thumbImage = new ThumbImage(env('THUMBIMAGE_DIR'), {
+	const thumbImage = new ThumbImage(`${env('ROOT')}/${env('THUMBIMAGE_DIR')}`, {
 		fileBasePath: 'sample.jpg',
 		type: 'avif',
 		size: { width: 1, height: 1 },
