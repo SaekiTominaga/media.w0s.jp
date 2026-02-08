@@ -49,7 +49,7 @@ export const thumbImageCreateApp = new Hono().post(validatorJson, async (context
 		return new Response(null, { status: 204 }); // TODO: 正常時と区別が付かないので、本来は 200 にしてボディ内に情報を含めるべき
 	}
 
-	const thumbImage = new ThumbImage(env('THUMBIMAGE_DIR'), {
+	const thumbImage = new ThumbImage(`${env('ROOT')}/${env('THUMBIMAGE_DIR')}`, {
 		fileBasePath: requestBody.filePath,
 		type: requestBody.type,
 		size: {

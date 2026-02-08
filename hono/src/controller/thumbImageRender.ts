@@ -124,7 +124,7 @@ export const thumbImageRenderApp = new Hono().get('/:path{.+}', corsMiddleware, 
 
 	const dimensions = imageSize(origFileData);
 
-	const thumbImage = new ThumbImage(env('THUMBIMAGE_DIR'), {
+	const thumbImage = new ThumbImage(`${env('ROOT')}/${env('THUMBIMAGE_DIR')}`, {
 		fileBasePath: requestParam.path,
 		type: requestQuery.type,
 		size: getThumbImageSize({ width: requestQuery.w, height: requestQuery.h }, { width: dimensions.width, height: dimensions.height }),
@@ -154,7 +154,7 @@ export const thumbImageRenderApp = new Hono().get('/:path{.+}', corsMiddleware, 
 	const thumbTypeAlt = thumbImage.altType;
 	if (thumbTypeAlt !== undefined) {
 		/* 代替タイプが設定されている場合はリアルタイム生成を行わず、ファイル生成情報を DB に登録する（別途、バッチ処理でファイル生成を行うため） */
-		const dao = new ThumbImageRenderDao(env('SQLITE_THUMBIMAGE'));
+		const dao = new ThumbImageRenderDao(`${env('ROOT')}/${env('SQLITE_DIR')}/${env('SQLITE_THUMBIMAGE')}`);
 		try {
 			const insertedCount = await dao.insert({
 				file_path: thumbImage.fileBasePath,

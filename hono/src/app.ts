@@ -28,7 +28,7 @@ import { isApi } from './util/request.ts';
 loadEnvFile(process.env['NODE_ENV'] === 'production' ? '.env.production' : '.env.development');
 
 /* Logger */
-Log4js.configure(env('LOGGER'));
+Log4js.configure(env('HONO_LOG4JS_CONF'));
 const logger = Log4js.getLogger();
 
 /* Hono */
@@ -210,7 +210,7 @@ app.onError((err, context) => {
 
 /* HTTP Server */
 if (process.env['TEST'] !== 'true') {
-	const port = env('PORT', 'number');
+	const port = env('HONO_PORT', 'number');
 	logger.info(`Server is running on http://localhost:${String(port)}`);
 
 	serve({

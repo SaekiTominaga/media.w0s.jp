@@ -3,13 +3,13 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "tsx --watch --tsconfig node/tsconfig.json node/src/app.ts",
-		"prebuild": "rimraf node/dist/* -g",
-		"build": "tsc -p node/tsconfig.json",
+		"dev": "tsx --watch --tsconfig hono/tsconfig.json hono/src/app.ts",
+		"prebuild": "rimraf hono/dist/* -g",
+		"build": "tsc -p hono/tsconfig.json",
 		"lint": "pnpm run /^lint:.*/",
-		"lint:js": "eslint node/@types/*.d.ts node/src/**/*.ts",
+		"lint:js": "eslint hono/@types/*.d.ts hono/src/**/*.ts",
 		"lint:css": "stylelint public/*.css",
-		"test": "node --experimental-test-coverage --env-file-if-exists=.env.test --test node/src/**/*.test.ts"
+		"test": "node --experimental-test-coverage --env-file-if-exists=.env.test --test hono/src/**/*.test.ts"
 	},
 	"dependencies": {
 		"@hono/node-server": "1.19.9",
