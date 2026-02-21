@@ -2,6 +2,7 @@
 .env
 .env.*
 log4js.*.json
+*.tsbuildinfo
 
 /.thumbimage
 
