@@ -23,13 +23,13 @@
 		"log4js": "6.9.1",
 		"qs": "6.15.0",
 		"sharp": "0.34.5",
-		"whatwg-mimetype": "4.0.0"
+		"whatwg-mimetype": "5.0.0"
 	},
 	"devDependencies": {
 		"@types/better-sqlite3": "7.6.13",
 		"@types/node": "24.10.0",
 		"@types/qs": "6.14.0",
-		"@types/whatwg-mimetype": "3.0.2",
+		"@types/whatwg-mimetype": "5.0.0",
 		"@w0s/eslint-config": "9.4.1",
 		"@w0s/stylelint-config": "4.17.0",
 		"@w0s/tsconfig": "2.0.1",
