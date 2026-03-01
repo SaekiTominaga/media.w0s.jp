@@ -18,7 +18,7 @@
 		"@w0s/file-size-format": "3.0.2",
 		"@w0s/sqlite-utility": "2.0.0",
 		"better-sqlite3": "12.6.2",
-		"hono": "4.11.8",
+		"hono": "4.12.1",
 		"image-size": "2.0.2",
 		"kysely": "0.28.11",
 		"log4js": "6.9.1",
