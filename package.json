@@ -7,7 +7,7 @@
 		"build": "tsc -p hono/tsconfig.json",
 		"lint": "pnpm run /^lint:.*/",
 		"lint:js": "eslint hono/@types/*.d.ts hono/src/**/*.ts",
-		"lint:css": "stylelint public/*.css",
+		"lint:css": "stylelint -f verbose public/*.css",
 		"test": "node --experimental-test-coverage --env-file-if-exists=.env.test --test hono/src/**/*.test.ts"
 	},
 	"dependencies": {
