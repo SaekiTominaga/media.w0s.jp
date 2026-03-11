@@ -1,6 +1,5 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import path from 'node:path';
 import ThumbImage from './ThumbImage.ts';
 
 await test('getter', async (t) => {
@@ -15,7 +14,7 @@ await test('getter', async (t) => {
 	});
 
 	await t.test('fileFullPath', () => {
-		assert.equal(thumbImage.fileFullPath, path.resolve('dir/path/to.jpg@s=100x200;q=80.avif'));
+		assert.equal(thumbImage.fileFullPath, 'dir/path/to.jpg@s=100x200;q=80.avif');
 	});
 
 	await t.test('mime', () => {
@@ -61,7 +60,7 @@ await test('setter', async (t) => {
 	});
 
 	await t.test('fileFullPath', () => {
-		assert.equal(thumbImage.fileFullPath, path.resolve('dir/path/to.jpg@s=200x400;q=50.webp'));
+		assert.equal(thumbImage.fileFullPath, 'dir/path/to.jpg@s=200x400;q=50.webp');
 	});
 
 	await t.test('mime', () => {
