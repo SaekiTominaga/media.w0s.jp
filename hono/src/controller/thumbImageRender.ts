@@ -173,7 +173,9 @@ export const thumbImageRenderApp = new Hono().get('/:path{.+}', corsMiddleware, 
 
 			switch (e.code /* https://sqlite.org/rescode.html */) {
 				case 'SQLITE_CONSTRAINT_UNIQUE': {
-					logger.info('ファイル生成情報は DB 登録済み', thumbImage.fileBasePath, thumbImage.type, thumbImage.size, thumbImage.quality);
+					logger.info(
+						`ファイル生成情報は DB 登録済み: ${thumbImage.fileBasePath} type:${thumbImage.type} size:${String(thumbImage.size.width)}x${String(thumbImage.size.width)} quality:${String(thumbImage.quality)}`,
+					);
 					break;
 				}
 				default: {
