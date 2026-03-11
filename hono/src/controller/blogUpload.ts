@@ -110,7 +110,7 @@ export const blogUploadApp = new Hono().post(validatorJson, async (context) => {
 			break;
 		}
 		default: {
-			logger.info('未対応のファイルタイプ', requestBody.type);
+			logger.info(`未対応のファイルタイプ: ${requestBody.type}`);
 
 			response = {
 				name: requestBody.fileName,
