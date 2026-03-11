@@ -1,7 +1,8 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import { Hono } from 'hono';
-import Log4js from 'log4js';
 import { MIMEType } from 'whatwg-mimetype';
+import { getLogger } from '../logger.ts';
 import configBlogUpload from '../config/blog-upload.ts';
 import { json as validatorJson } from '../validator/blogUpload.ts';
 
@@ -15,7 +16,7 @@ interface ResponseJson {
 /**
  * ブログ用ファイルアップロード
  */
-const logger = Log4js.getLogger('blog-upload');
+const logger = getLogger(path.basename(import.meta.url, '.ts'));
 
 /**
  * ファイルアップロードを実行する（正確にはアップロードされたファイルを `media.w0s.jp` の適切な場所に移動する）
