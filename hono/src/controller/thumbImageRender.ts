@@ -5,8 +5,8 @@ import { iec } from '@w0s/file-size-format';
 import { Hono, type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { imageSize } from 'image-size';
-import Log4js from 'log4js';
 import { env } from '@w0s/env-value-type';
+import { getLogger } from '../logger.ts';
 import configHono from '../config/hono.ts';
 import configThumbimage from '../config/thumb-image.ts';
 import ThumbImageRenderDao from '../db/ThumbImageRender.ts';
@@ -18,7 +18,7 @@ import { query as validatorQuery } from '../validator/thumbImageRender.ts';
 /**
  * サムネイル画像表示
  */
-const logger = Log4js.getLogger('thumbimage');
+const logger = getLogger(path.basename(import.meta.url, '.ts'));
 
 /**
  * Fetch Mode のチェック

@@ -1,0 +1,15 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Hono",
+			"type": "node",
+			"request": "launch",
+			"skipFiles": ["<node_internals>/**"],
+			"runtimeExecutable": "tsx",
+			"runtimeArgs": ["--watch", "--tsconfig", "hono/tsconfig.json", "hono/src/app.ts"],
+			"envFile": "${workspaceFolder}/.env.development",
+			"outputCapture": "std"
+		}
+	]
+}

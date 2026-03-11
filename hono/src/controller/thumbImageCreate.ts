@@ -2,8 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { iec } from '@w0s/file-size-format';
 import { Hono } from 'hono';
-import Log4js from 'log4js';
 import { env } from '@w0s/env-value-type';
+import { getLogger } from '../logger.ts';
 import configExpress from '../config/hono.ts';
 import ThumbImage from '../object/ThumbImage.ts';
 import { create as createThumbImage } from '../util/thumbImage.ts';
@@ -12,7 +12,7 @@ import { json as validatorJson } from '../validator/thumbImageCreate.ts';
 /**
  * サムネイル画像生成
  */
-const logger = Log4js.getLogger('thumbimage-create');
+const logger = getLogger(path.basename(import.meta.url, '.ts'));
 
 /**
  * 画像ファイル生成

@@ -1,7 +1,6 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { loadEnvFile } from 'node:process';
 import { Hono } from 'hono';
 import { basicAuth } from 'hono/basic-auth';
 import { compress } from 'hono/compress';
@@ -10,9 +9,9 @@ import { HTTPException } from 'hono/http-exception';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
-import Log4js from 'log4js';
 import qs from 'qs';
 import { env } from '@w0s/env-value-type';
+import { getLogger } from './logger.ts';
 import config from './config/hono.ts';
 import { blogUploadApp } from './controller/blogUpload.ts';
 import { thumbImageCreateApp } from './controller/thumbImageCreate.ts';
@@ -25,11 +24,8 @@ import {
 } from './util/httpHeader.ts';
 import { isApi } from './util/request.ts';
 
-loadEnvFile(process.env['NODE_ENV'] === 'production' ? '.env.production' : '.env.development');
-
 /* Logger */
-Log4js.configure(env('HONO_LOG4JS_CONF'));
-const logger = Log4js.getLogger();
+const logger = getLogger(path.basename(import.meta.url, '.ts'));
 
 /* Hono */
 const app = new Hono();
