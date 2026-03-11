@@ -8,7 +8,7 @@
 		"lint": "pnpm run /^lint:.*/",
 		"lint:js": "eslint hono/@types/*.d.ts hono/src/**/*.ts",
 		"lint:css": "stylelint -f verbose public/*.css",
-		"test": "node --experimental-test-coverage --env-file-if-exists=.env.test --test hono/src/**/*.test.ts"
+		"test": "node --experimental-test-coverage --env-file=.env.development --env-file=.env.test --test hono/src/**/*.test.ts"
 	},
 	"dependencies": {
 		"@hono/node-server": "1.19.10",
