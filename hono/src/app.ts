@@ -178,7 +178,7 @@ app.onError((err, context) => {
 					headers.set('WWW-Authenticate', wwwAuthenticate);
 				}
 			} else {
-				logger.info(err.status, err.message, context.req.header('User-Agent'));
+				logger.info(`${String(err.status)} ${err.message} <${String(context.req.header('User-Agent'))}>`);
 			}
 
 			title = TITLE_4XX;
