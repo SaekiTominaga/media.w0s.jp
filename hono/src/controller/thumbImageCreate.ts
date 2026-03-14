@@ -12,7 +12,7 @@ import { json as validatorJson } from '../validator/thumbImageCreate.ts';
 /**
  * サムネイル画像生成
  */
-const logger = getLogger(path.basename(import.meta.url, '.ts'));
+const logger = getLogger(path.basename(import.meta.url));
 
 /**
  * 画像ファイル生成

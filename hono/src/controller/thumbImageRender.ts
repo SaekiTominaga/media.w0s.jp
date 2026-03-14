@@ -18,7 +18,7 @@ import { query as validatorQuery } from '../validator/thumbImageRender.ts';
 /**
  * サムネイル画像表示
  */
-const logger = getLogger(path.basename(import.meta.url, '.ts'));
+const logger = getLogger(path.basename(import.meta.url));
 
 /**
  * Fetch Mode のチェック

@@ -16,7 +16,7 @@ interface ResponseJson {
 /**
  * ブログ用ファイルアップロード
  */
-const logger = getLogger(path.basename(import.meta.url, '.ts'));
+const logger = getLogger(path.basename(import.meta.url));
 
 /**
  * ファイルアップロードを実行する（正確にはアップロードされたファイルを `media.w0s.jp` の適切な場所に移動する）

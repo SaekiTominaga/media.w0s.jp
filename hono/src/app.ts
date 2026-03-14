@@ -25,7 +25,7 @@ import {
 import { isApi } from './util/request.ts';
 
 /* Logger */
-const logger = getLogger(path.basename(import.meta.url, '.ts'));
+const logger = getLogger(path.basename(import.meta.url));
 
 /* Hono */
 const app = new Hono();
