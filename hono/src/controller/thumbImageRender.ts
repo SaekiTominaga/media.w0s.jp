@@ -6,7 +6,7 @@ import { Hono, type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { imageSize } from 'image-size';
 import { env } from '@w0s/env-value-type';
-import { getLogger } from '../logger.ts';
+import type { Variables } from '../app.ts';
 import configHono from '../config/hono.ts';
 import configThumbimage from '../config/thumb-image.ts';
 import ThumbImageRenderDao from '../db/ThumbImageRender.ts';
@@ -18,7 +18,6 @@ import { query as validatorQuery } from '../validator/thumbImageRender.ts';
 /**
  * サムネイル画像表示
  */
-const logger = getLogger(path.basename(import.meta.url));
 
 /**
  * Fetch Mode のチェック
@@ -27,8 +26,9 @@ const logger = getLogger(path.basename(import.meta.url));
  *
  * @returns サムネイル画像の生成・表示を行う場合は true
  */
-const checkFetchMode = (context: Context): boolean => {
+const checkFetchMode = (context: Context<{ Variables: Variables }>): boolean => {
 	const { req, res } = context;
+	const logger = context.get('logger');
 
 	const fetchMode = req.header('Sec-Fetch-Mode');
 	res.headers.append('Vary', 'Sec-Fetch-Mode');
@@ -49,7 +49,7 @@ const checkFetchMode = (context: Context): boolean => {
  *
  * @returns Response
  */
-const render = (context: Context, file: Readonly<{ data: Buffer; mimeType: string; mtime?: Date }>): Response => {
+const render = (context: Context<{ Variables: Variables }>, file: Readonly<{ data: Buffer; mimeType: string; mtime?: Date }>): Response => {
 	const { req, res } = context;
 
 	if (file.mtime !== undefined) {
@@ -72,12 +72,15 @@ const render = (context: Context, file: Readonly<{ data: Buffer; mimeType: strin
 /**
  * 画像ファイル生成
  *
+ * @param context - Context
  * @param origFileFullPath - 元画像ファイルのフルパス
  * @param thumbImage - サムネイル画像
  *
  * @returns 生成した画像データ
  */
-const create = async (origFileFullPath: string, thumbImage: ThumbImage): Promise<Buffer> => {
+const create = async (context: Context<{ Variables: Variables }>, origFileFullPath: string, thumbImage: ThumbImage): Promise<Buffer> => {
+	const logger = context.get('logger');
+
 	/* 新しい画像ファイルを生成 */
 	const startTime = Date.now();
 	const createdData = await createThumbImage(origFileFullPath, thumbImage);
@@ -92,8 +95,9 @@ const create = async (origFileFullPath: string, thumbImage: ThumbImage): Promise
 	return createdData;
 };
 
-export const thumbImageRenderApp = new Hono().get('/:path{.+}', corsMiddleware, validatorQuery, async (context) => {
+export const thumbImageRenderApp = new Hono<{ Variables: Variables }>().get('/:path{.+}', corsMiddleware, validatorQuery, async (context) => {
 	const { req, res } = context;
+	const logger = context.get('logger');
 
 	const requestParam = req.param();
 	const requestQuery = req.valid('query');
@@ -200,7 +204,7 @@ export const thumbImageRenderApp = new Hono().get('/:path{.+}', corsMiddleware, 
 	}
 
 	/* 画像ファイル生成 */
-	const createdData = await create(origFileFullPath, thumbImage);
+	const createdData = await create(context, origFileFullPath, thumbImage);
 
 	/* 生成した画像データを表示 */
 	return render(context, { data: createdData, mimeType: thumbImage.mime });

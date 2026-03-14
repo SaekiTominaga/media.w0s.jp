@@ -9,6 +9,7 @@ import { HTTPException } from 'hono/http-exception';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
+import type { Logger } from 'pino';
 import qs from 'qs';
 import { env } from '@w0s/env-value-type';
 import { getLogger } from './logger.ts';
@@ -24,11 +25,16 @@ import {
 } from './util/httpHeader.ts';
 import { isApi } from './util/request.ts';
 
-/* Logger */
-const logger = getLogger(path.basename(import.meta.url));
+export interface Variables {
+	logger: Logger;
+}
 
-/* Hono */
-const app = new Hono();
+const app = new Hono<{ Variables: Variables }>();
+
+app.use(async (context, next) => {
+	context.set('logger', getLogger(context.req.path.substring(1)));
+	await next();
+});
 
 app.use(
 	compress({
@@ -159,6 +165,8 @@ app.notFound((context) => {
 	);
 });
 app.onError((err, context) => {
+	const logger = context.get('logger');
+
 	const TITLE_4XX = 'Client error';
 	const TITLE_5XX = 'Server error';
 
@@ -206,13 +214,17 @@ app.onError((err, context) => {
 
 /* HTTP Server */
 if (process.env['TEST'] !== 'true') {
-	const port = env('HONO_PORT', 'number');
-	logger.info(`Server is running on http://localhost:${String(port)}`);
+	const logger = getLogger(path.basename(import.meta.url));
 
-	serve({
-		fetch: app.fetch,
-		port: port,
-	});
+	serve(
+		{
+			fetch: app.fetch,
+			port: env('HONO_PORT', 'number'),
+		},
+		(info) => {
+			logger.info(`Server is running on http://localhost:${String(info.port)}`);
+		},
+	);
 }
 
 export default app;
