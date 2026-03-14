@@ -30,7 +30,7 @@
 		"@types/better-sqlite3": "7.6.13",
 		"@types/node": "24.10.0",
 		"@types/nodemailer": "7.0.11",
-		"@types/qs": "6.14.0",
+		"@types/qs": "6.15.0",
 		"@types/whatwg-mimetype": "5.0.0",
 		"@w0s/eslint-config": "9.4.1",
 		"@w0s/stylelint-config": "4.19.1",
