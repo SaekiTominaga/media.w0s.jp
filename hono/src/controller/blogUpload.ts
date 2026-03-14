@@ -1,8 +1,7 @@
 import fs from 'node:fs';
-import path from 'node:path';
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import { MIMEType } from 'whatwg-mimetype';
-import { getLogger } from '../logger.ts';
+import type { Variables } from '../app.ts';
 import configBlogUpload from '../config/blog-upload.ts';
 import { json as validatorJson } from '../validator/blogUpload.ts';
 
@@ -16,11 +15,11 @@ interface ResponseJson {
 /**
  * ブログ用ファイルアップロード
  */
-const logger = getLogger(path.basename(import.meta.url, '.ts'));
 
 /**
  * ファイルアップロードを実行する（正確にはアップロードされたファイルを `media.w0s.jp` の適切な場所に移動する）
  *
+ * @param context - Context
  * @param option - あらかじめ定義された情報
  * @param option.dir - 移動先ディレクトリ
  * @param option.limit - 取り扱うファイルサイズのリミット
@@ -33,9 +32,12 @@ const logger = getLogger(path.basename(import.meta.url, '.ts'));
  * @returns 返答内容
  */
 const upload = async (
+	context: Context<{ Variables: Variables }>,
 	option: Readonly<{ dir: string; limit: number }>,
 	requset: Readonly<{ fileName: string; tempPath: string; size: number; overwrite: boolean }>,
 ): Promise<ResponseJson> => {
+	const logger = context.get('logger');
+
 	const filePath = `${option.dir}/${requset.fileName}`;
 
 	if (!requset.overwrite && fs.existsSync(filePath)) {
@@ -72,8 +74,9 @@ const upload = async (
 	};
 };
 
-export const blogUploadApp = new Hono().post(validatorJson, async (context) => {
+export const blogUploadApp = new Hono<{ Variables: Variables }>().post(validatorJson, async (context) => {
 	const { req } = context;
+	const logger = context.get('logger');
 
 	const requestBody = req.valid('json');
 
@@ -81,6 +84,7 @@ export const blogUploadApp = new Hono().post(validatorJson, async (context) => {
 	switch (new MIMEType(requestBody.type).type) {
 		case 'image': {
 			response = await upload(
+				context,
 				{
 					dir: configBlogUpload.image.dir,
 					limit: configBlogUpload.image.limit,
@@ -96,6 +100,7 @@ export const blogUploadApp = new Hono().post(validatorJson, async (context) => {
 		}
 		case 'video': {
 			response = await upload(
+				context,
 				{
 					dir: configBlogUpload.video.dir,
 					limit: configBlogUpload.video.limit,

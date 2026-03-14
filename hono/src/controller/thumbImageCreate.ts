@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { iec } from '@w0s/file-size-format';
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import { env } from '@w0s/env-value-type';
-import { getLogger } from '../logger.ts';
+import type { Variables } from '../app.ts';
 import configExpress from '../config/hono.ts';
 import ThumbImage from '../object/ThumbImage.ts';
 import { create as createThumbImage } from '../util/thumbImage.ts';
@@ -12,17 +12,19 @@ import { json as validatorJson } from '../validator/thumbImageCreate.ts';
 /**
  * サムネイル画像生成
  */
-const logger = getLogger(path.basename(import.meta.url, '.ts'));
 
 /**
  * 画像ファイル生成
  *
+ * @param context - Context
  * @param origFileFullPath - 元画像ファイルのフルパス
  * @param thumbImage - サムネイル画像
  *
  * @returns 生成した画像データ
  */
-const create = async (origFileFullPath: string, thumbImage: ThumbImage): Promise<Buffer> => {
+const create = async (context: Context<{ Variables: Variables }>, origFileFullPath: string, thumbImage: ThumbImage): Promise<Buffer> => {
+	const logger = context.get('logger');
+
 	/* 新しい画像ファイルを生成 */
 	const startTime = Date.now();
 	const createdData = await createThumbImage(origFileFullPath, thumbImage);
@@ -37,8 +39,9 @@ const create = async (origFileFullPath: string, thumbImage: ThumbImage): Promise
 	return createdData;
 };
 
-export const thumbImageCreateApp = new Hono().post(validatorJson, async (context) => {
+export const thumbImageCreateApp = new Hono<{ Variables: Variables }>().post(validatorJson, async (context) => {
 	const { req } = context;
+	const logger = context.get('logger');
 
 	const requestBody = req.valid('json');
 
@@ -60,7 +63,7 @@ export const thumbImageCreateApp = new Hono().post(validatorJson, async (context
 	});
 
 	/* 画像ファイル生成 */
-	await create(origFileFullPath, thumbImage);
+	await create(context, origFileFullPath, thumbImage);
 
 	return new Response(null, { status: 204 });
 });
