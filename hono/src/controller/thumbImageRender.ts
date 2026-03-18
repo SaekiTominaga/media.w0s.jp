@@ -4,7 +4,7 @@ import { SqliteError } from 'better-sqlite3';
 import { iec } from '@w0s/file-size-format';
 import { Hono, type Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
-import { imageSize } from 'image-size';
+import { imageSizeFromFile } from 'image-size/fromFile';
 import { env } from '@w0s/env-value-type';
 import type { Variables } from '../app.ts';
 import configHono from '../config/hono.ts';
@@ -108,10 +108,6 @@ export const thumbImageRenderApp = new Hono<{ Variables: Variables }>().get('/:p
 		throw new HTTPException(404, { message: 'File not found' });
 	}
 
-	const origFileReadProcessTime = new ProcessTime();
-	const origFileData = await fs.promises.readFile(origFileFullPath);
-	logger.debug(`オリジナル画像を読み込み: ${requestParam.path} (${origFileReadProcessTime.getTimeFormat()})`);
-
 	if (!checkFetchMode(context)) {
 		/* `<a href>`, `<img>` 等による呼び出し時はオリジナル画像ファイルを出力する */
 		const extension = path.extname(origFileFullPath);
@@ -122,6 +118,10 @@ export const thumbImageRenderApp = new Hono<{ Variables: Variables }>().get('/:p
 			throw new HTTPException(403, { message: `Unknown extension image (${extension})` });
 		}
 
+		const origFileReadProcessTime = new ProcessTime();
+		const origFileData = await fs.promises.readFile(origFileFullPath);
+		logger.debug(`オリジナル画像を読み込み: ${requestParam.path} (${origFileReadProcessTime.getTimeFormat()})`);
+
 		res.headers.set('Content-Length', String(origFileData.byteLength));
 		res.headers.set('Content-Type', mimeType);
 		return context.body(Buffer.from(origFileData));
@@ -131,7 +131,7 @@ export const thumbImageRenderApp = new Hono<{ Variables: Variables }>().get('/:p
 	const origFileMtime = (await fs.promises.stat(origFileFullPath)).mtime;
 	logger.debug(`オリジナル画像の情報を取得: ${requestParam.path} (${origFileStatProcessTime.getTimeFormat()})`);
 
-	const dimensions = imageSize(origFileData);
+	const dimensions = await imageSizeFromFile(origFileFullPath);
 
 	const thumbImage = new ThumbImage(`${env('ROOT')}/${env('THUMBIMAGE_DIR')}`, {
 		fileBasePath: requestParam.path,
