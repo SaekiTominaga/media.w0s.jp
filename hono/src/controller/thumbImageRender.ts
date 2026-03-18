@@ -12,6 +12,7 @@ import configThumbimage from '../config/thumb-image.ts';
 import ThumbImageRenderDao from '../db/ThumbImageRender.ts';
 import { corsAllowNoOrigin as corsMiddleware } from '../middleware/cors.ts';
 import ThumbImage from '../object/ThumbImage.ts';
+import ProcessTime from '../util/ProcessTime.ts';
 import { getSize as getThumbImageSize, create as createThumbImage } from '../util/thumbImage.ts';
 import { query as validatorQuery } from '../validator/thumbImageRender.ts';
 
@@ -107,7 +108,9 @@ export const thumbImageRenderApp = new Hono<{ Variables: Variables }>().get('/:p
 		throw new HTTPException(404, { message: 'File not found' });
 	}
 
+	const origFileReadProcessTime = new ProcessTime();
 	const origFileData = await fs.promises.readFile(origFileFullPath);
+	logger.debug(`オリジナル画像を読み込み: ${requestParam.path} (${origFileReadProcessTime.getTimeFormat()})`);
 
 	if (!checkFetchMode(context)) {
 		/* `<a href>`, `<img>` 等による呼び出し時はオリジナル画像ファイルを出力する */
@@ -124,7 +127,9 @@ export const thumbImageRenderApp = new Hono<{ Variables: Variables }>().get('/:p
 		return context.body(Buffer.from(origFileData));
 	}
 
+	const origFileStatProcessTime = new ProcessTime();
 	const origFileMtime = (await fs.promises.stat(origFileFullPath)).mtime;
+	logger.debug(`オリジナル画像の情報を取得: ${requestParam.path} (${origFileStatProcessTime.getTimeFormat()})`);
 
 	const dimensions = imageSize(origFileData);
 
@@ -135,14 +140,24 @@ export const thumbImageRenderApp = new Hono<{ Variables: Variables }>().get('/:p
 		quality: requestQuery.quality,
 	});
 
+	const thumbFileReadProcessTime = new ProcessTime();
 	let thumbFileData: Buffer | undefined;
 	try {
 		thumbFileData = await fs.promises.readFile(thumbImage.fileFullPath);
-	} catch (e) {}
+		logger.debug(`サムネイル画像を読み込み: ${thumbImage.filePath} (${thumbFileReadProcessTime.getTimeFormat()})`);
+	} catch (e) {
+		if (!(e instanceof Error)) {
+			throw e;
+		}
+
+		logger.debug(`サムネイル画像の読み込みに失敗: ${thumbImage.filePath} (${thumbFileReadProcessTime.getTimeFormat()})`);
+	}
 
 	if (thumbFileData !== undefined) {
 		/* 画像ファイルが生成済みだった場合 */
-		const thumbFileMtime = fs.statSync(thumbImage.fileFullPath).mtime;
+		const thumbFileStatProcessTime = new ProcessTime();
+		const thumbFileMtime = (await fs.promises.stat(thumbImage.fileFullPath)).mtime;
+		logger.debug(`サムネイル画像の情報を取得: ${thumbImage.filePath} (${thumbFileStatProcessTime.getTimeFormat()})`);
 
 		if (origFileMtime <= thumbFileMtime) {
 			/* 生成済みの画像データを表示 */
@@ -190,16 +205,27 @@ export const thumbImageRenderApp = new Hono<{ Variables: Variables }>().get('/:p
 
 		thumbImage.type = thumbTypeAlt;
 
-		let thumbFileDataAlt: Buffer | undefined;
+		const thumbAltFileReadProcessTime = new ProcessTime();
+		let thumbAltFileData: Buffer | undefined;
 		try {
-			thumbFileDataAlt = await fs.promises.readFile(thumbImage.fileFullPath);
-		} catch (e) {}
-		if (thumbFileDataAlt !== undefined) {
+			thumbAltFileData = await fs.promises.readFile(thumbImage.fileFullPath);
+			logger.debug(`サムネイル代替画像を読み込み: ${thumbImage.filePath} (${thumbAltFileReadProcessTime.getTimeFormat()})`);
+		} catch (e) {
+			if (!(e instanceof Error)) {
+				throw e;
+			}
+
+			logger.debug(`サムネイル代替画像の読み込みに失敗: ${thumbImage.filePath} (${thumbFileReadProcessTime.getTimeFormat()})`);
+		}
+		if (thumbAltFileData !== undefined) {
 			/* 代替画像ファイルが生成済みだった場合は、生成済みの画像データを表示 */
 			logger.debug(`生成済みの代替画像を表示: ${thumbImage.filePath}`);
 
-			const thumbFileMtime = fs.statSync(thumbImage.fileFullPath).mtime;
-			return render(context, { data: thumbFileDataAlt, mimeType: thumbImage.mime, mtime: thumbFileMtime });
+			const thumbAltFileStatProcessTime = new ProcessTime();
+			const thumbAltFileMtime = (await fs.promises.stat(thumbImage.fileFullPath)).mtime;
+			logger.debug(`サムネイル代替画像の情報を取得: ${thumbImage.filePath} (${thumbAltFileStatProcessTime.getTimeFormat()})`);
+
+			return render(context, { data: thumbAltFileData, mimeType: thumbImage.mime, mtime: thumbAltFileMtime });
 		}
 	}
 
