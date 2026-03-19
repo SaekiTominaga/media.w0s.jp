@@ -52,6 +52,8 @@ const checkFetchMode = (context: Context<{ Variables: Variables }>): boolean => 
  */
 const render = (context: Context<{ Variables: Variables }>, file: Readonly<{ data: Buffer; mimeType: string; mtime?: Date }>): Response => {
 	const { req, res } = context;
+	const logger = context.get('logger');
+	const processTime = context.get('processTime');
 
 	if (file.mtime !== undefined) {
 		/* キャッシュ確認 */
@@ -67,7 +69,11 @@ const render = (context: Context<{ Variables: Variables }>, file: Readonly<{ dat
 	res.headers.set('Content-Length', String(file.data.byteLength));
 	res.headers.set('Content-Type', file.mimeType);
 
-	return context.body(Buffer.from(file.data));
+	const response = context.body(Buffer.from(file.data));
+
+	logger.info(`画像レスポンスデータ準備完了（${processTime.getTimeFormat()}）`);
+
+	return response;
 };
 
 /**
@@ -83,15 +89,14 @@ const create = async (context: Context<{ Variables: Variables }>, origFileFullPa
 	const logger = context.get('logger');
 
 	/* 新しい画像ファイルを生成 */
-	const startTime = Date.now();
+	const createProcessTime = new ProcessTime();
 	const createdData = await createThumbImage(origFileFullPath, thumbImage);
-	const processingTime = Date.now() - startTime;
 
 	/* 生成後の処理 */
 	const origSize = iec((await fs.promises.stat(origFileFullPath)).size, { digits: 1 });
 	const createdSize = iec(createdData.byteLength, { digits: 1 });
 
-	logger.info(`画像生成完了（${String(Math.round(processingTime / 1000))}秒）: ${thumbImage.filePath} （${origSize} → ${createdSize}）`);
+	logger.info(`画像生成完了（${createProcessTime.getTimeFormat()}）: ${thumbImage.filePath} (${origSize} → ${createdSize})`);
 
 	return createdData;
 };

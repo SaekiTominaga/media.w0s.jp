@@ -23,16 +23,19 @@ import {
 	csp as cspHeader,
 	reportingEndpoints as reportingEndpointsHeader,
 } from './util/httpHeader.ts';
+import ProcessTime from './util/ProcessTime.ts';
 import { isApi } from './util/request.ts';
 
 export interface Variables {
 	logger: Logger;
+	processTime: ProcessTime;
 }
 
 const app = new Hono<{ Variables: Variables }>();
 
 app.use(async (context, next) => {
 	context.set('logger', getLogger(context.req.path.substring(1)));
+	context.set('processTime', new ProcessTime());
 	await next();
 });
 
