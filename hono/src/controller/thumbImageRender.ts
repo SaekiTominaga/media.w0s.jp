@@ -124,8 +124,20 @@ export const thumbImageRenderApp = new Hono<{ Variables: Variables }>().get('/:p
 		}
 
 		const origFileReadProcessTime = new ProcessTime();
-		const origFileData = await fs.promises.readFile(origFileFullPath);
-		logger.debug(`オリジナル画像を読み込み: ${requestParam.path} (${origFileReadProcessTime.getTimeFormat()})`);
+		let origFileData: Buffer | undefined;
+		try {
+			origFileData = await fs.promises.readFile(origFileFullPath, {
+				signal: AbortSignal.timeout(configThumbimage.readFileTimeout * 1000),
+			});
+			logger.debug(`オリジナル画像を読み込み: ${requestParam.path} (${origFileReadProcessTime.getTimeFormat()})`);
+		} catch (e) {
+			if (e instanceof Error && e.name === 'AbortError') {
+				throw new HTTPException(503, {
+					message: `オリジナル画像の読み込みタイムアウト: ${requestParam.path} (${origFileReadProcessTime.getTimeFormat()})`,
+				});
+			}
+			throw e;
+		}
 
 		res.headers.set('Content-Length', String(origFileData.byteLength));
 		res.headers.set('Content-Type', mimeType);
@@ -148,14 +160,24 @@ export const thumbImageRenderApp = new Hono<{ Variables: Variables }>().get('/:p
 	const thumbFileReadProcessTime = new ProcessTime();
 	let thumbFileData: Buffer | undefined;
 	try {
-		thumbFileData = await fs.promises.readFile(thumbImage.fileFullPath);
+		thumbFileData = await fs.promises.readFile(thumbImage.fileFullPath, {
+			signal: AbortSignal.timeout(configThumbimage.readFileTimeout * 1000),
+		});
 		logger.debug(`サムネイル画像を読み込み: ${thumbImage.filePath} (${thumbFileReadProcessTime.getTimeFormat()})`);
 	} catch (e) {
 		if (!(e instanceof Error)) {
 			throw e;
 		}
 
-		logger.debug(`サムネイル画像の読み込みに失敗: ${thumbImage.filePath} (${thumbFileReadProcessTime.getTimeFormat()})`);
+		switch (e.name) {
+			case 'AbortError': {
+				throw new HTTPException(503, {
+					message: `サムネイル画像の読み込みタイムアウト: ${thumbImage.filePath} (${thumbFileReadProcessTime.getTimeFormat()})`,
+				});
+			}
+			default:
+				logger.debug(`サムネイル画像の読み込みに失敗: ${thumbImage.filePath} (${thumbFileReadProcessTime.getTimeFormat()})`);
+		}
 	}
 
 	if (thumbFileData !== undefined) {
@@ -213,14 +235,24 @@ export const thumbImageRenderApp = new Hono<{ Variables: Variables }>().get('/:p
 		const thumbAltFileReadProcessTime = new ProcessTime();
 		let thumbAltFileData: Buffer | undefined;
 		try {
-			thumbAltFileData = await fs.promises.readFile(thumbImage.fileFullPath);
+			thumbAltFileData = await fs.promises.readFile(thumbImage.fileFullPath, {
+				signal: AbortSignal.timeout(configThumbimage.readFileTimeout * 1000),
+			});
 			logger.debug(`サムネイル代替画像を読み込み: ${thumbImage.filePath} (${thumbAltFileReadProcessTime.getTimeFormat()})`);
 		} catch (e) {
 			if (!(e instanceof Error)) {
 				throw e;
 			}
 
-			logger.debug(`サムネイル代替画像の読み込みに失敗: ${thumbImage.filePath} (${thumbFileReadProcessTime.getTimeFormat()})`);
+			switch (e.name) {
+				case 'AbortError': {
+					throw new HTTPException(503, {
+						message: `サムネイル代替画像の読み込みタイムアウト: ${thumbImage.filePath} (${thumbAltFileReadProcessTime.getTimeFormat()})`,
+					});
+				}
+				default:
+					logger.debug(`サムネイル代替画像の読み込みに失敗: ${thumbImage.filePath} (${thumbAltFileReadProcessTime.getTimeFormat()})`);
+			}
 		}
 		if (thumbAltFileData !== undefined) {
 			/* 代替画像ファイルが生成済みだった場合は、生成済みの画像データを表示 */

@@ -193,6 +193,8 @@ app.onError((err, context) => {
 			}
 
 			title = TITLE_4XX;
+		} else if (err.status === 503) {
+			logger.warn(err.message);
 		} else {
 			logger.error(err.message);
 		}

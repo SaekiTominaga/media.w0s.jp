@@ -44,4 +44,5 @@ export default {
 		'.svg': 'image/svg+xml;charset=utf-8',
 		'.webp': 'image/webp',
 	},
+	readFileTimeout: 10, // fs.readFile() のタイムアウト値（秒）
 };
