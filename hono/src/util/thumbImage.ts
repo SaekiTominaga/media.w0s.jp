@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import Sharp from 'sharp';
+import sharp from 'sharp';
 import ThumbImage from '../object/ThumbImage.ts';
 import type { Size } from '../../@types/util.d.ts';
 
@@ -67,34 +67,33 @@ export const create = async (origFilePath: string, thumbImage: ThumbImage): Prom
 	}
 
 	/* sharp 設定 */
-	Sharp.cache(false);
+	sharp.cache(false);
 
-	// eslint-disable-next-line new-cap
-	const sharp = Sharp(origFilePath);
-	sharp.resize(thumbImage.size.width, thumbImage.size.height);
+	const image = sharp(origFilePath);
+	image.resize(thumbImage.size.width, thumbImage.size.height);
 	switch (thumbImage.type) {
 		case 'avif': {
-			sharp.avif({
+			image.avif({
 				quality: thumbImage.quality,
 			});
 			break;
 		}
 		case 'webp': {
-			sharp.webp({
+			image.webp({
 				quality: thumbImage.quality,
 			});
 			break;
 		}
 		case 'jpeg': {
-			sharp.jpeg({
+			image.jpeg({
 				quality: thumbImage.quality,
 			});
 			break;
 		}
 		case 'png': {
-			const metadata = await sharp.metadata();
+			const metadata = await image.metadata();
 
-			sharp.png({
+			image.png({
 				compressionLevel: 9,
 				palette: metadata.isPalette /* PNG8 */,
 			});
@@ -104,7 +103,10 @@ export const create = async (origFilePath: string, thumbImage: ThumbImage): Prom
 		default:
 	}
 
-	const fileData = await sharp.toBuffer();
+	const fileData = await image.toBuffer();
+
+	image.destroy();
+
 	await fs.promises.writeFile(thumbImage.fileFullPath, fileData);
 
 	return fileData;
