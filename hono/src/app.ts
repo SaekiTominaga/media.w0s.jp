@@ -173,34 +173,36 @@ app.onError((err, context) => {
 	const TITLE_4XX = 'Client error';
 	const TITLE_5XX = 'Server error';
 
-	let status: ContentfulStatusCode = 500;
 	const headers = new Headers();
 	let title = TITLE_5XX;
-	let message: string | undefined;
 	if (err instanceof HTTPException) {
-		status = err.status;
-		message = err.message;
-
 		if (err.status >= 400 && err.status < 500) {
-			if (err.status === 401) {
-				/* 手動で `WWW-Authenticate` ヘッダーを設定 https://github.com/honojs/hono/issues/952 */
-				const wwwAuthenticate = err.res?.headers.get('WWW-Authenticate');
-				if (wwwAuthenticate !== null && wwwAuthenticate !== undefined) {
-					headers.set('WWW-Authenticate', wwwAuthenticate);
-				}
-			} else {
-				logger.info(`${String(err.status)} ${err.message} <${String(context.req.header('User-Agent'))}>`);
-			}
-
 			title = TITLE_4XX;
+
+			switch (err.status) {
+				case 401: {
+					/* 手動で `WWW-Authenticate` ヘッダーを設定 https://github.com/honojs/hono/issues/952 */
+					const wwwAuthenticate = err.res?.headers.get('WWW-Authenticate');
+					if (wwwAuthenticate !== null && wwwAuthenticate !== undefined) {
+						headers.set('WWW-Authenticate', wwwAuthenticate);
+					}
+					break;
+				}
+				default: {
+					logger.info(`${String(err.status)} ${err.message} <${String(context.req.header('User-Agent'))}>`);
+				}
+			}
 		} else if (err.status === 503) {
 			logger.warn(err.message);
 		} else {
 			logger.error(err.message);
 		}
 	} else {
-		logger.fatal(err.message);
+		logger.fatal(err.stack);
 	}
+
+	const status = err instanceof HTTPException ? err.status : 500;
+	const message = err instanceof HTTPException ? err.message : undefined;
 
 	if (isApi(context)) {
 		return context.json({ message: message ?? title }, status);
