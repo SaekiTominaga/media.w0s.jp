@@ -13,7 +13,6 @@ import qs from 'qs';
 import { env } from '@w0s/env-value-type';
 import { getLogger } from './logger.ts';
 import config from './config/hono.ts';
-import { blogUploadApp } from './controller/blogUpload.ts';
 import { thumbImageCreateApp } from './controller/thumbImageCreate.ts';
 import { thumbImageRenderApp } from './controller/thumbImageRender.ts';
 import { getAuth } from './util/auth.ts';
@@ -147,7 +146,6 @@ app.use(
 /* Routes */
 app.route('/thumbimage/', thumbImageRenderApp);
 app.route(`/${config.api.dir}/thumbimage/create`, thumbImageCreateApp);
-app.route(`/${config.api.dir}/blog/upload`, blogUploadApp);
 
 /* Error pages */
 app.notFound((context) => {
