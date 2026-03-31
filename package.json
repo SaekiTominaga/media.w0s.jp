@@ -16,7 +16,7 @@
 		"@w0s/file-size-format": "3.0.2",
 		"@w0s/sqlite-utility": "2.0.1",
 		"better-sqlite3": "12.8.0",
-		"hono": "4.12.8",
+		"hono": "4.12.9",
 		"image-size": "2.0.2",
 		"kysely": "0.28.14",
 		"nodemailer": "8.0.2",
